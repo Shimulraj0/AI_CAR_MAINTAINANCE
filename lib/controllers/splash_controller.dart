@@ -11,7 +11,7 @@ class SplashController extends GetxController
     super.onInit();
     // Simulate loading process
     Future.delayed(const Duration(seconds: 3), () {
-      Get.offNamed(Routes.home);
+      Get.offNamed(Routes.onboarding);
     });
   }
 }

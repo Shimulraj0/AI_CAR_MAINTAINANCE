@@ -1,6 +1,7 @@
 import 'package:get/get.dart';
 import '../views/home/home_view.dart';
 import '../views/splash/splash_view.dart';
+import '../views/onboarding/onboarding_view.dart';
 import '../bindings/initial_binding.dart';
 import 'app_routes.dart';
 
@@ -14,5 +15,6 @@ class AppPages {
       binding: InitialBinding(),
     ),
     GetPage(name: Routes.splash, page: () => const SplashView()),
+    GetPage(name: Routes.onboarding, page: () => const OnboardingView()),
   ];
 }
