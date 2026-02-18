@@ -7,11 +7,22 @@ class ChangePasswordController extends GetxController {
   final confirmPasswordController = TextEditingController();
   final formKey = GlobalKey<FormState>();
 
+  final isNewPasswordVisible = false.obs;
+  final isConfirmPasswordVisible = false.obs;
+
+  void toggleNewPasswordVisibility() {
+    isNewPasswordVisible.value = !isNewPasswordVisible.value;
+  }
+
+  void toggleConfirmPasswordVisibility() {
+    isConfirmPasswordVisible.value = !isConfirmPasswordVisible.value;
+  }
+
   void resetPassword() {
     if (formKey.currentState!.validate()) {
       if (newPasswordController.text == confirmPasswordController.text) {
         Get.snackbar('Success', 'Password reset successfully');
-        Get.offAllNamed(Routes.login);
+        Get.offAllNamed(Routes.changePasswordSuccess);
       } else {
         Get.snackbar('Error', 'Passwords do not match');
       }

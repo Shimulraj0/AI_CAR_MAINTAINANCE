@@ -28,7 +28,7 @@ class LoginController extends GetxController {
   void login() {
     if (loginFormKey.currentState!.validate()) {
       // Perform login logic here
-      Get.offAllNamed(Routes.home);
+      Get.offAllNamed(Routes.vehicleRegistration);
     }
   }
 

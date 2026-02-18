@@ -11,7 +11,12 @@ import '../controllers/forgot_password_controller.dart';
 import '../views/verify_email/verify_email_view.dart';
 import '../controllers/verify_email_controller.dart';
 import '../views/change_password/change_password_view.dart';
+import '../views/change_password/password_reset_success_view.dart';
 import '../controllers/change_password_controller.dart';
+import '../views/vehicle_registration/vehicle_registration_view.dart';
+import '../controllers/vehicle_registration_controller.dart';
+import '../views/important_notice/important_notice_view.dart';
+import '../controllers/important_notice_controller.dart';
 import '../bindings/initial_binding.dart';
 import 'app_routes.dart';
 
@@ -59,6 +64,28 @@ class AppPages {
       page: () => const ChangePasswordView(),
       binding: BindingsBuilder(() {
         Get.lazyPut<ChangePasswordController>(() => ChangePasswordController());
+      }),
+    ),
+    GetPage(
+      name: Routes.changePasswordSuccess,
+      page: () => const PasswordResetSuccessView(),
+    ),
+    GetPage(
+      name: Routes.vehicleRegistration,
+      page: () => const VehicleRegistrationView(),
+      binding: BindingsBuilder(() {
+        Get.lazyPut<VehicleRegistrationController>(
+          () => VehicleRegistrationController(),
+        );
+      }),
+    ),
+    GetPage(
+      name: Routes.importantNotice,
+      page: () => const ImportantNoticeView(),
+      binding: BindingsBuilder(() {
+        Get.lazyPut<ImportantNoticeController>(
+          () => ImportantNoticeController(),
+        );
       }),
     ),
   ];

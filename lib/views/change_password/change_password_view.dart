@@ -53,36 +53,43 @@ class ChangePasswordView extends GetView<ChangePasswordController> {
                     // New Password
                     _buildLabel('New Password'),
                     const SizedBox(height: 8),
-                    TextFormField(
-                      controller: controller.newPasswordController,
-                      obscureText: true,
-                      decoration: InputDecoration(
-                        hintText: 'Enter new password',
-                        hintStyle: const TextStyle(color: Color(0xFF949CA9)),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: const BorderSide(
-                            color: Color(0xFFD2D6DB),
+                    Obx(
+                      () => TextFormField(
+                        controller: controller.newPasswordController,
+                        obscureText: !controller.isNewPasswordVisible.value,
+                        decoration: InputDecoration(
+                          hintText: 'Enter new password',
+                          hintStyle: const TextStyle(color: Color(0xFF949CA9)),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: const BorderSide(
+                              color: Color(0xFFD2D6DB),
+                            ),
+                          ),
+                          contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 16,
+                          ),
+                          suffixIcon: IconButton(
+                            icon: Icon(
+                              controller.isNewPasswordVisible.value
+                                  ? Icons.visibility
+                                  : Icons.visibility_off,
+                              color: const Color(0xFF949CA9),
+                            ),
+                            onPressed: controller.toggleNewPasswordVisibility,
                           ),
                         ),
-                        contentPadding: const EdgeInsets.symmetric(
-                          horizontal: 16,
-                          vertical: 16,
-                        ),
-                        suffixIcon: const Icon(
-                          Icons.visibility_off,
-                          color: Color(0xFF949CA9),
-                        ),
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Please enter a password';
+                          }
+                          if (value.length < 6) {
+                            return 'Password must be at least 6 characters';
+                          }
+                          return null;
+                        },
                       ),
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return 'Please enter a password';
-                        }
-                        if (value.length < 6) {
-                          return 'Password must be at least 6 characters';
-                        }
-                        return null;
-                      },
                     ),
 
                     const SizedBox(height: 24),
@@ -90,33 +97,41 @@ class ChangePasswordView extends GetView<ChangePasswordController> {
                     // Confirm Password
                     _buildLabel('Confirm Password'),
                     const SizedBox(height: 8),
-                    TextFormField(
-                      controller: controller.confirmPasswordController,
-                      obscureText: true,
-                      decoration: InputDecoration(
-                        hintText: 'Re-enter new password',
-                        hintStyle: const TextStyle(color: Color(0xFF949CA9)),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: const BorderSide(
-                            color: Color(0xFFD2D6DB),
+                    Obx(
+                      () => TextFormField(
+                        controller: controller.confirmPasswordController,
+                        obscureText: !controller.isConfirmPasswordVisible.value,
+                        decoration: InputDecoration(
+                          hintText: 'Re-enter new password',
+                          hintStyle: const TextStyle(color: Color(0xFF949CA9)),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: const BorderSide(
+                              color: Color(0xFFD2D6DB),
+                            ),
+                          ),
+                          contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 16,
+                          ),
+                          suffixIcon: IconButton(
+                            icon: Icon(
+                              controller.isConfirmPasswordVisible.value
+                                  ? Icons.visibility
+                                  : Icons.visibility_off,
+                              color: const Color(0xFF949CA9),
+                            ),
+                            onPressed:
+                                controller.toggleConfirmPasswordVisibility,
                           ),
                         ),
-                        contentPadding: const EdgeInsets.symmetric(
-                          horizontal: 16,
-                          vertical: 16,
-                        ),
-                        suffixIcon: const Icon(
-                          Icons.visibility_off,
-                          color: Color(0xFF949CA9),
-                        ),
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Please confirm your password';
+                          }
+                          return null;
+                        },
                       ),
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return 'Please confirm your password';
-                        }
-                        return null;
-                      },
                     ),
 
                     const SizedBox(height: 48),
