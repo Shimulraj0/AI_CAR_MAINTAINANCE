@@ -17,15 +17,16 @@ void main() {
             name: '/home',
             page: () => const Scaffold(body: Text('Home')),
           ),
+          GetPage(
+            name: '/onboarding',
+            page: () => const Scaffold(body: Text('Onboarding')),
+          ),
         ],
       ),
     );
 
-    // Verify background painter is present (CustomPaint)
-    expect(find.byKey(const Key('splash_background')), findsOneWidget);
-
-    // Verify "Autointel" text is present
-    expect(find.text('Autointel'), findsOneWidget);
+    // Verify Splash Background Image is present
+    expect(find.byType(Image), findsNWidgets(2)); // Background + Logo
 
     // Verify Navigation happens (simulated by checking if controller exists)
     expect(Get.isRegistered<SplashController>(), true);

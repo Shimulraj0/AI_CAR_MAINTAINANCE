@@ -2,8 +2,49 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../routes/app_routes.dart';
 
-class OnboardingView extends StatelessWidget {
+class OnboardingView extends StatefulWidget {
   const OnboardingView({super.key});
+
+  @override
+  State<OnboardingView> createState() => _OnboardingViewState();
+}
+
+class _OnboardingViewState extends State<OnboardingView> {
+  final PageController _pageController = PageController();
+  int _currentPage = 0;
+
+  final List<Map<String, String>> _onboardingData = [
+    {
+      "image": "assets/images/onboarding1.png",
+      "title": "Monitor Your Vehicle in\nReal Time",
+      "body":
+          "Get instant diagnostics, live data insights, and AI-powered vehicle health reports.",
+    },
+    {
+      "image": "assets/images/onboarding2.png",
+      "title": "Monitor Your Vehicle in\nReal Time",
+      "body":
+          "Get instant diagnostics, live data insights, and AI-powered vehicle health reports.",
+    },
+    {
+      "image": "assets/images/onboarding3.png",
+      "title": "Monitor Your Vehicle in Real Time",
+      "body":
+          "Get instant diagnostics, live data insights, and AI-powered vehicle health reports.",
+    },
+  ];
+
+  void _onSkip() {
+    if (_currentPage < _onboardingData.length - 1) {
+      _pageController.animateToPage(
+        _currentPage + 1,
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeInOut,
+      );
+    } else {
+      Get.offNamed(Routes.login);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -12,128 +53,157 @@ class OnboardingView extends StatelessWidget {
       body: SafeArea(
         child: Column(
           children: [
-            const SizedBox(height: 20),
-            // Status Bar Placeholder (using the user's provided structure logic)
-            // Note: In a real app, SafeArea handles status bar, but user provided specific UI for it.
-            // I'll stick to the requested visual structure as much as possible but use Flutter widgets.
-
-            // Image Section
-            Expanded(
-              flex: 5,
-              child: Container(
-                width: 350,
-                // height: 408, // allowing flex to handle height
-                decoration: ShapeDecoration(
-                  image: const DecorationImage(
-                    image: NetworkImage("https://placehold.co/350x408"),
-                    fit: BoxFit.fill,
-                  ),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                ),
-              ),
-            ),
-
-            const SizedBox(height: 40),
-
-            // Text Section
-            Container(
-              width: 350,
-              padding: const EdgeInsets.symmetric(horizontal: 12),
-              child: const Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
+            // Custom Status Bar / Header
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(
-                    'Monitor Your Vehicle in Real Time',
+                  const Text(
+                    "9:41",
                     style: TextStyle(
-                      color: Colors.black,
-                      fontSize: 24,
-                      fontFamily: 'Sora',
+                      fontFamily: 'SF Pro Text', // System font usually
                       fontWeight: FontWeight.w600,
-                      height: 1.33,
+                      fontSize: 15,
                     ),
                   ),
-                  SizedBox(height: 16),
-                  Text(
-                    'Get instant diagnostics, live data insights, and AI-powered vehicle health reports.',
-                    style: TextStyle(
-                      color: Colors.black,
-                      fontSize: 14,
-                      fontFamily: 'Inter',
-                      fontWeight: FontWeight.w400,
-                      height: 1.43,
-                    ),
+                  Row(
+                    children: [
+                      const Icon(Icons.signal_cellular_alt, size: 16),
+                      const SizedBox(width: 4),
+                      const Icon(Icons.wifi, size: 16),
+                      const SizedBox(width: 4),
+                      // Battery icon placeholder or custom
+                      Transform.rotate(
+                        angle: 1.5708, // 90 degrees
+                        child: const Icon(Icons.battery_full, size: 16),
+                      ),
+                    ],
                   ),
                 ],
               ),
             ),
 
-            const Spacer(flex: 2),
+            const SizedBox(height: 10),
 
-            // Pagination Indicator (dots)
-            Row(
-              mainAxisAlignment: MainAxisAlignment.start,
-              children: [
-                const SizedBox(width: 38), // align with text approximately
-                Container(
-                  width: 25,
-                  height: 6,
-                  decoration: BoxDecoration(
-                    color: const Color(0xFF3B5998), // Example active color
-                    borderRadius: BorderRadius.circular(3),
-                  ),
-                ),
-                const SizedBox(width: 8),
-                Container(
-                  width: 8,
-                  height: 8,
-                  decoration: const BoxDecoration(
-                    color: Color(0xFFE0E0E0), // Example inactive color
-                    shape: BoxShape.circle,
-                  ),
-                ),
-                const SizedBox(width: 8),
-                Container(
-                  width: 8,
-                  height: 8,
-                  decoration: const BoxDecoration(
-                    color: Color(0xFFE0E0E0),
-                    shape: BoxShape.circle,
-                  ),
-                ),
-              ],
+            // PageView Content
+            Expanded(
+              child: PageView.builder(
+                controller: _pageController,
+                onPageChanged: (value) {
+                  setState(() {
+                    _currentPage = value;
+                  });
+                },
+                itemCount: _onboardingData.length,
+                itemBuilder: (context, index) {
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 24),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // Image Section (First)
+                        Container(
+                          width: 350,
+                          height: 408,
+                          decoration: ShapeDecoration(
+                            image: DecorationImage(
+                              image: AssetImage(
+                                _onboardingData[index]['image']!,
+                              ),
+                              fit: BoxFit.fill,
+                            ),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                          ),
+                        ),
+
+                        const SizedBox(height: 32),
+
+                        // Text Section (Second)
+                        Text(
+                          _onboardingData[index]['title']!,
+                          style: const TextStyle(
+                            color: Colors.black,
+                            fontSize: 24,
+                            fontFamily: 'Sora',
+                            fontWeight: FontWeight.w600,
+                            height: 1.3,
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+                        Text(
+                          _onboardingData[index]['body']!,
+                          style: const TextStyle(
+                            color: Colors.black,
+                            fontSize: 14,
+                            fontFamily: 'Inter',
+                            fontWeight: FontWeight.w400,
+                            height: 1.5,
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                },
+              ),
             ),
 
-            const Spacer(flex: 1),
-
-            // Skip Button
+            // Indicators
             Padding(
-              padding: const EdgeInsets.only(bottom: 40),
-              child: TextButton(
-                onPressed: () {
-                  Get.offNamed(Routes.home);
-                },
-                child: const Text(
-                  'SKIP',
-                  style: TextStyle(
-                    color: Colors.black,
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                    fontFamily: 'Inter',
+              padding: const EdgeInsets.only(left: 24, bottom: 40),
+              child: Align(
+                alignment: Alignment.centerLeft,
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: List.generate(
+                    _onboardingData.length,
+                    (index) => Row(
+                      children: [
+                        AnimatedContainer(
+                          duration: const Duration(milliseconds: 300),
+                          width: _currentPage == index ? 30 : 10,
+                          height: 10,
+                          decoration: ShapeDecoration(
+                            color: _currentPage == index
+                                ? const Color(0xFF1E3A8A)
+                                : const Color(
+                                    0xFFD9D9D9,
+                                  ), // Light gray for inactive
+                            shape: _currentPage == index
+                                ? RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(
+                                      5,
+                                    ), // Pill shape
+                                  )
+                                : const OvalBorder(), // Circle
+                          ),
+                        ),
+                        if (index != _onboardingData.length - 1)
+                          const SizedBox(width: 8),
+                      ],
+                    ),
                   ),
                 ),
               ),
             ),
-            // Bottom handle indicator placeholder
-            Container(
-              width: 144,
-              height: 5,
-              margin: const EdgeInsets.only(bottom: 8),
-              decoration: BoxDecoration(
-                color: Colors.black,
-                borderRadius: BorderRadius.circular(10),
+
+            // Skip Button
+            Padding(
+              padding: const EdgeInsets.only(bottom: 20),
+              child: TextButton(
+                onPressed: _onSkip,
+                child: const Text(
+                  'Next',
+                  style: TextStyle(
+                    color: Colors.black,
+                    fontSize: 14,
+                    fontFamily: 'Sora',
+                    fontWeight: FontWeight.w400, // Matched font weight to image
+                    letterSpacing: 0.5,
+                  ),
+                ),
               ),
             ),
           ],
