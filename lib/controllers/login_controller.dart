@@ -4,8 +4,12 @@ import '../routes/app_routes.dart';
 
 class LoginController extends GetxController {
   final GlobalKey<FormState> loginFormKey = GlobalKey<FormState>();
-  final TextEditingController emailController = TextEditingController();
-  final TextEditingController passwordController = TextEditingController();
+  final TextEditingController emailController = TextEditingController(
+    text: 'mockuser@example.com',
+  );
+  final TextEditingController passwordController = TextEditingController(
+    text: 'password123',
+  );
 
   var isPasswordHidden = true.obs;
   var rememberMe = false.obs;

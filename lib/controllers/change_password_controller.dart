@@ -3,8 +3,8 @@ import 'package:get/get.dart';
 import '../routes/app_routes.dart';
 
 class ChangePasswordController extends GetxController {
-  final newPasswordController = TextEditingController();
-  final confirmPasswordController = TextEditingController();
+  final newPasswordController = TextEditingController(text: 'password123');
+  final confirmPasswordController = TextEditingController(text: 'password123');
   final formKey = GlobalKey<FormState>();
 
   final isNewPasswordVisible = false.obs;

@@ -2,7 +2,7 @@ import 'package:get/get.dart';
 import '../routes/app_routes.dart';
 
 class ImportantNoticeController extends GetxController {
-  final isChecked = false.obs;
+  final isChecked = true.obs;
 
   void toggleCheckbox() {
     isChecked.value = !isChecked.value;

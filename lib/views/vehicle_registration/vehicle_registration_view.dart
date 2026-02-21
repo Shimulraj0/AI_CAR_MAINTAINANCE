@@ -119,7 +119,10 @@ class VehicleRegistrationView extends GetView<VehicleRegistrationController> {
       padding: const EdgeInsets.all(12),
       decoration: ShapeDecoration(
         shape: RoundedRectangleBorder(
-          side: BorderSide(width: 1, color: Colors.black.withOpacity(0.04)),
+          side: BorderSide(
+            width: 1,
+            color: Colors.black.withValues(alpha: 0.04),
+          ),
           borderRadius: BorderRadius.circular(12),
         ),
       ),
@@ -149,7 +152,7 @@ class VehicleRegistrationView extends GetView<VehicleRegistrationController> {
                           TextSpan(
                             text: '(Optional)',
                             style: TextStyle(
-                              color: Colors.black.withOpacity(0.50),
+                              color: Colors.black.withValues(alpha: 0.50),
                               fontSize: 10,
                               fontFamily: 'Sora',
                               fontWeight: FontWeight.w400,
@@ -170,7 +173,7 @@ class VehicleRegistrationView extends GetView<VehicleRegistrationController> {
                     shape: RoundedRectangleBorder(
                       side: BorderSide(
                         width: 0.50,
-                        color: Colors.black.withOpacity(0.06),
+                        color: Colors.black.withValues(alpha: 0.06),
                       ),
                       borderRadius: BorderRadius.circular(8),
                     ),

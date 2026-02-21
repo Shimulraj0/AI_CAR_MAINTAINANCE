@@ -172,10 +172,10 @@ class ImportantNoticeView extends GetView<ImportantNoticeController> {
                   style: ElevatedButton.styleFrom(
                     backgroundColor: controller.isChecked.value
                         ? const Color(0xFF2B63A8)
-                        : const Color(0xFF2B63A8).withOpacity(0.5),
+                        : const Color(0xFF2B63A8).withValues(alpha: 0.5),
                     disabledBackgroundColor: const Color(
                       0xFF2B63A8,
-                    ).withOpacity(0.5),
+                    ).withValues(alpha: 0.5),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
                     ),

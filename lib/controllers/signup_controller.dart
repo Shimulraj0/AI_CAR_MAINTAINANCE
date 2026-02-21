@@ -5,15 +5,22 @@ import '../routes/app_routes.dart';
 class SignUpController extends GetxController {
   final GlobalKey<FormState> signUpFormKey = GlobalKey<FormState>();
 
-  final TextEditingController nameController = TextEditingController();
-  final TextEditingController emailController = TextEditingController();
-  final TextEditingController passwordController = TextEditingController();
-  final TextEditingController confirmPasswordController =
-      TextEditingController();
+  final TextEditingController nameController = TextEditingController(
+    text: 'Mock User',
+  );
+  final TextEditingController emailController = TextEditingController(
+    text: 'mockuser@example.com',
+  );
+  final TextEditingController passwordController = TextEditingController(
+    text: 'password123',
+  );
+  final TextEditingController confirmPasswordController = TextEditingController(
+    text: 'password123',
+  );
 
   var isPasswordHidden = true.obs;
   var isConfirmPasswordHidden = true.obs;
-  var agreeToTerms = false.obs;
+  var agreeToTerms = true.obs;
 
   @override
   void onClose() {

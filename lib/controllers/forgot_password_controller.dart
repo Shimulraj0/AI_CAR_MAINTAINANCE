@@ -4,7 +4,9 @@ import '../routes/app_routes.dart';
 
 class ForgotPasswordController extends GetxController {
   final GlobalKey<FormState> forgotPasswordFormKey = GlobalKey<FormState>();
-  final TextEditingController emailController = TextEditingController();
+  final TextEditingController emailController = TextEditingController(
+    text: 'mockuser@example.com',
+  );
 
   @override
   void onClose() {

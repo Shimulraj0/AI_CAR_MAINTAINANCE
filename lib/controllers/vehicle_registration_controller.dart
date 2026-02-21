@@ -5,13 +5,17 @@ import '../routes/app_routes.dart';
 class VehicleRegistrationController extends GetxController {
   final GlobalKey<FormState> formKey = GlobalKey<FormState>();
 
-  final manufacturerController = TextEditingController();
-  final modelController = TextEditingController();
-  final yearController = TextEditingController();
-  final fuelTypeController = TextEditingController();
-  final engineSizeController = TextEditingController();
-  final vinController = TextEditingController(); // Optional
-  final diagnosticCodesController = TextEditingController(); // Optional
+  final manufacturerController = TextEditingController(text: 'Toyota');
+  final modelController = TextEditingController(text: 'Camry');
+  final yearController = TextEditingController(text: '2022');
+  final fuelTypeController = TextEditingController(text: 'Hybrid');
+  final engineSizeController = TextEditingController(text: '2.5L');
+  final vinController = TextEditingController(
+    text: '1HGCM82633A00000',
+  ); // Optional
+  final diagnosticCodesController = TextEditingController(
+    text: 'P0171',
+  ); // Optional
 
   final isFormValid = false.obs;
 
@@ -24,6 +28,9 @@ class VehicleRegistrationController extends GetxController {
     yearController.addListener(_validateForm);
     fuelTypeController.addListener(_validateForm);
     engineSizeController.addListener(_validateForm);
+
+    // Initial validation since fields are pre-filled
+    _validateForm();
   }
 
   void _validateForm() {
