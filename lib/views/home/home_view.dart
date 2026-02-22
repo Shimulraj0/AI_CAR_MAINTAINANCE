@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import '../../controllers/home_controller.dart';
 import '../../widgets/custom_bottom_nav_bar.dart';
 
 class HomeView extends GetView<HomeController> {
