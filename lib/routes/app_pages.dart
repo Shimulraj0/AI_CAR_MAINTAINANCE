@@ -1,8 +1,18 @@
 import 'package:get/get.dart';
 import '../views/home/home_view.dart';
+import '../views/home/analyzing_view.dart';
+import '../views/home/diagnostic_result_view.dart';
+import '../views/home/save_reports_view.dart';
+import '../views/home/ai_chat_view.dart';
+import '../views/home/task_details_view.dart';
+import '../views/home/add_maintenance_view.dart';
 import '../views/splash/splash_view.dart';
 import '../views/onboarding/onboarding_view.dart';
 import '../views/login/login_view.dart';
+import '../views/home/subscription_view.dart';
+import '../views/home/edit_profile_view.dart';
+import '../views/home/my_vehicles_view.dart';
+import '../views/home/add_vehicles_view.dart';
 import '../controllers/login_controller.dart';
 import '../views/signup/signup_view.dart';
 import '../controllers/signup_controller.dart';
@@ -29,7 +39,11 @@ class AppPages {
       page: () => const HomeView(),
       binding: InitialBinding(),
     ),
-    GetPage(name: Routes.splash, page: () => const SplashView()),
+    GetPage(
+      name: Routes.splash,
+      page: () => const SplashView(),
+      transition: Transition.noTransition,
+    ),
     GetPage(name: Routes.onboarding, page: () => const OnboardingView()),
     GetPage(
       name: Routes.login,
@@ -88,5 +102,21 @@ class AppPages {
         );
       }),
     ),
+    GetPage(name: Routes.analyzing, page: () => const AnalyzingView()),
+    GetPage(
+      name: Routes.diagnosticResult,
+      page: () => const DiagnosticResultView(),
+    ),
+    GetPage(name: Routes.saveReports, page: () => const SaveReportsView()),
+    GetPage(name: Routes.aiChat, page: () => const AiChatView()),
+    GetPage(name: Routes.taskDetails, page: () => const TaskDetailsView()),
+    GetPage(
+      name: Routes.addMaintenance,
+      page: () => const AddMaintenanceView(),
+    ),
+    GetPage(name: Routes.subscription, page: () => const SubscriptionView()),
+    GetPage(name: Routes.editProfile, page: () => const EditProfileView()),
+    GetPage(name: Routes.myVehicles, page: () => const MyVehiclesView()),
+    GetPage(name: Routes.addVehicles, page: () => const AddVehiclesView()),
   ];
 }

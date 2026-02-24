@@ -41,13 +41,14 @@ class _CustomBottomNavBarState extends State<CustomBottomNavBar> {
           height: 64, // Exact hugging height
           // Adjusted padding to keep elements inside 360px balanced
           padding: const EdgeInsets.symmetric(horizontal: 16),
-          decoration: const BoxDecoration(
+          decoration: BoxDecoration(
             color: Colors.white,
-            boxShadow: [
+            borderRadius: BorderRadius.circular(20), // Adding curved corners
+            boxShadow: const [
               BoxShadow(
                 color: Color(0x3FACACAC),
-                blurRadius: 4,
-                offset: Offset(0, 0),
+                blurRadius: 10, // Softer shadow
+                offset: Offset(0, -2), // Slight upward offset for the bar
                 spreadRadius: 0,
               ),
             ],
@@ -102,16 +103,46 @@ class _CustomBottomNavBarState extends State<CustomBottomNavBar> {
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             if (item.containsKey('svgAsset'))
-              SvgPicture.asset(
-                item['svgAsset'] as String,
-                width: 24,
-                height: 24,
-                colorFilter: ColorFilter.mode(
-                  isSelected
-                      ? const Color(0xFF2B63A8)
-                      : const Color(0xFF8598B2),
-                  BlendMode.srcIn,
-                ),
+              FutureBuilder<String>(
+                future: DefaultAssetBundle.of(
+                  context,
+                ).loadString(item['svgAsset'] as String),
+                builder: (context, snapshot) {
+                  if (!snapshot.hasData) {
+                    return const SizedBox(width: 24, height: 24);
+                  }
+
+                  String svgString = snapshot.data!;
+                  final colorHex = isSelected ? '#2B63A8' : '#8598B2';
+
+                  if (isSelected &&
+                      (item['label'] == 'Diagnose' ||
+                          item['label'] == 'Profile' ||
+                          item['label'] == 'Home')) {
+                    // Fill the icon when selected
+                    svgString = svgString.replaceAll(
+                      'fill="none"',
+                      'fill="$colorHex"',
+                    );
+                    svgString = svgString.replaceAll(
+                      'stroke="#8599B3"',
+                      'stroke="$colorHex"',
+                    );
+                  } else {
+                    // Default stroke coloring
+                    svgString = svgString.replaceAll(
+                      'stroke="#8599B3"',
+                      'stroke="$colorHex"',
+                    );
+                    // Maintainaince icon uses fill
+                    svgString = svgString.replaceAll(
+                      'fill="#8599B3"',
+                      'fill="$colorHex"',
+                    );
+                  }
+
+                  return SvgPicture.string(svgString, width: 24, height: 24);
+                },
               )
             else
               Icon(
@@ -143,11 +174,38 @@ class _CustomBottomNavBarState extends State<CustomBottomNavBar> {
   Widget _buildFab() {
     return GestureDetector(
       onTap: widget.onFabTap,
-      child: Image.asset(
-        'assets/images/Popup.png',
-        width: 120,
-        height: 120,
-        fit: BoxFit.contain,
+      child: Container(
+        width: 72,
+        height: 72,
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          shape: BoxShape.circle,
+          boxShadow: [
+            BoxShadow(
+              color: Color(0x19000000),
+              blurRadius: 10,
+              offset: Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Center(
+          child: Container(
+            width: 56,
+            height: 56,
+            decoration: const BoxDecoration(
+              color: Color(0xFF2B63A8),
+              shape: BoxShape.circle,
+            ),
+            child: Center(
+              child: Image.asset(
+                'assets/images/Frame.png',
+                width: 28,
+                height: 28,
+                fit: BoxFit.contain,
+              ),
+            ),
+          ),
+        ),
       ),
     );
   }

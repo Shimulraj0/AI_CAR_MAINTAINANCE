@@ -25,6 +25,9 @@ class MyApp extends StatelessWidget {
       ),
       // INITIAL ROUTE DEFINITION
       initialRoute: AppPages.initial,
+      // DEFAULT TRANSITION
+      defaultTransition: Transition.rightToLeftWithFade,
+      transitionDuration: const Duration(milliseconds: 300),
       // GETPAGES DEFINITION (Centralized Routing)
       getPages: AppPages.routes,
     );
