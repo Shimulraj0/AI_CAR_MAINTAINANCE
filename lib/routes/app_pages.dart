@@ -27,6 +27,18 @@ import '../views/vehicle_registration/vehicle_registration_view.dart';
 import '../controllers/vehicle_registration_controller.dart';
 import '../views/important_notice/important_notice_view.dart';
 import '../controllers/important_notice_controller.dart';
+import '../views/notifications/notifications_view.dart';
+import '../controllers/notifications_controller.dart';
+import '../views/privacy_terms/privacy_terms_view.dart';
+import '../controllers/privacy_terms_controller.dart';
+import '../views/privacy_terms/privacy_policy_view.dart';
+import '../controllers/privacy_policy_controller.dart';
+import '../views/privacy_terms/terms_conditions_view.dart';
+import '../controllers/terms_conditions_controller.dart';
+import '../views/faqs/faqs_view.dart';
+import '../controllers/faqs_controller.dart';
+import '../views/support/contact_support_view.dart';
+import '../controllers/contact_support_controller.dart';
 import '../bindings/initial_binding.dart';
 import 'app_routes.dart';
 
@@ -118,5 +130,49 @@ class AppPages {
     GetPage(name: Routes.editProfile, page: () => const EditProfileView()),
     GetPage(name: Routes.myVehicles, page: () => const MyVehiclesView()),
     GetPage(name: Routes.addVehicles, page: () => const AddVehiclesView()),
+    GetPage(
+      name: Routes.notifications,
+      page: () => const NotificationsView(),
+      binding: BindingsBuilder(() {
+        Get.lazyPut<NotificationsController>(() => NotificationsController());
+      }),
+    ),
+    GetPage(
+      name: Routes.privacyTerms,
+      page: () => const PrivacyTermsView(),
+      binding: BindingsBuilder(() {
+        Get.lazyPut<PrivacyTermsController>(() => PrivacyTermsController());
+      }),
+    ),
+    GetPage(
+      name: Routes.privacyPolicy,
+      page: () => const PrivacyPolicyView(),
+      binding: BindingsBuilder(() {
+        Get.lazyPut<PrivacyPolicyController>(() => PrivacyPolicyController());
+      }),
+    ),
+    GetPage(
+      name: Routes.termsConditions,
+      page: () => const TermsConditionsView(),
+      binding: BindingsBuilder(() {
+        Get.lazyPut<TermsConditionsController>(
+          () => TermsConditionsController(),
+        );
+      }),
+    ),
+    GetPage(
+      name: Routes.faqs,
+      page: () => const FaqsView(),
+      binding: BindingsBuilder(() {
+        Get.lazyPut<FaqsController>(() => FaqsController());
+      }),
+    ),
+    GetPage(
+      name: Routes.contactSupport,
+      page: () => const ContactSupportView(),
+      binding: BindingsBuilder(() {
+        Get.lazyPut<ContactSupportController>(() => ContactSupportController());
+      }),
+    ),
   ];
 }

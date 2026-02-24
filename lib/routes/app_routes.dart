@@ -20,4 +20,10 @@ abstract class Routes {
   static const String editProfile = '/edit-profile';
   static const String myVehicles = '/my-vehicles';
   static const String addVehicles = '/add-vehicles';
+  static const String notifications = '/notifications';
+  static const String privacyTerms = '/privacy-terms';
+  static const String privacyPolicy = '/privacy-policy';
+  static const String termsConditions = '/terms-conditions';
+  static const String faqs = '/faqs';
+  static const String contactSupport = '/contact-support';
 }

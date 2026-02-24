@@ -153,16 +153,20 @@ class _CustomBottomNavBarState extends State<CustomBottomNavBar> {
                     : const Color(0xFF8598B2),
               ),
             const SizedBox(height: 4),
-            Text(
-              item['label'] as String,
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                color: isSelected
-                    ? const Color(0xFF2B63A8)
-                    : const Color(0xFF8598B2),
-                fontSize: 12,
-                fontFamily: 'Archivo',
-                fontWeight: FontWeight.w400,
+            FittedBox(
+              fit: BoxFit.scaleDown,
+              child: Text(
+                item['label'] as String,
+                textAlign: TextAlign.center,
+                maxLines: 1,
+                style: TextStyle(
+                  color: isSelected
+                      ? const Color(0xFF2B63A8)
+                      : const Color(0xFF8598B2),
+                  fontSize: 12,
+                  fontFamily: 'Archivo',
+                  fontWeight: FontWeight.w400,
+                ),
               ),
             ),
           ],
@@ -198,7 +202,7 @@ class _CustomBottomNavBarState extends State<CustomBottomNavBar> {
             ),
             child: Center(
               child: Image.asset(
-                'assets/images/Frame.png',
+                'assets/images/chatbob.png',
                 width: 28,
                 height: 28,
                 fit: BoxFit.contain,

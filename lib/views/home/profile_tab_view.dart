@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 import '../../controllers/home_controller.dart';
 import '../../routes/app_routes.dart';
@@ -211,20 +212,24 @@ class ProfileTabView extends GetView<HomeController> {
       child: Column(
         children: [
           _buildMenuItem(
-            Icons.edit_outlined,
+            'assets/images/editprofile.svg',
             'Edit Profile',
             onTap: () => Get.toNamed(Routes.editProfile),
           ),
           _buildDivider(),
           _buildMenuItem(
-            Icons.directions_car_outlined,
+            'assets/images/Caricon.svg',
             'My Vehicles',
             onTap: () => Get.toNamed(Routes.myVehicles),
           ),
           _buildDivider(),
-          _buildMenuItem(Icons.insert_drive_file_outlined, 'Saved Reports'),
+          _buildMenuItem('assets/images/reports.svg', 'Saved Reports'),
           _buildDivider(),
-          _buildMenuItem(Icons.notifications_none, 'Notifications'),
+          _buildMenuItem(
+            'assets/images/notification.svg',
+            'Notifications',
+            onTap: () => Get.toNamed(Routes.notifications),
+          ),
           _buildDivider(),
           _buildMenuItem(
             Icons.credit_card_outlined,
@@ -232,15 +237,33 @@ class ProfileTabView extends GetView<HomeController> {
             onTap: () => Get.toNamed(Routes.subscription),
           ),
           _buildDivider(),
-          _buildMenuItem(Icons.shield_outlined, 'Privacy & Terms'),
+          _buildMenuItem(
+            Icons.shield_outlined,
+            'Privacy & Terms',
+            onTap: () => Get.toNamed(Routes.privacyTerms),
+          ),
           _buildDivider(),
-          _buildMenuItem(Icons.help_outline, 'Help & Support'),
+          _buildMenuItem(
+            Icons.help_outline,
+            'FAQs',
+            onTap: () => Get.toNamed(Routes.faqs),
+          ),
+          _buildDivider(),
+          _buildMenuItem(
+            Icons.support_agent_outlined,
+            'Contact Support',
+            onTap: () => Get.toNamed(Routes.contactSupport),
+          ),
         ],
       ),
     );
   }
 
-  Widget _buildMenuItem(IconData icon, String title, {VoidCallback? onTap}) {
+  Widget _buildMenuItem(
+    dynamic iconOrAsset,
+    String title, {
+    VoidCallback? onTap,
+  }) {
     return InkWell(
       onTap: onTap ?? () {},
       child: Padding(
@@ -250,11 +273,16 @@ class ProfileTabView extends GetView<HomeController> {
           children: [
             Row(
               children: [
-                Icon(
-                  icon,
-                  size: 20,
-                  color: const Color(0xFF6B7280),
-                ), // Adjusted color for lucide icons
+                if (iconOrAsset is String)
+                  iconOrAsset.endsWith('.svg')
+                      ? SvgPicture.asset(iconOrAsset, width: 22, height: 22)
+                      : Image.asset(iconOrAsset, width: 20, height: 20)
+                else if (iconOrAsset is IconData)
+                  Icon(
+                    iconOrAsset,
+                    size: 20,
+                    color: const Color(0xFF6B7280),
+                  ), // Adjusted color for lucide icons
                 const SizedBox(width: 12),
                 Text(
                   title,
