@@ -213,7 +213,9 @@ class AiChatView extends StatelessWidget {
                 decoration: BoxDecoration(
                   color: const Color(0xFFE7F1FC),
                   borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: Colors.black.withOpacity(0.1)),
+                  border: Border.all(
+                    color: Colors.black.withValues(alpha: 0.1),
+                  ),
                 ),
                 child: const TextField(
                   decoration: InputDecoration(

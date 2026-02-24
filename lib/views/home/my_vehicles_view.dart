@@ -31,7 +31,7 @@ class MyVehiclesView extends GetView<HomeController> {
                   width: 24,
                   height: 24,
                   decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.10),
+                    color: Colors.white.withValues(alpha: 0.10),
                     shape: BoxShape.circle,
                   ),
                   child: const Icon(
@@ -214,7 +214,10 @@ class MyVehiclesView extends GetView<HomeController> {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.black.withOpacity(0.06), width: 0.8),
+        border: Border.all(
+          color: Colors.black.withValues(alpha: 0.06),
+          width: 0.8,
+        ),
       ),
       child: Padding(
         padding: const EdgeInsets.all(16),

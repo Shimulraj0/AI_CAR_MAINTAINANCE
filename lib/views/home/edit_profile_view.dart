@@ -31,7 +31,7 @@ class EditProfileView extends GetView<HomeController> {
                   width: 24,
                   height: 24,
                   decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.10),
+                    color: Colors.white.withValues(alpha: 0.10),
                     shape: BoxShape.circle,
                   ),
                   child: const Icon(
@@ -110,12 +110,12 @@ class EditProfileView extends GetView<HomeController> {
               color: Colors.white,
               shape: BoxShape.circle,
               border: Border.all(
-                color: Colors.black.withOpacity(0.10),
+                color: Colors.black.withValues(alpha: 0.10),
                 width: 0.8,
               ),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.05),
+                  color: Colors.black.withValues(alpha: 0.05),
                   blurRadius: 4,
                   offset: const Offset(0, 2),
                 ),
@@ -157,7 +157,7 @@ class EditProfileView extends GetView<HomeController> {
               color: const Color(0xFFF3F4F6),
               borderRadius: BorderRadius.circular(12),
               border: Border.all(
-                color: Colors.black.withOpacity(0.08),
+                color: Colors.black.withValues(alpha: 0.08),
                 width: 1,
               ),
             ),

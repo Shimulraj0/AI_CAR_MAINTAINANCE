@@ -20,7 +20,7 @@ class AddMaintenanceView extends GetView<HomeController> {
             width: 24,
             height: 24,
             decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.1),
+              color: Colors.white.withValues(alpha: 0.1),
               shape: BoxShape.circle,
             ),
             child: const Icon(Icons.arrow_back, color: Colors.white, size: 16),
@@ -170,7 +170,7 @@ class AddMaintenanceView extends GetView<HomeController> {
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
               borderSide: BorderSide(
-                color: Colors.black.withOpacity(0.08),
+                color: Colors.black.withValues(alpha: 0.08),
                 width: 1,
               ),
             ),

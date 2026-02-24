@@ -31,7 +31,7 @@ class SubscriptionView extends GetView<HomeController> {
                   width: 24,
                   height: 24,
                   decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.10),
+                    color: Colors.white.withValues(alpha: 0.10),
                     shape: BoxShape.circle,
                   ),
                   child: const Icon(
@@ -112,7 +112,7 @@ class SubscriptionView extends GetView<HomeController> {
         border: Border.all(color: const Color(0xFFE1E1E1)),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.04),
+            color: Colors.black.withValues(alpha: 0.04),
             blurRadius: 8,
             offset: const Offset(0, 4),
           ),

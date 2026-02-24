@@ -54,7 +54,7 @@ class ProfileTabView extends GetView<HomeController> {
               width: 24,
               height: 24,
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.10),
+                color: Colors.white.withValues(alpha: 0.10),
                 shape: BoxShape.circle,
               ),
               child: const Icon(
@@ -86,7 +86,10 @@ class ProfileTabView extends GetView<HomeController> {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.black.withOpacity(0.06), width: 0.8),
+        border: Border.all(
+          color: Colors.black.withValues(alpha: 0.06),
+          width: 0.8,
+        ),
       ),
       child: Row(
         children: [
@@ -200,7 +203,10 @@ class ProfileTabView extends GetView<HomeController> {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.black.withOpacity(0.06), width: 0.8),
+        border: Border.all(
+          color: Colors.black.withValues(alpha: 0.06),
+          width: 0.8,
+        ),
       ),
       child: Column(
         children: [
@@ -269,7 +275,7 @@ class ProfileTabView extends GetView<HomeController> {
   }
 
   Widget _buildDivider() {
-    return Container(height: 1, color: Colors.black.withOpacity(0.04));
+    return Container(height: 1, color: Colors.black.withValues(alpha: 0.04));
   }
 
   Widget _buildLogoutButton() {

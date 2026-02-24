@@ -31,7 +31,7 @@ class AddVehiclesView extends GetView<HomeController> {
                   width: 24,
                   height: 24,
                   decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.10),
+                    color: Colors.white.withValues(alpha: 0.10),
                     shape: BoxShape.circle,
                   ),
                   child: const Icon(
@@ -165,7 +165,10 @@ class AddVehiclesView extends GetView<HomeController> {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.black.withOpacity(0.04), width: 1),
+        border: Border.all(
+          color: Colors.black.withValues(alpha: 0.04),
+          width: 1,
+        ),
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -193,7 +196,7 @@ class AddVehiclesView extends GetView<HomeController> {
               color: const Color(0x192B63A8),
               borderRadius: BorderRadius.circular(8),
               border: Border.all(
-                color: Colors.black.withOpacity(0.06),
+                color: Colors.black.withValues(alpha: 0.06),
                 width: 0.5,
               ),
             ),
@@ -224,7 +227,10 @@ class AddVehiclesView extends GetView<HomeController> {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.black.withOpacity(0.04), width: 1),
+        border: Border.all(
+          color: Colors.black.withValues(alpha: 0.04),
+          width: 1,
+        ),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -248,7 +254,7 @@ class AddVehiclesView extends GetView<HomeController> {
                     TextSpan(
                       text: '(Optional)',
                       style: TextStyle(
-                        color: Colors.black.withOpacity(0.50),
+                        color: Colors.black.withValues(alpha: 0.50),
                         fontSize: 11,
                         fontFamily: 'Sora',
                         fontWeight: FontWeight.w400,
@@ -267,7 +273,7 @@ class AddVehiclesView extends GetView<HomeController> {
               color: const Color(0x192B63A8),
               borderRadius: BorderRadius.circular(8),
               border: Border.all(
-                color: Colors.black.withOpacity(0.06),
+                color: Colors.black.withValues(alpha: 0.06),
                 width: 0.5,
               ),
             ),
