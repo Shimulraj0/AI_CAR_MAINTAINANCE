@@ -308,7 +308,7 @@ class ProfileTabView extends GetView<HomeController> {
 
   Widget _buildLogoutButton() {
     return InkWell(
-      onTap: () {},
+      onTap: () => Get.offAllNamed(Routes.login),
       borderRadius: BorderRadius.circular(12),
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 12),
