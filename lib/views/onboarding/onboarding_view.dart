@@ -53,39 +53,6 @@ class _OnboardingViewState extends State<OnboardingView> {
       body: SafeArea(
         child: Column(
           children: [
-            // Custom Status Bar / Header
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  const Text(
-                    "9:41",
-                    style: TextStyle(
-                      fontFamily: 'SF Pro Text', // System font usually
-                      fontWeight: FontWeight.w600,
-                      fontSize: 15,
-                    ),
-                  ),
-                  Row(
-                    children: [
-                      const Icon(Icons.signal_cellular_alt, size: 16),
-                      const SizedBox(width: 4),
-                      const Icon(Icons.wifi, size: 16),
-                      const SizedBox(width: 4),
-                      // Battery icon placeholder or custom
-                      Transform.rotate(
-                        angle: 1.5708, // 90 degrees
-                        child: const Icon(Icons.battery_full, size: 16),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-
-            const SizedBox(height: 10),
-
             // PageView Content
             Expanded(
               child: PageView.builder(
@@ -103,18 +70,23 @@ class _OnboardingViewState extends State<OnboardingView> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         // Image Section (First)
-                        Container(
-                          width: 350,
-                          height: 408,
-                          decoration: ShapeDecoration(
-                            image: DecorationImage(
-                              image: AssetImage(
-                                _onboardingData[index]['image']!,
+                        SizedBox(
+                          width: double.infinity,
+                          child: Center(
+                            child: Container(
+                              width: 350,
+                              height: 408,
+                              decoration: ShapeDecoration(
+                                image: DecorationImage(
+                                  image: AssetImage(
+                                    _onboardingData[index]['image']!,
+                                  ),
+                                  fit: BoxFit.fill,
+                                ),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
                               ),
-                              fit: BoxFit.fill,
-                            ),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(8),
                             ),
                           ),
                         ),

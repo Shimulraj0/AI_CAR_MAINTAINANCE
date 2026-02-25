@@ -1,14 +1,22 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../controllers/home_controller.dart';
+import '../../controllers/edit_profile_controller.dart';
 import '../../routes/app_routes.dart';
 import '../../widgets/custom_bottom_nav_bar.dart';
 
-class EditProfileView extends GetView<HomeController> {
+class EditProfileView extends GetView<EditProfileController> {
   const EditProfileView({super.key});
 
   @override
   Widget build(BuildContext context) {
+    // Inject the editing controller
+    Get.put(EditProfileController());
+
+    // We still need the HomeController for bottom nav navigation
+    final homeController = Get.find<HomeController>();
+
     return Scaffold(
       backgroundColor: const Color(0xFFF8FAFC),
       appBar: PreferredSize(
@@ -61,11 +69,23 @@ class EditProfileView extends GetView<HomeController> {
             const SizedBox(height: 32),
             _buildProfileImage(),
             const SizedBox(height: 32),
-            _buildInputField('Full Name', 'Alex Johnson'),
+            _buildInputField(
+              'Full Name',
+              controller.nameController,
+              TextInputType.name,
+            ),
             const SizedBox(height: 20),
-            _buildInputField('Email', 'alex.johnson@email.com'),
+            _buildInputField(
+              'Email',
+              controller.emailController,
+              TextInputType.emailAddress,
+            ),
             const SizedBox(height: 20),
-            _buildInputField('Phone', '(555) 123-4567'),
+            _buildInputField(
+              'Phone',
+              controller.phoneController,
+              TextInputType.phone,
+            ),
             const SizedBox(height: 48),
             _buildSaveButton(),
             const SizedBox(height: 40),
@@ -75,7 +95,7 @@ class EditProfileView extends GetView<HomeController> {
       bottomNavigationBar: CustomBottomNavBar(
         currentIndex: 3, // Profile Tab index
         onTap: (index) {
-          controller.changeTabIndex(index);
+          homeController.changeTabIndex(index);
           Get.offAllNamed(Routes.home);
         },
         onFabTap: () {
@@ -88,53 +108,65 @@ class EditProfileView extends GetView<HomeController> {
 
   Widget _buildProfileImage() {
     return Center(
-      child: Stack(
-        alignment: Alignment.bottomRight,
-        children: [
-          Container(
-            width: 80,
-            height: 80,
-            decoration: const BoxDecoration(
-              shape: BoxShape.circle,
-              image: DecorationImage(
-                image: AssetImage('assets/images/profile.png'),
-                fit: BoxFit.cover,
-              ),
-            ),
-          ),
-          Container(
-            width: 26,
-            height: 26,
-            margin: const EdgeInsets.only(bottom: 2, right: 2),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              shape: BoxShape.circle,
-              border: Border.all(
-                color: Colors.black.withValues(alpha: 0.10),
-                width: 0.8,
-              ),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.05),
-                  blurRadius: 4,
-                  offset: const Offset(0, 2),
+      child: GestureDetector(
+        onTap: () => controller.pickImage(),
+        child: Stack(
+          alignment: Alignment.bottomRight,
+          children: [
+            Obx(
+              () => Container(
+                width: 80,
+                height: 80,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  image: DecorationImage(
+                    image: controller.pickedImagePath.value.isNotEmpty
+                        ? FileImage(File(controller.pickedImagePath.value))
+                              as ImageProvider
+                        : const AssetImage('assets/images/profile.png'),
+                    fit: BoxFit.cover,
+                  ),
                 ),
-              ],
-            ),
-            child: const Center(
-              child: Icon(
-                Icons.edit_outlined,
-                size: 14,
-                color: Color(0xFF6B7280),
               ),
             ),
-          ),
-        ],
+            Container(
+              width: 26,
+              height: 26,
+              margin: const EdgeInsets.only(bottom: 2, right: 2),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                shape: BoxShape.circle,
+                border: Border.all(
+                  color: Colors.black.withValues(alpha: 0.10),
+                  width: 0.8,
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.05),
+                    blurRadius: 4,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
+              ),
+              child: const Center(
+                child: Icon(
+                  Icons.edit_outlined,
+                  size: 14,
+                  color: Color(0xFF6B7280),
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
 
-  Widget _buildInputField(String label, String value) {
+  Widget _buildInputField(
+    String label,
+    TextEditingController textController,
+    TextInputType keyboardType,
+  ) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 26),
       child: Column(
@@ -152,7 +184,7 @@ class EditProfileView extends GetView<HomeController> {
           const SizedBox(height: 8),
           Container(
             width: double.infinity,
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
             decoration: BoxDecoration(
               color: const Color(0xFFF3F4F6),
               borderRadius: BorderRadius.circular(12),
@@ -161,13 +193,18 @@ class EditProfileView extends GetView<HomeController> {
                 width: 1,
               ),
             ),
-            child: Text(
-              value,
+            child: TextField(
+              controller: textController,
+              keyboardType: keyboardType,
               style: const TextStyle(
-                color: Color(0xFF90A1B9),
+                color: Color(0xFF0F0F0F),
                 fontSize: 14,
                 fontFamily: 'Inter',
-                fontWeight: FontWeight.w400,
+                fontWeight: FontWeight.w500,
+              ),
+              decoration: const InputDecoration(
+                border: InputBorder.none,
+                isDense: true,
               ),
             ),
           ),
@@ -182,7 +219,10 @@ class EditProfileView extends GetView<HomeController> {
       child: InkWell(
         onTap: () {
           // Handle Save
-          Get.back();
+          controller.saveChanges();
+          Future.delayed(const Duration(milliseconds: 1500), () {
+            Get.back();
+          });
         },
         borderRadius: BorderRadius.circular(12),
         child: Container(

@@ -30,17 +30,34 @@ class SplashView extends GetView<SplashController> {
                 mainAxisSize: MainAxisSize.min,
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Container(
-                    width: 216,
-                    height: 180,
-                    decoration: const BoxDecoration(
-                      shape: BoxShape.rectangle,
-                      borderRadius: BorderRadius.all(Radius.circular(4)),
-                    ),
-                    // Using PNG asset
-                    child: Image.asset(
-                      'assets/images/splash_logo.png',
-                      fit: BoxFit.fill,
+                  TweenAnimationBuilder(
+                    tween: Tween<double>(begin: 0.0, end: 1.0),
+                    duration: const Duration(milliseconds: 1500),
+                    curve: Curves.easeOutBack,
+                    builder: (context, value, child) {
+                      return Transform.scale(
+                        scale: value,
+                        child: Opacity(
+                          opacity: value.clamp(
+                            0.0,
+                            1.0,
+                          ), // Ensure opacity stays within 0 to 1
+                          child: child,
+                        ),
+                      );
+                    },
+                    child: Container(
+                      width: 216,
+                      height: 180,
+                      decoration: const BoxDecoration(
+                        shape: BoxShape.rectangle,
+                        borderRadius: BorderRadius.all(Radius.circular(4)),
+                      ),
+                      // Using PNG asset
+                      child: Image.asset(
+                        'assets/images/splash_logo.png',
+                        fit: BoxFit.fill,
+                      ),
                     ),
                   ),
                 ],

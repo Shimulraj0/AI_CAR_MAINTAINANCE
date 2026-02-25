@@ -1,8 +1,57 @@
 import 'package:flutter/material.dart';
+import 'dart:math' as math;
 import 'package:get/get.dart';
 
-class DiagnoseTabView extends StatelessWidget {
+class DiagnoseTabView extends StatefulWidget {
   const DiagnoseTabView({super.key});
+
+  @override
+  State<DiagnoseTabView> createState() => _DiagnoseTabViewState();
+}
+
+class _DiagnoseTabViewState extends State<DiagnoseTabView>
+    with SingleTickerProviderStateMixin {
+  bool _isAnalyzing = false;
+  late final AnimationController _animationController;
+
+  @override
+  void initState() {
+    super.initState();
+    _animationController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1500),
+    );
+  }
+
+  @override
+  void dispose() {
+    _animationController.dispose();
+    super.dispose();
+  }
+
+  void _handleAnalyze() async {
+    if (_isAnalyzing) return;
+    setState(() {
+      _isAnalyzing = true;
+    });
+    _animationController.repeat();
+
+    // Simulating processing delay before navigation
+    await Future.delayed(const Duration(seconds: 2));
+
+    if (mounted) {
+      Get.toNamed('/analyzing')?.then((_) {
+        // Reset state if user comes back
+        if (mounted) {
+          setState(() {
+            _isAnalyzing = false;
+          });
+          _animationController.stop();
+          _animationController.reset();
+        }
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -174,33 +223,52 @@ class DiagnoseTabView extends StatelessWidget {
             width: double.infinity,
             height: 50,
             decoration: BoxDecoration(
-              gradient: const LinearGradient(
-                colors: [
-                  Color(0xFF8BB8E8),
-                  Color(0xFFA5C9F0),
-                ], // Lighter gradient to look like opacity
-              ),
+              color: _isAnalyzing ? null : const Color(0xFF2B63A8),
+              gradient: _isAnalyzing
+                  ? const LinearGradient(
+                      colors: [Color(0xFF8BB8E8), Color(0xFFA5C9F0)],
+                    )
+                  : null,
               borderRadius: BorderRadius.circular(12),
             ),
             child: ElevatedButton(
-              onPressed: () {
-                Get.toNamed('/analyzing');
-              },
+              onPressed: _isAnalyzing ? null : _handleAnalyze,
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.transparent,
                 shadowColor: Colors.transparent,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
+                disabledBackgroundColor: Colors.transparent,
+                disabledForegroundColor: Colors.white,
               ),
-              child: const Text(
-                'Analyze',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 16,
-                  fontFamily: 'Inter',
-                  fontWeight: FontWeight.w600,
-                ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  AnimatedBuilder(
+                    animation: _animationController,
+                    builder: (context, child) {
+                      return Transform.rotate(
+                        angle: _animationController.value * 2 * math.pi,
+                        child: child,
+                      );
+                    },
+                    child: CustomPaint(
+                      size: const Size(20, 20),
+                      painter: _ScanIconPainter(),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  const Text(
+                    'Analyze',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 16,
+                      fontFamily: 'Inter',
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
               ),
             ),
           ),
@@ -210,4 +278,55 @@ class DiagnoseTabView extends StatelessWidget {
       ),
     );
   }
+}
+
+class _ScanIconPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final center = Offset(size.width / 2, size.height / 2);
+    final paint = Paint()
+      ..color = Colors.white
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1.5
+      ..strokeCap = StrokeCap.round;
+
+    // Outer broken arc
+    canvas.drawArc(
+      Rect.fromCircle(center: center, radius: 8.5),
+      0.5,
+      4.0,
+      false,
+      paint,
+    );
+    canvas.drawArc(
+      Rect.fromCircle(center: center, radius: 8.5),
+      5.0,
+      1.2,
+      false,
+      paint,
+    );
+
+    // Inner broken arc
+    canvas.drawArc(
+      Rect.fromCircle(center: center, radius: 4.5),
+      2.0,
+      3.0,
+      false,
+      paint,
+    );
+    canvas.drawArc(
+      Rect.fromCircle(center: center, radius: 4.5),
+      -0.5,
+      2.0,
+      false,
+      paint,
+    );
+
+    // Center dot
+    paint.style = PaintingStyle.fill;
+    canvas.drawCircle(center, 1.5, paint);
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }

@@ -59,16 +59,15 @@ class _CustomBottomNavBarState extends State<CustomBottomNavBar> {
               SizedBox(
                 height: 64,
                 child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
-                    _buildNavItem(0, _navItems[0]),
-                    _buildNavItem(1, _navItems[1]),
+                    Expanded(child: _buildNavItem(0, _navItems[0])),
+                    Expanded(child: _buildNavItem(1, _navItems[1])),
                     const SizedBox(
-                      width: 70,
-                    ), // Placeholder space for the floating AI button
-                    _buildNavItem(2, _navItems[3]),
-                    _buildNavItem(3, _navItems[4]),
+                      width: 80,
+                    ), // Dedicated space for the 72px AI button without invasion
+                    Expanded(child: _buildNavItem(2, _navItems[3])),
+                    Expanded(child: _buildNavItem(3, _navItems[4])),
                   ],
                 ),
               ),
@@ -95,7 +94,7 @@ class _CustomBottomNavBarState extends State<CustomBottomNavBar> {
       onTap: () => widget.onTap(itemIndex),
       customBorder: const CircleBorder(),
       child: SizedBox(
-        width: 60,
+        width: double.infinity,
         height: double.infinity,
         child: Column(
           mainAxisSize: MainAxisSize.min,

@@ -1,11 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import '../../controllers/ai_chat_controller.dart';
 
-class AiChatView extends StatelessWidget {
+class AiChatView extends GetView<AiChatController> {
   const AiChatView({super.key});
 
   @override
   Widget build(BuildContext context) {
+    // Ensure controller is initialized
+    Get.put(AiChatController());
+
     return Scaffold(
       backgroundColor: const Color(0xFFF8FAFC),
       appBar: AppBar(
@@ -35,36 +39,28 @@ class AiChatView extends StatelessWidget {
       body: Column(
         children: [
           Expanded(
-            child: ListView(
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-              children: [
-                _buildAiMessage(
-                  text:
-                      "Hello! I'm your Autointel AI assistant. How can I help you with your vehicle today?",
+            child: Obx(
+              () => ListView.separated(
+                controller: controller.scrollController,
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 24,
+                  vertical: 16,
                 ),
-                const SizedBox(height: 16),
-                _buildUserMessage(
-                  text:
-                      "My check engine light just turned on while driving, and I'm noticing slight vibrations when the car is idling. What could be causing this, and is it safe to continue driving?",
-                ),
-                const SizedBox(height: 16),
-                _buildAiMessage(
-                  text:
-                      "Based on the P0133 code, I'd recommend checking the sensor wiring first. It's often just a loose connection. Would you like a cost estimate for a replacement sensor?",
-                  options: [
-                    'Estimate Cost',
-                    'Find Mechanic',
-                    'How to check wiring?',
-                  ],
-                ),
-                const SizedBox(height: 16),
-                _buildUserMessage(text: "Estimate Cost"),
-                const SizedBox(height: 16),
-                _buildAiMessage(
-                  text:
-                      "The average cost for an O2 Sensor replacement is between \$150 and \$250. This includes parts (\$80-\$150) and labor (\$70-\$100).",
-                ),
-              ],
+                itemCount: controller.messages.length,
+                separatorBuilder: (context, index) =>
+                    const SizedBox(height: 16),
+                itemBuilder: (context, index) {
+                  final message = controller.messages[index];
+                  if (message.isUser) {
+                    return _buildUserMessage(text: message.text);
+                  } else {
+                    return _buildAiMessage(
+                      text: message.text,
+                      options: message.options,
+                    );
+                  }
+                },
+              ),
             ),
           ),
           _buildMessageInput(),
@@ -82,7 +78,7 @@ class AiChatView extends StatelessWidget {
           height: 40,
           decoration: const BoxDecoration(shape: BoxShape.circle),
           clipBehavior: Clip.antiAlias,
-          child: Image.asset('assets/images/Frame.png', fit: BoxFit.cover),
+          child: Image.asset('assets/images/TM 2.png', fit: BoxFit.cover),
         ),
         const SizedBox(width: 12),
         Expanded(
@@ -124,22 +120,25 @@ class AiChatView extends StatelessWidget {
                         runSpacing: 8,
                         children: options
                             .map(
-                              (opt) => Container(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 12,
-                                  vertical: 6,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: Colors.white,
-                                  borderRadius: BorderRadius.circular(10),
-                                ),
-                                child: Text(
-                                  opt,
-                                  style: const TextStyle(
-                                    color: Color(0xFF2F5EA8),
-                                    fontSize: 12,
-                                    fontFamily: 'Inter',
-                                    fontWeight: FontWeight.w400,
+                              (opt) => GestureDetector(
+                                onTap: () => controller.sendMessage(opt),
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 12,
+                                    vertical: 6,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: Colors.white,
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
+                                  child: Text(
+                                    opt,
+                                    style: const TextStyle(
+                                      color: Color(0xFF2F5EA8),
+                                      fontSize: 12,
+                                      fontFamily: 'Inter',
+                                      fontWeight: FontWeight.w400,
+                                    ),
                                   ),
                                 ),
                               ),
@@ -189,11 +188,9 @@ class AiChatView extends StatelessWidget {
         Container(
           width: 40,
           height: 40,
-          decoration: const BoxDecoration(
-            color: Colors.grey,
-            shape: BoxShape.circle,
-          ),
-          // User profile image placeholder (matches the UI mock)
+          clipBehavior: Clip.antiAlias,
+          decoration: const BoxDecoration(shape: BoxShape.circle),
+          child: Image.asset('assets/images/chatuser.png', fit: BoxFit.cover),
         ),
       ],
     );
@@ -217,8 +214,11 @@ class AiChatView extends StatelessWidget {
                     color: Colors.black.withValues(alpha: 0.1),
                   ),
                 ),
-                child: const TextField(
-                  decoration: InputDecoration(
+                child: TextField(
+                  controller: controller.textController,
+                  onSubmitted: (value) => controller.sendMessage(value),
+                  textInputAction: TextInputAction.send,
+                  decoration: const InputDecoration(
                     hintText: 'write your message',
                     hintStyle: TextStyle(
                       color: Color(0xFF949CA9),
@@ -231,15 +231,23 @@ class AiChatView extends StatelessWidget {
               ),
             ),
             const SizedBox(width: 12),
-            Container(
-              width: 48,
-              height: 48,
-              decoration: const BoxDecoration(
-                color: Color(0xFF2B63A8),
-                shape: BoxShape.circle,
-              ),
-              child: const Center(
-                child: Icon(Icons.send_rounded, color: Colors.white, size: 20),
+            GestureDetector(
+              onTap: () =>
+                  controller.sendMessage(controller.textController.text),
+              child: Container(
+                width: 48,
+                height: 48,
+                decoration: const BoxDecoration(
+                  color: Color(0xFF2B63A8),
+                  shape: BoxShape.circle,
+                ),
+                child: const Center(
+                  child: Icon(
+                    Icons.send_rounded,
+                    color: Colors.white,
+                    size: 20,
+                  ),
+                ),
               ),
             ),
           ],

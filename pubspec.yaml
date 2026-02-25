@@ -37,6 +37,8 @@ dependencies:
   get: ^4.7.3
   flutter_svg: ^2.0.10
   introduction_screen: ^4.0.0
+  image_picker: ^1.2.1
+  flutter_launcher_icons: ^0.14.4
 
 dev_dependencies:
   flutter_test:
@@ -88,3 +90,10 @@ flutter:
   #
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/to/font-from-package
+
+flutter_launcher_icons:
+  android: "launcher_icon"
+  ios: true
+  remove_alpha_ios: true
+  image_path: "assets/images/app_icon.png"
+  min_sdk_android: 21
