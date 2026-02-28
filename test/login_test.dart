@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get/get.dart';
-import 'package:auto_intel/views/login/login_view.dart';
+import 'package:auto_intel/views/auth/login/login_view.dart';
 import 'package:auto_intel/controllers/login_controller.dart';
 
 void main() {

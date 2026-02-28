@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import '../../routes/app_routes.dart';
 import '../../widgets/custom_bottom_nav_bar.dart';
@@ -15,12 +16,69 @@ class HomeView extends GetView<HomeController> {
     return Scaffold(
       backgroundColor: Colors.white,
       body: Obx(
-        () => SafeArea(
-          bottom: false,
-          child: IndexedStack(
-            index: controller.currentIndex.value,
-            children: [
-              SingleChildScrollView(
+        () => IndexedStack(
+          index: controller.currentIndex.value,
+          children: [
+            Scaffold(
+              backgroundColor: Colors.white,
+              appBar: AppBar(
+                title: const Text(
+                  'Home',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 18,
+                    fontFamily: 'Archivo',
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                centerTitle: true,
+                backgroundColor: const Color(0xFF2B63A8),
+                elevation: 0,
+                systemOverlayStyle: const SystemUiOverlayStyle(
+                  statusBarColor: Colors.transparent,
+                  statusBarIconBrightness: Brightness.light,
+                ),
+                toolbarHeight: kToolbarHeight,
+                automaticallyImplyLeading: false,
+                actions: [
+                  Center(
+                    child: Container(
+                      margin: const EdgeInsets.only(right: 16),
+                      child: Stack(
+                        children: [
+                          IconButton(
+                            icon: const Icon(
+                              Icons.notifications_none,
+                              color: Colors.white,
+                              size: 28,
+                            ),
+                            onPressed: () {
+                              Get.toNamed(Routes.notifications);
+                            },
+                          ),
+                          Positioned(
+                            right: 10,
+                            top: 10,
+                            child: Container(
+                              width: 8,
+                              height: 8,
+                              decoration: BoxDecoration(
+                                color: const Color(0xFFEF4444),
+                                shape: BoxShape.circle,
+                                border: Border.all(
+                                  color: const Color(0xFF2B63A8),
+                                  width: 1.5,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              body: SingleChildScrollView(
                 child: Column(
                   children: [
                     // Header Section
@@ -95,12 +153,15 @@ class HomeView extends GetView<HomeController> {
                                           height: 48,
                                           child: ElevatedButton(
                                             onPressed: () {
-                                              Get.snackbar(
-                                                'Quick Analyze',
-                                                'Analyzing vehicle status...',
-                                                snackPosition:
-                                                    SnackPosition.BOTTOM,
-                                              );
+                                              if (Get.isRegistered<
+                                                HomeController
+                                              >()) {
+                                                Get.find<HomeController>()
+                                                    .changeTabIndex(
+                                                      1,
+                                                      autoStart: true,
+                                                    );
+                                              }
                                             },
                                             style: ElevatedButton.styleFrom(
                                               backgroundColor: const Color(
@@ -363,11 +424,11 @@ class HomeView extends GetView<HomeController> {
                   ],
                 ),
               ),
-              const DiagnoseTabView(),
-              const MaintenanceTabView(), // Third tab
-              const ProfileTabView(), // Fourth tab (Profile)
-            ],
-          ),
+            ),
+            const DiagnoseTabView(),
+            const MaintenanceTabView(), // Third tab
+            const ProfileTabView(), // Fourth tab (Profile)
+          ],
         ),
       ),
       // Custom Animated Bottom Navigation Bar

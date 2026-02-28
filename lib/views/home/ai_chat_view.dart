@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import '../../controllers/ai_chat_controller.dart';
 
@@ -25,6 +26,11 @@ class AiChatView extends GetView<AiChatController> {
         centerTitle: true,
         backgroundColor: const Color(0xFF2B63A8),
         elevation: 0,
+        systemOverlayStyle: const SystemUiOverlayStyle(
+          statusBarColor: Colors.transparent,
+          statusBarIconBrightness: Brightness.light,
+        ),
+        toolbarHeight: kToolbarHeight,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.white),
           onPressed: () => Get.back(),

@@ -1,41 +1,43 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import '../../controllers/login_controller.dart';
+import '../../../controllers/login_controller.dart';
 
 class LoginView extends GetView<LoginController> {
   const LoginView({super.key});
 
   @override
   Widget build(BuildContext context) {
-    // Ensure controller is registered if not using bindings
-    if (!Get.isRegistered<LoginController>()) {
-      Get.put(LoginController());
-    }
-
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
         title: const Text(
-          'Log In',
+          'log In',
           style: TextStyle(
-            color: Color(0xFF2B63A8),
+            color: Colors.white,
             fontSize: 18,
             fontFamily: 'Archivo',
             fontWeight: FontWeight.w600,
           ),
         ),
         centerTitle: true,
-        backgroundColor: Colors.white,
+        backgroundColor: const Color(0xFF2B63A8),
         elevation: 0,
+        automaticallyImplyLeading: false,
+        systemOverlayStyle: const SystemUiOverlayStyle(
+          statusBarColor: Colors.transparent,
+          statusBarIconBrightness: Brightness.light,
+        ),
       ),
       body: SingleChildScrollView(
         child: Column(
           children: [
-            // Below Header Space (overlapping if needed, or simple column)
-            // Using standard column layout for simplicity first, can adjust for overlap if critical.
             Padding(
-              padding: const EdgeInsets.all(24.0),
+              padding: const EdgeInsets.symmetric(
+                horizontal: 24.0,
+                vertical: 32.0,
+              ),
               child: Form(
                 key: controller.loginFormKey,
                 child: Column(
@@ -45,7 +47,7 @@ class LoginView extends GetView<LoginController> {
                       'Welcome Back !',
                       style: TextStyle(
                         color: Color(0xFF2B63A8),
-                        fontSize: 20,
+                        fontSize: 24,
                         fontFamily: 'Poppins',
                         fontWeight: FontWeight.w600,
                       ),
@@ -64,24 +66,9 @@ class LoginView extends GetView<LoginController> {
                     const SizedBox(height: 32),
 
                     // Email Field
-                    _buildLabel('Email'),
-                    const SizedBox(height: 8),
                     TextFormField(
                       controller: controller.emailController,
-                      decoration: InputDecoration(
-                        hintText: 'brooklynsim@gm |',
-                        hintStyle: const TextStyle(color: Color(0xFF0F0F0F)),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: const BorderSide(
-                            color: Color(0xFFD2D6DB),
-                          ),
-                        ),
-                        contentPadding: const EdgeInsets.symmetric(
-                          horizontal: 16,
-                          vertical: 16,
-                        ),
-                      ),
+                      decoration: _inputDecoration('Email', 'brooklynsim@gm |'),
                       validator: (value) => GetUtils.isEmail(value ?? '')
                           ? null
                           : 'Please enter a valid email',
@@ -89,35 +76,22 @@ class LoginView extends GetView<LoginController> {
                     const SizedBox(height: 24),
 
                     // Password Field
-                    _buildLabel('Password'),
-                    const SizedBox(height: 8),
                     Obx(
                       () => TextFormField(
                         controller: controller.passwordController,
                         obscureText: controller.isPasswordHidden.value,
-                        decoration: InputDecoration(
-                          hintText: '••••••••',
-                          hintStyle: const TextStyle(color: Color(0xFF0F0F0F)),
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            borderSide: const BorderSide(
-                              color: Color(0xFFD2D6DB),
+                        decoration: _inputDecoration('Password', '••••••••')
+                            .copyWith(
+                              suffixIcon: IconButton(
+                                icon: Icon(
+                                  controller.isPasswordHidden.value
+                                      ? Icons.visibility_off_outlined
+                                      : Icons.visibility_outlined,
+                                  color: const Color(0xFF949CA9),
+                                ),
+                                onPressed: controller.togglePasswordVisibility,
+                              ),
                             ),
-                          ),
-                          suffixIcon: IconButton(
-                            icon: Icon(
-                              controller.isPasswordHidden.value
-                                  ? Icons.visibility_off_outlined
-                                  : Icons.visibility_outlined,
-                              color: const Color(0xFF949CA9),
-                            ),
-                            onPressed: controller.togglePasswordVisibility,
-                          ),
-                          contentPadding: const EdgeInsets.symmetric(
-                            horizontal: 16,
-                            vertical: 16,
-                          ),
-                        ),
                         validator: (value) => (value?.length ?? 0) >= 6
                             ? null
                             : 'Password must be at least 6 chars',
@@ -133,16 +107,22 @@ class LoginView extends GetView<LoginController> {
                         Row(
                           children: [
                             Obx(
-                              () => Checkbox(
-                                value: controller.rememberMe.value,
-                                onChanged: (val) =>
-                                    controller.toggleRememberMe(),
-                                activeColor: const Color(0xFF2B63A8),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(4),
+                              () => SizedBox(
+                                width: 24,
+                                height: 24,
+                                child: Checkbox(
+                                  value: controller.rememberMe.value,
+                                  onChanged: (val) =>
+                                      controller.toggleRememberMe(),
+                                  activeColor: Colors.black,
+                                  checkColor: Colors.white,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(4),
+                                  ),
                                 ),
                               ),
                             ),
+                            const SizedBox(width: 8),
                             const Text(
                               'Remember me',
                               style: TextStyle(
@@ -172,11 +152,12 @@ class LoginView extends GetView<LoginController> {
                     // Sign In Button
                     SizedBox(
                       width: double.infinity,
-                      height: 50,
+                      height: 54,
                       child: ElevatedButton(
                         onPressed: controller.login,
                         style: ElevatedButton.styleFrom(
                           backgroundColor: const Color(0xFF2B63A8),
+                          elevation: 0,
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(12),
                           ),
@@ -196,30 +177,37 @@ class LoginView extends GetView<LoginController> {
                     const SizedBox(height: 24),
                     const Center(
                       child: Text(
-                        'Or ',
+                        'Or',
                         style: TextStyle(
                           color: Color(0xFF2B63A8),
                           fontSize: 14,
+                          fontFamily: 'Inter',
                         ),
                       ),
                     ),
                     const SizedBox(height: 24),
 
-                    // Social Logins (Placeholders)
+                    // Social Logins
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        _socialButton(
-                          SvgPicture.asset('assets/images/Google.svg'),
+                        _socialCircleButton(
+                          SvgPicture.asset(
+                            'assets/images/Google.svg',
+                            width: 24,
+                          ),
                         ),
                         const SizedBox(width: 16),
-                        _socialButton(
-                          SvgPicture.asset('assets/images/Frame 26.svg'),
+                        _socialCircleButton(
+                          SvgPicture.asset(
+                            'assets/images/Frame 26.svg',
+                            width: 24,
+                          ),
                         ),
                       ],
                     ),
 
-                    const SizedBox(height: 24),
+                    const SizedBox(height: 32),
 
                     // Sign Up Link
                     Row(
@@ -257,25 +245,42 @@ class LoginView extends GetView<LoginController> {
     );
   }
 
-  Widget _buildLabel(String label) {
-    return Text(
-      label,
-      style: const TextStyle(
+  InputDecoration _inputDecoration(String label, String hint) {
+    return InputDecoration(
+      labelText: label,
+      labelStyle: const TextStyle(
         color: Color(0xFF0F0F0F),
         fontSize: 14,
         fontFamily: 'Inter',
         fontWeight: FontWeight.w500,
       ),
+      floatingLabelBehavior: FloatingLabelBehavior.always,
+      hintText: hint,
+      hintStyle: const TextStyle(color: Color(0xFF949CA9), fontSize: 14),
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: const BorderSide(color: Color(0xFFD2D6DB)),
+      ),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: const BorderSide(color: Color(0xFFD2D6DB)),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: const BorderSide(color: Color(0xFF2B63A8), width: 1.5),
+      ),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
     );
   }
 
-  Widget _socialButton(Widget icon) {
+  Widget _socialCircleButton(Widget icon) {
     return Container(
-      width: 46,
-      height: 46,
-      decoration: const ShapeDecoration(
-        color: Color(0xFFE5E7EB),
-        shape: OvalBorder(),
+      width: 50,
+      height: 50,
+      decoration: BoxDecoration(
+        color: const Color(0xFFF3F4F6),
+        shape: BoxShape.circle,
+        border: Border.all(color: const Color(0xFFE5E7EB)),
       ),
       child: Center(child: icon),
     );

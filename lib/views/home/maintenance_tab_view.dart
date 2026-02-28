@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
+import '../../controllers/home_controller.dart';
 
 class MaintenanceTabView extends StatefulWidget {
   const MaintenanceTabView({super.key});
@@ -13,17 +15,80 @@ class _MaintenanceTabViewState extends State<MaintenanceTabView> {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        _buildHeader(),
-        _buildTabs(),
-        Expanded(
-          child: ListView(
-            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-            children: _buildTabContent(),
+    return Scaffold(
+      backgroundColor: Colors.white,
+      appBar: AppBar(
+        title: const Text(
+          'Maintenance',
+          style: TextStyle(
+            color: Colors.white,
+            fontSize: 18,
+            fontFamily: 'Archivo',
+            fontWeight: FontWeight.w600,
           ),
         ),
-      ],
+        centerTitle: true,
+        backgroundColor: const Color(0xFF2B63A8),
+        elevation: 0,
+        systemOverlayStyle: const SystemUiOverlayStyle(
+          statusBarColor: Colors.transparent,
+          statusBarIconBrightness: Brightness.light,
+        ),
+        toolbarHeight: kToolbarHeight,
+        leading: Center(
+          child: Container(
+            margin: const EdgeInsets.only(left: 16),
+            width: 32,
+            height: 32,
+            decoration: BoxDecoration(
+              color: Colors.white.withValues(alpha: 0.2),
+              shape: BoxShape.circle,
+            ),
+            child: IconButton(
+              padding: EdgeInsets.zero,
+              icon: const Icon(Icons.arrow_back, color: Colors.white, size: 18),
+              onPressed: () {
+                if (Get.isRegistered<HomeController>()) {
+                  Get.find<HomeController>().changeTabIndex(0);
+                } else {
+                  Get.back();
+                }
+              },
+            ),
+          ),
+        ),
+        actions: [
+          Center(
+            child: Container(
+              margin: const EdgeInsets.only(right: 16),
+              width: 36,
+              height: 36,
+              decoration: const BoxDecoration(
+                color: Color(0xFFEDF2F9),
+                shape: BoxShape.circle,
+              ),
+              child: IconButton(
+                padding: EdgeInsets.zero,
+                icon: const Icon(Icons.add, color: Color(0xFF2B63A8), size: 20),
+                onPressed: () {
+                  Get.toNamed('/add-maintenance');
+                },
+              ),
+            ),
+          ),
+        ],
+      ),
+      body: Column(
+        children: [
+          _buildTabs(),
+          Expanded(
+            child: ListView(
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+              children: _buildTabContent(),
+            ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -102,43 +167,6 @@ class _MaintenanceTabViewState extends State<MaintenanceTabView> {
       default:
         return [];
     }
-  }
-
-  Widget _buildHeader() {
-    return Container(
-      color: const Color(0xFF2B63A8),
-      padding: const EdgeInsets.only(left: 24, right: 24, top: 48, bottom: 24),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          const SizedBox(width: 40), // Spacer for balance
-          const Text(
-            'Maintenance',
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: 18,
-              fontFamily: 'Archivo',
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-          InkWell(
-            onTap: () {
-              Get.toNamed('/add-maintenance');
-            },
-            borderRadius: BorderRadius.circular(18),
-            child: Container(
-              width: 36,
-              height: 36,
-              decoration: const BoxDecoration(
-                color: Color(0xFFEDF2F9),
-                shape: BoxShape.circle,
-              ),
-              child: const Icon(Icons.add, color: Color(0xFF2B63A8)),
-            ),
-          ),
-        ],
-      ),
-    );
   }
 
   Widget _buildTabs() {

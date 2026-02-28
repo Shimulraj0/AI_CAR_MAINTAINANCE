@@ -8,20 +8,20 @@ import '../views/home/task_details_view.dart';
 import '../views/home/add_maintenance_view.dart';
 import '../views/splash/splash_view.dart';
 import '../views/onboarding/onboarding_view.dart';
-import '../views/login/login_view.dart';
+import '../views/auth/login/login_view.dart';
 import '../views/home/subscription_view.dart';
 import '../views/home/edit_profile_view.dart';
 import '../views/home/my_vehicles_view.dart';
 import '../views/home/add_vehicles_view.dart';
 import '../controllers/login_controller.dart';
-import '../views/signup/signup_view.dart';
+import '../views/auth/signup/signup_view.dart';
 import '../controllers/signup_controller.dart';
-import '../views/forgot_password/forgot_password_view.dart';
+import '../views/auth/forgot_password/forgot_password_view.dart';
 import '../controllers/forgot_password_controller.dart';
-import '../views/verify_email/verify_email_view.dart';
+import '../views/auth/verify_email/verify_email_view.dart';
 import '../controllers/verify_email_controller.dart';
-import '../views/change_password/change_password_view.dart';
-import '../views/change_password/password_reset_success_view.dart';
+import '../views/auth/change_password/change_password_view.dart';
+import '../views/auth/change_password/password_reset_success_view.dart';
 import '../controllers/change_password_controller.dart';
 import '../views/vehicle_registration/vehicle_registration_view.dart';
 import '../controllers/vehicle_registration_controller.dart';
@@ -39,6 +39,7 @@ import '../views/faqs/faqs_view.dart';
 import '../controllers/faqs_controller.dart';
 import '../views/support/contact_support_view.dart';
 import '../controllers/contact_support_controller.dart';
+import '../controllers/diagnostic_result_controller.dart';
 import '../bindings/initial_binding.dart';
 import 'app_routes.dart';
 
@@ -60,6 +61,8 @@ class AppPages {
     GetPage(
       name: Routes.login,
       page: () => const LoginView(),
+      transition: Transition.rightToLeft,
+      transitionDuration: const Duration(milliseconds: 250),
       binding: BindingsBuilder(() {
         Get.lazyPut<LoginController>(() => LoginController());
       }),
@@ -67,6 +70,8 @@ class AppPages {
     GetPage(
       name: Routes.signup,
       page: () => const SignUpView(),
+      transition: Transition.rightToLeft,
+      transitionDuration: const Duration(milliseconds: 250),
       binding: BindingsBuilder(() {
         Get.lazyPut<SignUpController>(() => SignUpController());
       }),
@@ -118,6 +123,11 @@ class AppPages {
     GetPage(
       name: Routes.diagnosticResult,
       page: () => const DiagnosticResultView(),
+      binding: BindingsBuilder(() {
+        Get.lazyPut<DiagnosticResultController>(
+          () => DiagnosticResultController(),
+        );
+      }),
     ),
     GetPage(name: Routes.saveReports, page: () => const SaveReportsView()),
     GetPage(name: Routes.aiChat, page: () => const AiChatView()),

@@ -34,7 +34,7 @@ class _OnboardingViewState extends State<OnboardingView> {
     },
   ];
 
-  void _onSkip() {
+  void _onSkip() async {
     if (_currentPage < _onboardingData.length - 1) {
       _pageController.animateToPage(
         _currentPage + 1,
@@ -42,7 +42,9 @@ class _OnboardingViewState extends State<OnboardingView> {
         curve: Curves.easeInOut,
       );
     } else {
-      Get.offNamed(Routes.login);
+      // Small delay to allow button ripple/splash to show before heavy transition
+      await Future.delayed(const Duration(milliseconds: 100));
+      Get.offAllNamed(Routes.login);
     }
   }
 

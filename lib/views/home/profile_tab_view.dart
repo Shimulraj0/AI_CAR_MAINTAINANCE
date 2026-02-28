@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 import '../../controllers/home_controller.dart';
@@ -9,73 +10,64 @@ class ProfileTabView extends GetView<HomeController> {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        _buildHeader(),
-        Expanded(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.only(
-              left: 26,
-              right: 26,
-              top: 24,
-              bottom: 24,
+    return Scaffold(
+      backgroundColor: Colors.white,
+      appBar: AppBar(
+        title: const Text(
+          'Profile',
+          style: TextStyle(
+            color: Colors.white,
+            fontSize: 18,
+            fontFamily: 'Archivo',
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        centerTitle: true,
+        backgroundColor: const Color(0xFF2B63A8),
+        elevation: 0,
+        systemOverlayStyle: const SystemUiOverlayStyle(
+          statusBarColor: Colors.transparent,
+          statusBarIconBrightness: Brightness.light,
+        ),
+        toolbarHeight: kToolbarHeight,
+        leading: Center(
+          child: Container(
+            margin: const EdgeInsets.only(left: 16),
+            width: 32,
+            height: 32,
+            decoration: BoxDecoration(
+              color: Colors.white.withValues(alpha: 0.2),
+              shape: BoxShape.circle,
             ),
-            child: Column(
-              children: [
-                _buildProfileCard(),
-                const SizedBox(height: 24),
-                _buildSubscriptionCard(),
-                const SizedBox(height: 24),
-                _buildMenuSection(),
-                const SizedBox(height: 24),
-                _buildLogoutButton(),
-                const SizedBox(height: 100), // Space for bottom nav
-              ],
+            child: IconButton(
+              padding: EdgeInsets.zero,
+              icon: const Icon(Icons.arrow_back, color: Colors.white, size: 18),
+              onPressed: () {
+                controller.changeTabIndex(0);
+              },
             ),
           ),
         ),
-      ],
-    );
-  }
-
-  Widget _buildHeader() {
-    return Container(
-      color: const Color(0xFF2B63A8),
-      padding: const EdgeInsets.only(left: 26, right: 26, top: 48, bottom: 16),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          InkWell(
-            onTap: () {
-              // Go back to Home Tab
-              controller.changeTabIndex(0);
-            },
-            borderRadius: BorderRadius.circular(100),
-            child: Container(
-              width: 24,
-              height: 24,
-              decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.10),
-                shape: BoxShape.circle,
-              ),
-              child: const Icon(
-                Icons.arrow_back,
-                color: Colors.white,
-                size: 16,
-              ),
-            ),
-          ),
-          const Text(
-            'Profile',
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: 18,
-              fontFamily: 'Archivo',
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-          const SizedBox(width: 24), // Spacer for balance
-        ],
+      ),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.only(
+          left: 26,
+          right: 26,
+          top: 24,
+          bottom: 24,
+        ),
+        child: Column(
+          children: [
+            _buildProfileCard(),
+            const SizedBox(height: 24),
+            _buildSubscriptionCard(),
+            const SizedBox(height: 24),
+            _buildMenuSection(),
+            const SizedBox(height: 24),
+            _buildLogoutButton(),
+            const SizedBox(height: 100), // Space for bottom nav
+          ],
+        ),
       ),
     );
   }

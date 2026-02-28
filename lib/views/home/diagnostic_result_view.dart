@@ -1,12 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../routes/app_routes.dart';
+import '../../controllers/diagnostic_result_controller.dart';
 
-class DiagnosticResultView extends StatelessWidget {
+class DiagnosticResultView extends GetView<DiagnosticResultController> {
   const DiagnosticResultView({super.key});
 
   @override
   Widget build(BuildContext context) {
+    // Ensure controller is registered if not already (safeguard)
+    if (!Get.isRegistered<DiagnosticResultController>()) {
+      Get.put(DiagnosticResultController());
+    }
+
     return Scaffold(
       backgroundColor: const Color(0xFFF8FAFC),
       appBar: AppBar(
@@ -169,6 +175,7 @@ class DiagnosticResultView extends StatelessWidget {
 
               // Cause 1: Faulty O2 Sensor (High Prob)
               _buildCauseCard(
+                index: 0,
                 title: 'Faulty O2 Sensor',
                 probLabel: 'High Prob.',
                 probColor: const Color(0xFFE7000B),
@@ -184,6 +191,7 @@ class DiagnosticResultView extends StatelessWidget {
 
               // Cause 2: Exhaust Leak (Medium Prob)
               _buildCauseCard(
+                index: 1,
                 title: 'Exhaust Leak',
                 probLabel: 'Medium Prob.',
                 probColor: const Color(0xFFF54900),
@@ -199,6 +207,7 @@ class DiagnosticResultView extends StatelessWidget {
 
               // Cause 3: Wiring Issue (Low Prob)
               _buildCauseCard(
+                index: 2,
                 title: 'Wiring Issue',
                 probLabel: 'Low Prob.',
                 probColor: const Color(0xFFD08700),
@@ -277,7 +286,9 @@ class DiagnosticResultView extends StatelessWidget {
                   const SizedBox(width: 12),
                   Expanded(
                     child: ElevatedButton.icon(
-                      onPressed: () {},
+                      onPressed: () {
+                        Get.toNamed(Routes.aiChat);
+                      },
                       icon: const Icon(Icons.chat_bubble_outline, size: 20),
                       label: const Text(
                         'Chat AI',
@@ -300,7 +311,9 @@ class DiagnosticResultView extends StatelessWidget {
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton.icon(
-                  onPressed: () {},
+                  onPressed: () {
+                    Get.toNamed(Routes.addMaintenance);
+                  },
                   icon: const Icon(Icons.calendar_today_outlined, size: 20),
                   label: const Text(
                     'Schedule Service',
@@ -364,6 +377,7 @@ class DiagnosticResultView extends StatelessWidget {
   }
 
   Widget _buildCauseCard({
+    required int index,
     required String title,
     required String probLabel,
     required Color probColor,
@@ -372,72 +386,114 @@ class DiagnosticResultView extends StatelessWidget {
     required String whyMatch,
     required String action,
   }) {
-    return _buildCard(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                title,
-                style: const TextStyle(
-                  color: Color(0xFF0A0A0A),
-                  fontSize: 16,
-                  fontFamily: 'Inter',
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-              Row(
-                children: [
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 8,
-                      vertical: 4,
-                    ),
-                    decoration: BoxDecoration(
-                      color: probBgColor,
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Text(
-                      probLabel,
-                      style: TextStyle(
-                        color: probColor,
-                        fontSize: 12,
+    return Obx(() {
+      final isExpanded = controller.isExpanded(index);
+      return Container(
+        width: double.infinity,
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(12),
+          boxShadow: const [
+            BoxShadow(
+              color: Color(0x19000000),
+              blurRadius: 3,
+              offset: Offset(0, 1),
+            ),
+          ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            InkWell(
+              onTap: () => controller.toggleExpansion(index),
+              borderRadius: BorderRadius.circular(12),
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      title,
+                      style: const TextStyle(
+                        color: Color(0xFF0A0A0A),
+                        fontSize: 16,
                         fontFamily: 'Inter',
+                        fontWeight: FontWeight.w600,
                       ),
                     ),
-                  ),
-                  const SizedBox(width: 8),
-                  const Icon(Icons.keyboard_arrow_up, color: Colors.grey),
-                ],
+                    Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 4,
+                          ),
+                          decoration: BoxDecoration(
+                            color: probBgColor,
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Text(
+                            probLabel,
+                            style: TextStyle(
+                              color: probColor,
+                              fontSize: 12,
+                              fontFamily: 'Inter',
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Icon(
+                          isExpanded
+                              ? Icons.keyboard_arrow_up
+                              : Icons.keyboard_arrow_down,
+                          color: Colors.grey,
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
               ),
-            ],
-          ),
-          const SizedBox(height: 16),
-          _buildCauseSection(
-            Icons.info_outline,
-            'What This Means',
-            meaning,
-            const Color(0xFF2B63A8),
-          ),
-          const SizedBox(height: 12),
-          _buildCauseSection(
-            Icons.check_circle_outline,
-            'Why This Matches Your Issue',
-            whyMatch,
-            Colors.green,
-          ),
-          const SizedBox(height: 12),
-          _buildCauseSection(
-            Icons.build_circle_outlined,
-            'Recommended Action',
-            action,
-            const Color(0xFF2B63A8),
-          ),
-        ],
-      ),
-    );
+            ),
+            AnimatedCrossFade(
+              firstChild: const SizedBox(width: double.infinity),
+              secondChild: Padding(
+                padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+                child: Column(
+                  children: [
+                    const Divider(height: 1, color: Color(0xFFF1F5F9)),
+                    const SizedBox(height: 16),
+                    _buildCauseSection(
+                      Icons.info_outline,
+                      'What This Means',
+                      meaning,
+                      const Color(0xFF2B63A8),
+                    ),
+                    const SizedBox(height: 12),
+                    _buildCauseSection(
+                      Icons.check_circle_outline,
+                      'Why This Matches Your Issue',
+                      whyMatch,
+                      Colors.green,
+                    ),
+                    const SizedBox(height: 12),
+                    _buildCauseSection(
+                      Icons.build_circle_outlined,
+                      'Recommended Action',
+                      action,
+                      const Color(0xFF2B63A8),
+                    ),
+                  ],
+                ),
+              ),
+              crossFadeState: isExpanded
+                  ? CrossFadeState.showSecond
+                  : CrossFadeState.showFirst,
+              duration: const Duration(milliseconds: 300),
+            ),
+          ],
+        ),
+      );
+    });
   }
 
   Widget _buildCauseSection(

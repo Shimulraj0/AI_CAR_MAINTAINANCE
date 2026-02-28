@@ -39,6 +39,7 @@ dependencies:
   introduction_screen: ^4.0.0
   image_picker: ^1.2.1
   flutter_launcher_icons: ^0.14.4
+  flutter_rocket: ^0.0.13
 
 dev_dependencies:
   flutter_test:
