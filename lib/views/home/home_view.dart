@@ -336,12 +336,7 @@ class HomeView extends GetView<HomeController> {
                                           const SizedBox(width: 16),
                                           TextButton(
                                             onPressed: () {
-                                              Get.snackbar(
-                                                'Ask AI',
-                                                'AI Assistant is getting ready...',
-                                                snackPosition:
-                                                    SnackPosition.BOTTOM,
-                                              );
+                                              Get.toNamed(Routes.aiChat);
                                             },
                                             child: const Text(
                                               'Ask AI',

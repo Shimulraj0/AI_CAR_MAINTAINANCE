@@ -291,7 +291,7 @@ class DiagnosticResultView extends GetView<DiagnosticResultController> {
                       },
                       icon: const Icon(Icons.chat_bubble_outline, size: 20),
                       label: const Text(
-                        'Chat AI',
+                        'Live Chat Support',
                         style: TextStyle(fontWeight: FontWeight.w600),
                       ),
                       style: ElevatedButton.styleFrom(

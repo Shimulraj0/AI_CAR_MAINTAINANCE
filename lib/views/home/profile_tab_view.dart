@@ -215,7 +215,11 @@ class ProfileTabView extends GetView<HomeController> {
             onTap: () => Get.toNamed(Routes.myVehicles),
           ),
           _buildDivider(),
-          _buildMenuItem('assets/images/reports.svg', 'Saved Reports'),
+          _buildMenuItem(
+            'assets/images/reports.svg',
+            'Saved Reports',
+            onTap: () => Get.toNamed(Routes.saveReports),
+          ),
           _buildDivider(),
           _buildMenuItem(
             'assets/images/notification.svg',
