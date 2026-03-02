@@ -1,6 +1,6 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
     <application
-        android:label="AutoIntel"
+        android:label="Auto Intel Diagnostics"
         android:name="${applicationName}"
         android:icon="@mipmap/launcher_icon">
         <activity
