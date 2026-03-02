@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../controllers/privacy_terms_controller.dart';
+import '../../controllers/home_controller.dart';
 import '../../routes/app_routes.dart';
 import '../../widgets/custom_bottom_nav_bar.dart';
 
@@ -65,6 +66,7 @@ class PrivacyTermsView extends GetView<PrivacyTermsController> {
       bottomNavigationBar: CustomBottomNavBar(
         currentIndex: 3, // Profile Tab index
         onTap: (index) {
+          Get.find<HomeController>().changeTabIndex(index);
           Get.offAllNamed(Routes.home); // Go back home and switch tab
         },
         onFabTap: () {

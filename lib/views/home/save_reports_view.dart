@@ -54,10 +54,13 @@ class SaveReportsView extends StatelessWidget {
       bottomNavigationBar: CustomBottomNavBar(
         currentIndex: 3, // Assuming 3 is Profile
         onTap: (index) {
-          Get.until((route) => Get.currentRoute == Routes.home);
           homeController.changeTabIndex(index);
+          Get.offAllNamed(Routes.home);
         },
-        onFabTap: () {},
+        onFabTap: () {
+          Get.offAllNamed(Routes.home);
+          Get.toNamed(Routes.aiChat);
+        },
       ),
     );
   }

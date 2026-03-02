@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../controllers/notifications_controller.dart';
+import '../../controllers/home_controller.dart';
 import '../../routes/app_routes.dart';
 import '../../widgets/custom_bottom_nav_bar.dart';
 import '../../models/notification_model.dart';
@@ -99,6 +100,7 @@ class NotificationsView extends GetView<NotificationsController> {
       bottomNavigationBar: CustomBottomNavBar(
         currentIndex: 3, // Profile Tab index
         onTap: (index) {
+          Get.find<HomeController>().changeTabIndex(index);
           Get.offAllNamed(Routes.home); // Go back home and switch tab
         },
         onFabTap: () {
