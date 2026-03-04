@@ -15,7 +15,7 @@ class AiChatView extends GetView<AiChatController> {
       backgroundColor: const Color(0xFFF8FAFC),
       appBar: AppBar(
         title: const Text(
-          'Ai Chat',
+          'Chat AI',
           style: TextStyle(
             color: Colors.white,
             fontSize: 18,
