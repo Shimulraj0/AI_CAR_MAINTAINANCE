@@ -333,20 +333,6 @@ class HomeView extends GetView<HomeController> {
                                               ),
                                             ),
                                           ),
-                                          const SizedBox(width: 16),
-                                          TextButton(
-                                            onPressed: () {
-                                              Get.toNamed(Routes.aiChat);
-                                            },
-                                            child: const Text(
-                                              'Ask AI',
-                                              style: TextStyle(
-                                                color: Color(0xFF2B63A8),
-                                                fontWeight: FontWeight.w600,
-                                                fontSize: 14,
-                                              ),
-                                            ),
-                                          ),
                                         ],
                                       ),
                                     ],
