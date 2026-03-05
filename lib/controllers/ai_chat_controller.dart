@@ -24,7 +24,7 @@ class AiChatController extends GetxController {
     messages.addAll([
       ChatMessage(
         text:
-            "Hello! I'm your Autointel assistant. How can I help you with your vehicle today?",
+            "Hello! I'm your Autointel Assistant. How can I help you with your vehicle today?",
         isUser: false,
       ),
       ChatMessage(
