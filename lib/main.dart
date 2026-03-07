@@ -3,9 +3,14 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'routes/app_pages.dart';
 import 'services/api_service.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'firebase_options.dart';
+import 'services/push_notification_service.dart';
 
-void main() {
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
   // 1. Handle asynchronous errors globally
   PlatformDispatcher.instance.onError = (error, stack) {
@@ -58,6 +63,10 @@ void main() {
   // Initialize Services (e.g., ApiService) before running the app
   // This is where you would also initialize Firebase, LocalStorage, etc.
   Get.put(ApiService());
+
+  // Initialize Push Notifications
+  final pushNotificationService = PushNotificationService();
+  await pushNotificationService.initialize();
 
   runApp(const MyApp());
 }
