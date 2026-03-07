@@ -3,6 +3,9 @@ import 'package:get/get.dart';
 import '../../controllers/home_controller.dart';
 import '../../routes/app_routes.dart';
 import '../../widgets/custom_bottom_nav_bar.dart';
+import 'dart:io' show Platform;
+import 'package:pay/pay.dart';
+import '../../configs/payment_config.dart';
 
 class SubscriptionView extends GetView<HomeController> {
   const SubscriptionView({super.key});
@@ -271,30 +274,55 @@ class SubscriptionView extends GetView<HomeController> {
                 _buildFeatureRow('Smart Maintenance System', false),
                 _buildFeatureRow('Priority Support', false),
                 const SizedBox(height: 32),
-                InkWell(
-                  onTap: () {
-                    // Handle upgrade
-                  },
-                  borderRadius: BorderRadius.circular(30),
-                  child: Container(
+                if (Platform.isIOS)
+                  SizedBox(
                     width: double.infinity,
-                    padding: const EdgeInsets.symmetric(vertical: 14),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFF0A0A0A),
-                      borderRadius: BorderRadius.circular(30),
-                    ),
-                    alignment: Alignment.center,
-                    child: const Text(
-                      'Upgrade to Pro',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 16,
-                        fontFamily: 'Poppins',
-                        fontWeight: FontWeight.w500,
+                    height: 50,
+                    child: ApplePayButton(
+                      paymentConfiguration: PaymentConfiguration.fromJsonString(
+                        defaultApplePay,
+                      ),
+                      paymentItems: const [
+                        PaymentItem(
+                          label: 'AutoIntel Premium',
+                          amount: '99.99',
+                          status: PaymentItemStatus.final_price,
+                        ),
+                      ],
+                      style: ApplePayButtonStyle.black,
+                      type: ApplePayButtonType.subscribe,
+                      onPaymentResult: (result) {
+                        debugPrint('Payment Result: $result');
+                      },
+                      loadingIndicator: const Center(
+                        child: CircularProgressIndicator(),
                       ),
                     ),
                   ),
-                ),
+                if (Platform.isAndroid)
+                  SizedBox(
+                    width: double.infinity,
+                    height: 50,
+                    child: GooglePayButton(
+                      paymentConfiguration: PaymentConfiguration.fromJsonString(
+                        defaultGooglePay,
+                      ),
+                      paymentItems: const [
+                        PaymentItem(
+                          label: 'AutoIntel Premium',
+                          amount: '99.99',
+                          status: PaymentItemStatus.final_price,
+                        ),
+                      ],
+                      type: GooglePayButtonType.subscribe,
+                      onPaymentResult: (result) {
+                        debugPrint('Payment Result: $result');
+                      },
+                      loadingIndicator: const Center(
+                        child: CircularProgressIndicator(),
+                      ),
+                    ),
+                  ),
               ],
             ),
           ),

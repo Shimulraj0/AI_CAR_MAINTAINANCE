@@ -40,6 +40,7 @@ dependencies:
   image_picker: ^1.2.1
   flutter_launcher_icons: ^0.14.4
   flutter_rocket: ^0.0.13
+  pay: ^3.3.0
 
 dev_dependencies:
   flutter_test:
