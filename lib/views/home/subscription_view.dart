@@ -275,51 +275,59 @@ class SubscriptionView extends GetView<HomeController> {
                 _buildFeatureRow('Priority Support', false),
                 const SizedBox(height: 32),
                 if (Platform.isIOS)
-                  SizedBox(
-                    width: double.infinity,
-                    height: 50,
-                    child: ApplePayButton(
-                      paymentConfiguration: PaymentConfiguration.fromJsonString(
-                        defaultApplePay,
-                      ),
-                      paymentItems: const [
-                        PaymentItem(
-                          label: 'AutoIntel Premium',
-                          amount: '99.99',
-                          status: PaymentItemStatus.final_price,
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(20),
+                    child: SizedBox(
+                      width: double.infinity,
+                      height: 50,
+                      child: ApplePayButton(
+                        paymentConfiguration:
+                            PaymentConfiguration.fromJsonString(
+                              defaultApplePay,
+                            ),
+                        paymentItems: const [
+                          PaymentItem(
+                            label: 'AutoIntel Premium',
+                            amount: '99.99',
+                            status: PaymentItemStatus.final_price,
+                          ),
+                        ],
+                        style: ApplePayButtonStyle.black,
+                        type: ApplePayButtonType.subscribe,
+                        onPaymentResult: (result) {
+                          debugPrint('Payment Result: $result');
+                        },
+                        loadingIndicator: const Center(
+                          child: CircularProgressIndicator(),
                         ),
-                      ],
-                      style: ApplePayButtonStyle.black,
-                      type: ApplePayButtonType.subscribe,
-                      onPaymentResult: (result) {
-                        debugPrint('Payment Result: $result');
-                      },
-                      loadingIndicator: const Center(
-                        child: CircularProgressIndicator(),
                       ),
                     ),
                   ),
                 if (Platform.isAndroid)
-                  SizedBox(
-                    width: double.infinity,
-                    height: 50,
-                    child: GooglePayButton(
-                      paymentConfiguration: PaymentConfiguration.fromJsonString(
-                        defaultGooglePay,
-                      ),
-                      paymentItems: const [
-                        PaymentItem(
-                          label: 'AutoIntel Premium',
-                          amount: '99.99',
-                          status: PaymentItemStatus.final_price,
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(12),
+                    child: SizedBox(
+                      width: double.infinity,
+                      height: 50,
+                      child: GooglePayButton(
+                        paymentConfiguration:
+                            PaymentConfiguration.fromJsonString(
+                              defaultGooglePay,
+                            ),
+                        paymentItems: const [
+                          PaymentItem(
+                            label: 'AutoIntel Premium',
+                            amount: '99.99',
+                            status: PaymentItemStatus.final_price,
+                          ),
+                        ],
+                        type: GooglePayButtonType.subscribe,
+                        onPaymentResult: (result) {
+                          debugPrint('Payment Result: $result');
+                        },
+                        loadingIndicator: const Center(
+                          child: CircularProgressIndicator(),
                         ),
-                      ],
-                      type: GooglePayButtonType.subscribe,
-                      onPaymentResult: (result) {
-                        debugPrint('Payment Result: $result');
-                      },
-                      loadingIndicator: const Center(
-                        child: CircularProgressIndicator(),
                       ),
                     ),
                   ),

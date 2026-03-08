@@ -92,15 +92,15 @@ class _DiagnoseTabViewState extends State<DiagnoseTabView>
         leading: Center(
           child: Container(
             margin: const EdgeInsets.only(left: 16),
-            width: 32,
-            height: 32,
+            width: 28,
+            height: 28,
             decoration: BoxDecoration(
               color: Colors.white.withValues(alpha: 0.2),
               shape: BoxShape.circle,
             ),
             child: IconButton(
               padding: EdgeInsets.zero,
-              icon: const Icon(Icons.arrow_back, color: Colors.white, size: 18),
+              icon: const Icon(Icons.arrow_back, color: Colors.white, size: 16),
               onPressed: () {
                 if (Get.isRegistered<HomeController>()) {
                   Get.find<HomeController>().changeTabIndex(0);
