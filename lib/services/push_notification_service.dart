@@ -108,7 +108,6 @@ class PushNotificationService {
     try {
       String? token = await _firebaseMessaging.getToken();
       debugPrint("FCM Token: $token");
-      // TODO: Send this token to your backend server
     } catch (e) {
       debugPrint("Error getting FCM token: $e");
     }

@@ -590,13 +590,13 @@ packages:
     source: hosted
     version: "3.2.0"
   pay_ios:
-    dependency: transitive
+    dependency: "direct overridden"
     description:
       name: pay_ios
-      sha256: ca4a7a12b4396b1205f314bebbc92e5268c627b65e5e6b3ab30efc2326da0a28
+      sha256: d87ccd6a25ea843bd88f689155543067d83a82c5f6ff963a6876f402820bf6c1
       url: "https://pub.dev"
     source: hosted
-    version: "1.1.0"
+    version: "1.0.12"
   pay_platform_interface:
     dependency: transitive
     description:
