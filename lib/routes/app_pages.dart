@@ -7,6 +7,7 @@ import '../views/home/ai_chat_view.dart';
 import '../views/home/task_details_view.dart';
 import '../views/home/add_maintenance_view.dart';
 import '../views/splash/splash_view.dart';
+import '../controllers/splash_controller.dart';
 import '../views/onboarding/onboarding_view.dart';
 import '../views/auth/login/login_view.dart';
 import '../views/home/subscription_view.dart';
@@ -56,6 +57,9 @@ class AppPages {
       name: Routes.splash,
       page: () => const SplashView(),
       transition: Transition.noTransition,
+      binding: BindingsBuilder(() {
+        Get.put<SplashController>(SplashController());
+      }),
     ),
     GetPage(name: Routes.onboarding, page: () => const OnboardingView()),
     GetPage(

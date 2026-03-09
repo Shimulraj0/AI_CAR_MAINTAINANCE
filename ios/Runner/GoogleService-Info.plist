@@ -3,17 +3,17 @@
 <plist version="1.0">
 <dict>
 	<key>API_KEY</key>
-	<string>AIzaSyBHMI3hl749dY5pbhXFg3dS9b9kEY4nyDo</string>
+	<string>AIzaSyCRaOg6q_WXBb1WksoDqdAY4hOmN1v9JKQ</string>
 	<key>GCM_SENDER_ID</key>
-	<string>1070047694833</string>
+	<string>581964658291</string>
 	<key>PLIST_VERSION</key>
 	<string>1</string>
 	<key>BUNDLE_ID</key>
 	<string>com.autointeldiagnostics.autointel</string>
 	<key>PROJECT_ID</key>
-	<string>autointel-6c14d</string>
+	<string>autofgbfgbv</string>
 	<key>STORAGE_BUCKET</key>
-	<string>autointel-6c14d.firebasestorage.app</string>
+	<string>autofgbfgbv.firebasestorage.app</string>
 	<key>IS_ADS_ENABLED</key>
 	<false></false>
 	<key>IS_ANALYTICS_ENABLED</key>
@@ -25,6 +25,6 @@
 	<key>IS_SIGNIN_ENABLED</key>
 	<true></true>
 	<key>GOOGLE_APP_ID</key>
-	<string>1:1070047694833:ios:5ebb2310c2467acc173e50</string>
+	<string>1:581964658291:ios:3df2a2bf10ca743fbf5c06</string>
 </dict>
 </plist>

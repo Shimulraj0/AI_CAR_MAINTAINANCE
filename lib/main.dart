@@ -10,7 +10,17 @@ import 'services/push_notification_service.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  try {
+    if (Firebase.apps.isEmpty) {
+      await Firebase.initializeApp(
+        options: DefaultFirebaseOptions.currentPlatform,
+      );
+    }
+  } catch (e) {
+    if (!e.toString().contains('duplicate-app')) {
+      rethrow;
+    }
+  }
 
   // 1. Handle asynchronous errors globally
   PlatformDispatcher.instance.onError = (error, stack) {
@@ -64,9 +74,11 @@ void main() async {
   // This is where you would also initialize Firebase, LocalStorage, etc.
   Get.put(ApiService());
 
-  // Initialize Push Notifications
+  // Initialize Push Notifications in the background so it doesn't block UI load
   final pushNotificationService = PushNotificationService();
-  await pushNotificationService.initialize();
+  pushNotificationService.initialize().catchError((e) {
+    debugPrint("Push notification initialization error: $e");
+  });
 
   runApp(const MyApp());
 }

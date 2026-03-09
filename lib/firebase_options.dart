@@ -85,5 +85,4 @@ class DefaultFirebaseOptions {
     storageBucket: 'autointel-6c14d.firebasestorage.app',
     measurementId: 'G-J9TBLCYKBK',
   );
-
 }

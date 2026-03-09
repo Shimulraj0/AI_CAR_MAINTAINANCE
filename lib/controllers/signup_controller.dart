@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../routes/app_routes.dart';
+import '../services/api_service.dart';
 
 class SignUpController extends GetxController {
   final GlobalKey<FormState> signUpFormKey = GlobalKey<FormState>();
@@ -49,8 +50,44 @@ class SignUpController extends GetxController {
         Get.snackbar('Error', 'Please agree to the terms and conditions');
         return;
       }
-      // Perform sign up logic here
-      Get.toNamed(Routes.verifyEmail, arguments: {'isSignUp': true});
+
+      if (passwordController.text != confirmPasswordController.text) {
+        Get.snackbar('Error', 'Passwords do not match');
+        return;
+      }
+
+      final apiService = Get.find<ApiService>();
+
+      final payload = {
+        'name': nameController.text.trim(),
+        'email': emailController.text.trim(),
+        'password': passwordController.text,
+      };
+
+      apiService
+          .initiateRegistration(payload)
+          .listen(
+            (response) {
+              if (response.isOk) {
+                // 200 or 201 check loosely depending on backend
+                Get.snackbar(
+                  'Success',
+                  'Registration initiated successfully. Please check your email.',
+                );
+                Get.toNamed(Routes.verifyEmail, arguments: {'isSignUp': true});
+              } else {
+                Get.snackbar(
+                  'Registration Failed',
+                  response.body?['message'] ??
+                      'Unable to process request at this time.',
+                  snackPosition: SnackPosition.BOTTOM,
+                );
+              }
+            },
+            onError: (error) {
+              Get.snackbar('Error', 'An unexpected error occurred: $error');
+            },
+          );
     }
   }
 

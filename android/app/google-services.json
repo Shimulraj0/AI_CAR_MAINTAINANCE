@@ -1,13 +1,13 @@
 {
   "project_info": {
-    "project_number": "1070047694833",
-    "project_id": "autointel-6c14d",
-    "storage_bucket": "autointel-6c14d.firebasestorage.app"
+    "project_number": "581964658291",
+    "project_id": "autofgbfgbv",
+    "storage_bucket": "autofgbfgbv.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:1070047694833:android:681d82f551423946173e50",
+        "mobilesdk_app_id": "1:581964658291:android:dbbf95d6d117b25fbf5c06",
         "android_client_info": {
           "package_name": "com.example.auto_intel"
         }
@@ -15,7 +15,26 @@
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyAc6lwl_dMbDAiLnZSC-tvpQNG3lAFsFcU"
+          "current_key": "AIzaSyBIpTarKglaxySl7nHBdaNLTqtGfGaJnhQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:581964658291:android:1bd2ea5b982d4b72bf5c06",
+        "android_client_info": {
+          "package_name": "com.example.autointel"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBIpTarKglaxySl7nHBdaNLTqtGfGaJnhQ"
         }
       ],
       "services": {
