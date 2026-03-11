@@ -76,60 +76,72 @@ class ForgotPasswordView extends GetView<ForgotPasswordController> {
               const SizedBox(height: 32),
 
               // Selection Card (Acting as Button)
-              GestureDetector(
-                onTap: controller.sendResetLink,
-                child: Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(16),
-                    border: Border.all(
-                      color: const Color(0xFF2B63A8).withAlpha(100),
-                      width: 1,
+              Obx(
+                () => GestureDetector(
+                  onTap: controller.isLoading.value
+                      ? null
+                      : controller.sendResetLink,
+                  child: Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(
+                        color: const Color(0xFF2B63A8).withAlpha(100),
+                        width: 1,
+                      ),
                     ),
-                  ),
-                  child: Row(
-                    children: [
-                      Container(
-                        width: 48,
-                        height: 48,
-                        decoration: const BoxDecoration(
-                          color: Color(0xFFF3F4F6),
-                          shape: BoxShape.circle,
-                        ),
-                        child: const Icon(
-                          Icons.email_outlined,
-                          color: Color(0xFF0F0F0F),
-                          size: 24,
-                        ),
-                      ),
-                      const SizedBox(width: 16),
-                      const Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Via email',
-                            style: TextStyle(
-                              color: Color(0xFF949CA9),
-                              fontSize: 12,
-                              fontFamily: 'Inter',
-                              fontWeight: FontWeight.w400,
+                    child: controller.isLoading.value
+                        ? const Center(
+                            child: CircularProgressIndicator(
+                              color: Color(0xFF2B63A8),
                             ),
+                          )
+                        : Row(
+                            children: [
+                              Container(
+                                width: 48,
+                                height: 48,
+                                decoration: const BoxDecoration(
+                                  color: Color(0xFFF3F4F6),
+                                  shape: BoxShape.circle,
+                                ),
+                                child: const Icon(
+                                  Icons.email_outlined,
+                                  color: Color(0xFF0F0F0F),
+                                  size: 24,
+                                ),
+                              ),
+                              const SizedBox(width: 16),
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  const Text(
+                                    'Via email',
+                                    style: TextStyle(
+                                      color: Color(0xFF949CA9),
+                                      fontSize: 12,
+                                      fontFamily: 'Inter',
+                                      fontWeight: FontWeight.w400,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    controller.emailController.text.isNotEmpty 
+                                        ? controller.emailController.text 
+                                        : 'No email provided',
+                                    style: const TextStyle(
+                                      color: Color(0xFF0F0F0F),
+                                      fontSize: 16,
+                                      fontFamily: 'Inter',
+                                      fontWeight: FontWeight.w700,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
                           ),
-                          SizedBox(height: 4),
-                          Text(
-                            'mu***@gmail.com',
-                            style: TextStyle(
-                              color: Color(0xFF0F0F0F),
-                              fontSize: 16,
-                              fontFamily: 'Inter',
-                              fontWeight: FontWeight.w700,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
                   ),
                 ),
               ),

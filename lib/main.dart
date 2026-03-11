@@ -72,7 +72,7 @@ void main() async {
 
   // Initialize Services (e.g., ApiService) before running the app
   // This is where you would also initialize Firebase, LocalStorage, etc.
-  Get.put(ApiService());
+  await Get.putAsync(() => ApiService().init());
 
   // Initialize Push Notifications in the background so it doesn't block UI load
   final pushNotificationService = PushNotificationService();

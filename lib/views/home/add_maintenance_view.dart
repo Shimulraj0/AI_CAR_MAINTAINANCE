@@ -1,14 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import '../../controllers/add_maintenance_controller.dart';
 import '../../controllers/home_controller.dart';
 import '../../widgets/custom_bottom_nav_bar.dart';
 import '../../routes/app_routes.dart';
 
-class AddMaintenanceView extends GetView<HomeController> {
+class AddMaintenanceView extends GetView<AddMaintenanceController> {
   const AddMaintenanceView({super.key});
 
   @override
   Widget build(BuildContext context) {
+    if (!Get.isRegistered<AddMaintenanceController>()) {
+      Get.put(AddMaintenanceController());
+    }
+    
     return Scaffold(
       backgroundColor: const Color(0xFFF8FAFC),
       appBar: AppBar(
@@ -44,57 +49,66 @@ class AddMaintenanceView extends GetView<HomeController> {
           top: 16,
           bottom: 24,
         ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _buildInputField('Service Type', hintText: ''),
-            const SizedBox(height: 16),
-            _buildInputField('Date', hintText: 'YYYY-MM-DD'),
-            const SizedBox(height: 16),
-            _buildInputField('Mileage', hintText: 'Current mileage'),
-            const SizedBox(height: 16),
-            _buildInputField(
-              'Notes(optional)',
-              hintText: 'Additional notes...',
-              maxLines: 4,
-            ),
-            const SizedBox(height: 16),
-            _buildInputField('Next Due Date', hintText: 'YYYY-MM-DD'),
-            const SizedBox(height: 32),
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: () {
-                  // Handle save action
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(
-                    0xFF8FB1D6,
-                  ), // Disabled looking blue from design
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  elevation: 0,
-                ),
-                child: const Text(
-                  'Save Service Record',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 16,
-                    fontFamily: 'Inter',
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
+        child: Form(
+          key: controller.formKey,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _buildInputField('Service Type', hintText: '', txtController: controller.serviceTypeController),
+              const SizedBox(height: 16),
+              _buildInputField('Date', hintText: 'YYYY-MM-DD', txtController: controller.dateController),
+              const SizedBox(height: 16),
+              _buildInputField('Mileage', hintText: 'Current mileage', txtController: controller.mileageController, keyboardType: TextInputType.number),
+              const SizedBox(height: 16),
+              _buildInputField(
+                'Notes(optional)',
+                hintText: 'Additional notes...',
+                maxLines: 4,
+                txtController: controller.notesController
               ),
-            ),
-          ],
+              const SizedBox(height: 16),
+              _buildInputField('Next Due Date', hintText: 'YYYY-MM-DD', txtController: controller.nextDueDateController),
+              const SizedBox(height: 32),
+              SizedBox(
+                width: double.infinity,
+                child: Obx(() => ElevatedButton(
+                  onPressed: controller.isLoading.value ? null : controller.saveServiceRecord,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(
+                      0xFF8FB1D6,
+                    ), // Disabled looking blue from design
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    elevation: 0,
+                  ),
+                  child: controller.isLoading.value 
+                      ? const SizedBox(
+                          height: 20, width: 20, 
+                          child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2)
+                        )
+                      : const Text(
+                    'Save Service Record',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 16,
+                      fontFamily: 'Inter',
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                )),
+              ),
+            ],
+          ),
         ),
       ),
       bottomNavigationBar: CustomBottomNavBar(
         currentIndex: 2, // Originating from Maintenance view
         onTap: (index) {
-          controller.changeTabIndex(index);
+          if (Get.isRegistered<HomeController>()) {
+             Get.find<HomeController>().changeTabIndex(index);
+          }
           Get.offAllNamed(Routes.home);
         },
         onFabTap: () {
@@ -109,6 +123,8 @@ class AddMaintenanceView extends GetView<HomeController> {
     String label, {
     required String hintText,
     int maxLines = 1,
+    TextEditingController? txtController,
+    TextInputType? keyboardType,
   }) {
     // Handling the rich text for 'Notes(optional)'
     Widget labelWidget;
@@ -154,8 +170,16 @@ class AddMaintenanceView extends GetView<HomeController> {
       children: [
         labelWidget,
         const SizedBox(height: 8),
-        TextField(
+        TextFormField(
+          controller: txtController,
           maxLines: maxLines,
+          keyboardType: keyboardType,
+          validator: (value) {
+             if (label == 'Service Type' || label == 'Date') {
+                if (value == null || value.trim().isEmpty) return 'Required';
+             }
+             return null;
+          },
           decoration: InputDecoration(
             hintText: hintText,
             hintStyle: const TextStyle(

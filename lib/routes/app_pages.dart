@@ -6,6 +6,7 @@ import '../views/home/save_reports_view.dart';
 import '../views/home/ai_chat_view.dart';
 import '../views/home/task_details_view.dart';
 import '../views/home/add_maintenance_view.dart';
+import '../controllers/add_maintenance_controller.dart';
 import '../views/splash/splash_view.dart';
 import '../controllers/splash_controller.dart';
 import '../views/onboarding/onboarding_view.dart';
@@ -139,6 +140,9 @@ class AppPages {
     GetPage(
       name: Routes.addMaintenance,
       page: () => const AddMaintenanceView(),
+      binding: BindingsBuilder(() {
+        Get.lazyPut<AddMaintenanceController>(() => AddMaintenanceController());
+      }),
     ),
     GetPage(name: Routes.subscription, page: () => const SubscriptionView()),
     GetPage(name: Routes.editProfile, page: () => const EditProfileView()),

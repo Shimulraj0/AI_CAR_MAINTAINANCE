@@ -303,28 +303,32 @@ class ProfileTabView extends GetView<HomeController> {
   }
 
   Widget _buildLogoutButton() {
-    return InkWell(
-      onTap: () => Get.offAllNamed(Routes.login),
-      borderRadius: BorderRadius.circular(12),
-      child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 12),
-        child: const Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(Icons.logout_rounded, size: 20, color: Color(0xFFDC2626)),
-            SizedBox(width: 8),
-            Text(
-              'Log Out',
-              style: TextStyle(
-                color: Color(0xFFDC2626),
-                fontSize: 16,
-                fontFamily: 'Inter',
-                fontWeight: FontWeight.w500,
+    return Obx(
+      () => controller.isLoadingLogout.value
+          ? const Center(child: CircularProgressIndicator())
+          : InkWell(
+              onTap: () => controller.logout(),
+              borderRadius: BorderRadius.circular(12),
+              child: Container(
+                padding: const EdgeInsets.symmetric(vertical: 12),
+                child: const Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(Icons.logout_rounded, size: 20, color: Color(0xFFDC2626)),
+                    SizedBox(width: 8),
+                    Text(
+                      'Log Out',
+                      style: TextStyle(
+                        color: Color(0xFFDC2626),
+                        fontSize: 16,
+                        fontFamily: 'Inter',
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
-          ],
-        ),
-      ),
     );
   }
 }

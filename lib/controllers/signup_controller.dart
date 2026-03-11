@@ -6,22 +6,15 @@ import '../services/api_service.dart';
 class SignUpController extends GetxController {
   final GlobalKey<FormState> signUpFormKey = GlobalKey<FormState>();
 
-  final TextEditingController nameController = TextEditingController(
-    text: 'Mock User',
-  );
-  final TextEditingController emailController = TextEditingController(
-    text: 'mockuser@example.com',
-  );
-  final TextEditingController passwordController = TextEditingController(
-    text: 'password123',
-  );
-  final TextEditingController confirmPasswordController = TextEditingController(
-    text: 'password123',
-  );
+  final TextEditingController nameController = TextEditingController();
+  final TextEditingController emailController = TextEditingController();
+  final TextEditingController passwordController = TextEditingController();
+  final TextEditingController confirmPasswordController = TextEditingController();
 
   var isPasswordHidden = true.obs;
   var isConfirmPasswordHidden = true.obs;
   var agreeToTerms = true.obs;
+  var isLoading = false.obs;
 
   @override
   void onClose() {
@@ -59,32 +52,42 @@ class SignUpController extends GetxController {
       final apiService = Get.find<ApiService>();
 
       final payload = {
-        'name': nameController.text.trim(),
+        'full_name': nameController.text.trim(),
         'email': emailController.text.trim(),
         'password': passwordController.text,
+        'confirm_password': confirmPasswordController.text,
       };
+
+      isLoading.value = true;
 
       apiService
           .initiateRegistration(payload)
           .listen(
             (response) {
-              if (response.isOk) {
-                // 200 or 201 check loosely depending on backend
-                Get.snackbar(
-                  'Success',
-                  'Registration initiated successfully. Please check your email.',
-                );
-                Get.toNamed(Routes.verifyEmail, arguments: {'isSignUp': true});
+              isLoading.value = false;
+              print('Signup API Status Code: ${response.statusCode}');
+              print('Signup API Response Body: ${response.body}');
+
+              if (response.statusCode == 200 || response.statusCode == 201) {
+                Get.snackbar('Success', 'Account created successfully!');
+                Get.toNamed(Routes.verifyEmail, arguments: {
+                  'isSignUp': true,
+                  'email': emailController.text.trim(),
+                });
               } else {
+                print('SignUp API Error Status Code: ${response.statusCode}');
+                print('SignUp API Error Body: ${response.body}');
                 Get.snackbar(
-                  'Registration Failed',
-                  response.body?['message'] ??
+                  'Sign Up Failed',
+                  response.body?['message'] ?? response.body?['detail'] ??
                       'Unable to process request at this time.',
                   snackPosition: SnackPosition.BOTTOM,
                 );
               }
             },
             onError: (error) {
+              isLoading.value = false;
+              print('Signup API Error: $error');
               Get.snackbar('Error', 'An unexpected error occurred: $error');
             },
           );

@@ -63,9 +63,12 @@ class EditProfileView extends GetView<EditProfileController> {
           ),
         ),
       ),
-      body: SingleChildScrollView(
-        child: Column(
-          children: [
+      body: Obx(
+        () => controller.isLoading.value
+            ? const Center(child: CircularProgressIndicator())
+            : SingleChildScrollView(
+                child: Column(
+                  children: [
             const SizedBox(height: 32),
             _buildProfileImage(),
             const SizedBox(height: 32),
@@ -89,8 +92,9 @@ class EditProfileView extends GetView<EditProfileController> {
             const SizedBox(height: 48),
             _buildSaveButton(),
             const SizedBox(height: 40),
-          ],
-        ),
+                  ],
+                ),
+              ),
       ),
       bottomNavigationBar: CustomBottomNavBar(
         currentIndex: 3, // Profile Tab index
@@ -218,11 +222,9 @@ class EditProfileView extends GetView<EditProfileController> {
       padding: const EdgeInsets.symmetric(horizontal: 26),
       child: InkWell(
         onTap: () {
-          // Handle Save
-          controller.saveChanges();
-          Future.delayed(const Duration(milliseconds: 1500), () {
-            Get.back();
-          });
+          if (!controller.isSaving.value) {
+            controller.saveChanges();
+          }
         },
         borderRadius: BorderRadius.circular(12),
         child: Container(
@@ -233,14 +235,25 @@ class EditProfileView extends GetView<EditProfileController> {
             borderRadius: BorderRadius.circular(12),
           ),
           alignment: Alignment.center,
-          child: const Text(
-            'Save Changes',
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: 16,
-              fontFamily: 'Inter',
-              fontWeight: FontWeight.w500,
-            ),
+          child: Obx(
+            () => controller.isSaving.value
+                ? const SizedBox(
+                    width: 24,
+                    height: 24,
+                    child: CircularProgressIndicator(
+                      color: Colors.white,
+                      strokeWidth: 2.5,
+                    ),
+                  )
+                : const Text(
+                    'Save Changes',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 16,
+                      fontFamily: 'Inter',
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
           ),
         ),
       ),
