@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import '../services/api_service.dart';
+import '../routes/app_routes.dart';
+import 'home_controller.dart';
 
 class EditProfileController extends GetxController {
   final nameController = TextEditingController();
@@ -11,6 +13,7 @@ class EditProfileController extends GetxController {
   final RxString name = "".obs;
   final RxString email = "".obs;
   final RxString phone = "".obs;
+  final RxString currentImageUrl = "".obs;
 
   var isLoading = false.obs;
   var isSaving = false.obs;
@@ -38,6 +41,7 @@ class EditProfileController extends GetxController {
             name.value = data['full_name'] ?? data['name'] ?? '';
             email.value = data['email'] ?? '';
             phone.value = data['phone'] ?? '';
+            currentImageUrl.value = data['profile_picture'] ?? data['image'] ?? data['avatar'] ?? '';
             
             nameController.text = name.value;
             emailController.text = email.value;
@@ -82,21 +86,41 @@ class EditProfileController extends GetxController {
   void saveChanges() {
     final apiService = Get.find<ApiService>();
     
-    final payload = {
+    // Create FormData object to handle both text fields and the image file
+    final formData = FormData({
       'full_name': nameController.text.trim(),
       'phone': phoneController.text.trim(),
-      // 'email': emailController.text.trim(), // Usually email is not partially updated, but can be added if backend supports it.
-    };
+    });
+
+    // If a new image was picked, append it as a MultipartFile
+    if (pickedImagePath.value.isNotEmpty) {
+      formData.files.add(MapEntry(
+        'profile_picture', // Replace with exact backend field name (e.g., 'image', 'avatar', 'profile_picture')
+        MultipartFile(pickedImagePath.value, filename: pickedImagePath.value.split('/').last),
+      ));
+    }
 
     isSaving.value = true;
 
-    apiService.partialUpdateProfile(payload).listen(
+    // Use the new API service method that accepts FormData
+    apiService.updateProfileWithImage(formData).listen(
       (response) {
         isSaving.value = false;
+        
+        debugPrint('UpdateProfile Status Code: ${response.statusCode}');
+        debugPrint('UpdateProfile Response Body: ${response.body}');
+        
         if (response.statusCode == 200 || response.statusCode == 204) {
           name.value = nameController.text;
           phone.value = phoneController.text;
           
+          // Refresh the global home controller and set its index to Profile section
+          if (Get.isRegistered<HomeController>()) {
+            final homeCtrl = Get.find<HomeController>();
+            homeCtrl.fetchUserProfile();
+            homeCtrl.changeTabIndex(3); // Set to Profile tab
+          }
+
           Get.snackbar(
             'Success',
             'Profile updated successfully!',
@@ -105,13 +129,34 @@ class EditProfileController extends GetxController {
             colorText: Colors.white,
           );
           
-          Future.delayed(const Duration(milliseconds: 1500), () {
-            Get.back();
-          });
+          Get.offAllNamed(Routes.home);
         } else {
+          String errorMsg = 'Could not update profile';
+          if (response.body != null) {
+            if (response.body is Map) {
+              if (response.body['message'] != null) {
+                errorMsg = response.body['message'].toString();
+              } else if (response.body['detail'] != null) {
+                errorMsg = response.body['detail'].toString();
+              } else {
+                // It's likely a field validation error like {"phone": ["Invalid format"]}
+                var errors = [];
+                (response.body as Map).forEach((key, value) {
+                  if (value is List) {
+                    errors.add(value.join('\n'));
+                  } else {
+                    errors.add(value.toString());
+                  }
+                });
+                errorMsg = errors.join('\n');
+              }
+            } else {
+              errorMsg = response.body.toString();
+            }
+          }
           Get.snackbar(
             'Update Failed',
-            response.body?['message'] ?? 'Could not update profile',
+            errorMsg,
             snackPosition: SnackPosition.BOTTOM,
             backgroundColor: Colors.red,
             colorText: Colors.white,
@@ -120,6 +165,7 @@ class EditProfileController extends GetxController {
       },
       onError: (error) {
         isSaving.value = false;
+        debugPrint('UpdateProfile Error: $error');
         Get.snackbar('Error', 'An unexpected error occurred: $error');
       },
     );

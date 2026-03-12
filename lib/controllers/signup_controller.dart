@@ -65,8 +65,8 @@ class SignUpController extends GetxController {
           .listen(
             (response) {
               isLoading.value = false;
-              print('Signup API Status Code: ${response.statusCode}');
-              print('Signup API Response Body: ${response.body}');
+              debugPrint('Signup API Status Code: ${response.statusCode}');
+              debugPrint('Signup API Response Body: ${response.body}');
 
               if (response.statusCode == 200 || response.statusCode == 201) {
                 Get.snackbar('Success', 'Account created successfully!');
@@ -75,8 +75,8 @@ class SignUpController extends GetxController {
                   'email': emailController.text.trim(),
                 });
               } else {
-                print('SignUp API Error Status Code: ${response.statusCode}');
-                print('SignUp API Error Body: ${response.body}');
+                debugPrint('SignUp API Error Status Code: ${response.statusCode}');
+                debugPrint('SignUp API Error Body: ${response.body}');
                 Get.snackbar(
                   'Sign Up Failed',
                   response.body?['message'] ?? response.body?['detail'] ??
@@ -87,7 +87,7 @@ class SignUpController extends GetxController {
             },
             onError: (error) {
               isLoading.value = false;
-              print('Signup API Error: $error');
+              debugPrint('Signup API Error: $error');
               Get.snackbar('Error', 'An unexpected error occurred: $error');
             },
           );

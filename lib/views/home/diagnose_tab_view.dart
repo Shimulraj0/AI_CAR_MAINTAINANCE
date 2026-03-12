@@ -1,73 +1,27 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'dart:math' as math;
 import 'package:get/get.dart';
 import '../../controllers/home_controller.dart';
+import '../../controllers/diagnose_controller.dart';
 
-class DiagnoseTabView extends StatefulWidget {
+class DiagnoseTabView extends GetView<DiagnoseController> {
   const DiagnoseTabView({super.key});
 
   @override
-  State<DiagnoseTabView> createState() => _DiagnoseTabViewState();
-}
-
-class _DiagnoseTabViewState extends State<DiagnoseTabView>
-    with SingleTickerProviderStateMixin {
-  bool _isAnalyzing = false;
-  late final AnimationController _animationController;
-
-  @override
-  void initState() {
-    super.initState();
-    _animationController = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 1500),
-    );
-
+  Widget build(BuildContext context) {
     // Check if we need to auto-start the analysis process
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (Get.isRegistered<HomeController>()) {
         final homeCtrl = Get.find<HomeController>();
         if (homeCtrl.autoStartDiagnose.value) {
-          homeCtrl.autoStartDiagnose.value = false; // Reset flat
-          _handleAnalyze();
+          homeCtrl.autoStartDiagnose.value = false; // Reset flag
+          controller.startAnalysis();
         }
       }
     });
-  }
 
-  @override
-  void dispose() {
-    _animationController.dispose();
-    super.dispose();
-  }
-
-  void _handleAnalyze() async {
-    if (_isAnalyzing) return;
-    setState(() {
-      _isAnalyzing = true;
-    });
-    _animationController.repeat();
-
-    // Simulating processing delay before navigation
-    await Future.delayed(const Duration(seconds: 2));
-
-    if (mounted) {
-      Get.toNamed('/analyzing')?.then((_) {
-        // Reset state if user comes back
-        if (mounted) {
-          setState(() {
-            _isAnalyzing = false;
-          });
-          _animationController.stop();
-          _animationController.reset();
-        }
-      });
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
+    final homeController = Get.find<HomeController>();
+    
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
@@ -127,7 +81,7 @@ class _DiagnoseTabViewState extends State<DiagnoseTabView>
               ),
             ),
             const SizedBox(height: 8),
-            Container(
+            Obx(() => Container(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
               decoration: BoxDecoration(
                 color: Colors.white,
@@ -136,17 +90,26 @@ class _DiagnoseTabViewState extends State<DiagnoseTabView>
               ),
               child: DropdownButtonHideUnderline(
                 child: DropdownButton<String>(
-                  value: '2021 Toyota Camry',
+                  value: controller.selectedVehicleId.value.isEmpty ? null : controller.selectedVehicleId.value,
                   isExpanded: true,
+                  hint: const Text("Select Vehicle"),
                   icon: const Icon(
                     Icons.keyboard_arrow_down,
                     color: Colors.grey,
                   ),
-                  items: ['2021 Toyota Camry'].map((String value) {
+                  items: homeController.userVehicles.map((vehicle) {
+                    final make = vehicle['manufacturer'] ?? vehicle['make'] ?? '';
+                    final model = vehicle['model'] ?? '';
+                    final year = vehicle['year']?.toString() ?? '';
+                    final vehicleId = vehicle['id']?.toString() ?? vehicle['uuid']?.toString() ?? "";
+                    
+                    String displayName = "$year $make $model".trim();
+                    if (displayName.isEmpty) displayName = "Unnamed Vehicle";
+
                     return DropdownMenuItem<String>(
-                      value: value,
+                      value: vehicleId,
                       child: Text(
-                        value,
+                        displayName,
                         style: const TextStyle(
                           color: Color(0xFF1A1D23),
                           fontSize: 14,
@@ -155,10 +118,14 @@ class _DiagnoseTabViewState extends State<DiagnoseTabView>
                       ),
                     );
                   }).toList(),
-                  onChanged: (_) {},
+                  onChanged: (newValue) {
+                    if (newValue != null) {
+                      controller.selectedVehicleId.value = newValue;
+                    }
+                  },
                 ),
               ),
-            ),
+            )),
 
             const SizedBox(height: 24),
 
@@ -193,44 +160,83 @@ class _DiagnoseTabViewState extends State<DiagnoseTabView>
                         color: Colors.black.withValues(alpha: 0.08),
                       ),
                     ),
-                    child: const TextField(
+                    child: TextField(
+                      controller: controller.diagnosticCodeController,
                       decoration: InputDecoration(
                         hintText: 'Enter code',
-                        hintStyle: TextStyle(
+                        hintStyle: const TextStyle(
                           color: Color(0xFF9CA3AF),
                           fontSize: 14,
                           fontFamily: 'Inter',
                         ),
                         border: InputBorder.none,
-                        contentPadding: EdgeInsets.symmetric(
+                        contentPadding: const EdgeInsets.symmetric(
                           horizontal: 16,
                           vertical: 12,
                         ),
                       ),
+                      onSubmitted: (_) => controller.addDiagnosticCode(),
                     ),
                   ),
                 ),
-                const SizedBox(width: 8),
-                Container(
-                  height: 48,
-                  padding: const EdgeInsets.symmetric(horizontal: 24),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFEDF2F9),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  alignment: Alignment.center,
-                  child: const Text(
-                    'Add',
-                    style: TextStyle(
-                      color: Color(0xFF2F5EA8),
-                      fontSize: 14,
-                      fontFamily: 'Inter',
-                      fontWeight: FontWeight.w600,
+                GestureDetector(
+                  onTap: controller.addDiagnosticCode,
+                  child: Container(
+                    height: 48,
+                    padding: const EdgeInsets.symmetric(horizontal: 24),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFEDF2F9),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    alignment: Alignment.center,
+                    child: const Text(
+                      'Add',
+                      style: TextStyle(
+                        color: Color(0xFF2F5EA8),
+                        fontSize: 14,
+                        fontFamily: 'Inter',
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
                   ),
                 ),
               ],
             ),
+            const SizedBox(height: 12),
+            
+            // Added codes list
+            Obx(() => Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: controller.diagnosticCodes.asMap().entries.map((entry) {
+                return Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF2B63A8).withValues(alpha:0.1),
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(color: const Color(0xFF2B63A8).withValues(alpha:0.2)),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        entry.value,
+                        style: const TextStyle(
+                          color: Color(0xFF2B63A8),
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      const SizedBox(width: 4),
+                      GestureDetector(
+                        onTap: () => controller.removeDiagnosticCode(entry.key),
+                        child: const Icon(Icons.close, size: 14, color: Color(0xFF2B63A8)),
+                      ),
+                    ],
+                  ),
+                );
+              }).toList(),
+            )),
 
             const SizedBox(height: 24),
 
@@ -260,10 +266,11 @@ class _DiagnoseTabViewState extends State<DiagnoseTabView>
                 borderRadius: BorderRadius.circular(12),
                 border: Border.all(color: Colors.black.withValues(alpha: 0.08)),
               ),
-              child: const TextField(
+              child: TextField(
+                controller: controller.symptomsController,
                 maxLines: null,
                 keyboardType: TextInputType.multiline,
-                decoration: InputDecoration(
+                decoration: const InputDecoration(
                   hintText:
                       'e.g. Engine misfires at idle, rough vibration, reduced fuel economy...',
                   hintStyle: TextStyle(
@@ -279,12 +286,12 @@ class _DiagnoseTabViewState extends State<DiagnoseTabView>
 
             const SizedBox(height: 48), // Spacer before button
 
-            Container(
+            Obx(() => Container(
               width: double.infinity,
               height: 50,
               decoration: BoxDecoration(
-                color: _isAnalyzing ? null : const Color(0xFF2B63A8),
-                gradient: _isAnalyzing
+                color: controller.isLoading.value ? null : const Color(0xFF2B63A8),
+                gradient: controller.isLoading.value
                     ? const LinearGradient(
                         colors: [Color(0xFF8BB8E8), Color(0xFFA5C9F0)],
                       )
@@ -292,7 +299,7 @@ class _DiagnoseTabViewState extends State<DiagnoseTabView>
                 borderRadius: BorderRadius.circular(12),
               ),
               child: ElevatedButton(
-                onPressed: _isAnalyzing ? null : _handleAnalyze,
+                onPressed: controller.isLoading.value ? null : controller.startAnalysis,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.transparent,
                   shadowColor: Colors.transparent,
@@ -305,23 +312,24 @@ class _DiagnoseTabViewState extends State<DiagnoseTabView>
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    AnimatedBuilder(
-                      animation: _animationController,
-                      builder: (context, child) {
-                        return Transform.rotate(
-                          angle: _animationController.value * 2 * math.pi,
-                          child: child,
-                        );
-                      },
-                      child: CustomPaint(
+                    if (controller.isLoading.value)
+                      const SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                        ),
+                      )
+                    else 
+                      CustomPaint(
                         size: const Size(20, 20),
                         painter: _ScanIconPainter(),
                       ),
-                    ),
                     const SizedBox(width: 8),
-                    const Text(
-                      'Analyze',
-                      style: TextStyle(
+                    Text(
+                      controller.isLoading.value ? 'Analyzing...' : 'Analyze',
+                      style: const TextStyle(
                         color: Colors.white,
                         fontSize: 16,
                         fontFamily: 'Inter',
@@ -331,7 +339,7 @@ class _DiagnoseTabViewState extends State<DiagnoseTabView>
                   ],
                 ),
               ),
-            ),
+            )),
 
             const SizedBox(height: 80), // Bottom nav padding
           ],

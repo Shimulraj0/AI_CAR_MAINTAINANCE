@@ -1,6 +1,8 @@
 import 'package:get/get.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
 class ApiService extends GetConnect {
   // Example: Using RxDart's BehaviorSubject to track global loading state
@@ -10,6 +12,8 @@ class ApiService extends GetConnect {
 
   String? _token;
   String? _resetToken;
+  String? _csrfToken;
+  String? _sessionId;
 
   // Expose stream for listeners
   Stream<bool> get isLoadingStream => _isLoadingSubject.stream;
@@ -18,11 +22,15 @@ class ApiService extends GetConnect {
     final prefs = await SharedPreferences.getInstance();
     _token = prefs.getString('auth_token');
     _resetToken = prefs.getString('reset_token');
+    _csrfToken = prefs.getString('csrf_token') ?? 'JzRi4cSVcW79ODedGqUV7PoqbctoDGR3';
+    _sessionId = prefs.getString('last_session_id');
     return this;
   }
 
   String? getToken() => _token;
   String? getResetToken() => _resetToken;
+  String? getCsrfToken() => _csrfToken;
+  String? getSessionId() => _sessionId;
 
   Future<void> saveToken(String token) async {
     _token = token;
@@ -36,12 +44,34 @@ class ApiService extends GetConnect {
     await prefs.setString('reset_token', resetToken);
   }
 
+  Future<void> saveCsrfToken(String csrfToken) async {
+    _csrfToken = csrfToken;
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('csrf_token', csrfToken);
+  }
+
+  Future<void> saveSessionId(String sessionId) async {
+    _sessionId = sessionId;
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('last_session_id', sessionId);
+  }
+
+  Future<void> clearSessionId() async {
+    _sessionId = null;
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove('last_session_id');
+  }
+
   Future<void> clearToken() async {
     _token = null;
     _resetToken = null;
+    _csrfToken = null;
+    _sessionId = null;
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove('auth_token');
     await prefs.remove('reset_token');
+    await prefs.remove('csrf_token');
+    await prefs.remove('last_session_id');
   }
 
   @override
@@ -57,11 +87,19 @@ class ApiService extends GetConnect {
 
     // Request modifier (Interceptors)
     httpClient.addRequestModifier<dynamic>((request) {
-      request.headers['Content-Type'] = 'application/json';
+      // Only set application/json if the body is not FormData
+      final isMultipart = request.headers['content-type']?.contains('multipart/form-data') ?? false;
+      if (!isMultipart) {
+          request.headers['Content-Type'] = 'application/json';
+      }
       request.headers['Accept'] = 'application/json';
-      request.headers['Cookie'] = 'csrftoken=JzRi4cSVcW79ODedGqUV7PoqbctoDGR3';
-      // Attach token if available, but NOT for password reset confirm which 
-      // strictly uses the token in the JSON payload instead.
+      
+      String? csrf = getCsrfToken();
+      if (csrf != null) {
+        request.headers['Cookie'] = 'csrftoken=$csrf';
+      }
+
+      // Attach token if available
       if (!request.url.path.contains('password-reset/confirm')) {
         String? token = getToken();
         if (token != null) request.headers['Authorization'] = 'Bearer $token';
@@ -155,6 +193,100 @@ class ApiService extends GetConnect {
     ).doOnDone(() => _isLoadingSubject.add(false));
   }
 
+  Future<Map<String, String>> _getHeaders() async {
+    final Map<String, String> headers = {
+      'Content-Type': 'application/json',
+      'Accept': 'application/json',
+    };
+
+    String? token = getToken();
+    if (token != null) headers['Authorization'] = 'Bearer $token';
+
+    String? csrf = getCsrfToken();
+    if (csrf != null) headers['Cookie'] = 'csrftoken=$csrf';
+
+    return headers;
+  }
+
+  Future<http.Response> createDiagnostic(Map<String, dynamic> payload) async {
+    final url = Uri.parse('${httpClient.baseUrl}/api/diagnostics/');
+    final headers = await _getHeaders();
+    
+    _isLoadingSubject.add(true);
+    try {
+      final response = await http.post(
+        url,
+        headers: headers,
+        body: json.encode(payload),
+      );
+      
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        print('DIAGNOSTIC CREATED: ${response.body}');
+      }
+      
+      return response;
+    } finally {
+      _isLoadingSubject.add(false);
+    }
+  }
+
+  Future<http.Response> getDiagnosticDetails(String id) async {
+    final url = Uri.parse('\${httpClient.baseUrl}/api/diagnostics/\$id/');
+    final headers = await _getHeaders();
+    
+    _isLoadingSubject.add(true);
+    try {
+      final response = await http.get(
+        url,
+        headers: headers,
+      );
+      return response;
+    } finally {
+      _isLoadingSubject.add(false);
+    }
+  }
+
+  // Updated to return raw bytes using http package for reliability with binary data
+  Future<http.Response> exportDiagnosticPdf(String sessionId) async {
+    final url = Uri.parse('\${httpClient.baseUrl}/api/diagnostics/export/pdf/');
+    final headers = await _getHeaders();
+    
+    _isLoadingSubject.add(true);
+    try {
+      final response = await http.post(
+        url,
+        headers: headers,
+        body: json.encode({'session_id': sessionId}),
+      );
+      return response;
+    } finally {
+      _isLoadingSubject.add(false);
+    }
+  }
+
+  // --- VEHICLES API ---
+  Stream<Response> getVehicles() {
+    _isLoadingSubject.add(true);
+    return Stream.fromFuture(
+      get('/api/vehicles/'),
+    ).doOnDone(() => _isLoadingSubject.add(false));
+  }
+
+  Stream<Response> addVehicle(Map<String, dynamic> payload) {
+    _isLoadingSubject.add(true);
+    return Stream.fromFuture(
+      post('/api/vehicles/', payload),
+    ).doOnDone(() => _isLoadingSubject.add(false));
+  }
+
+  Stream<Response> updateVehicle(String id, Map<String, dynamic> payload) {
+    _isLoadingSubject.add(true);
+    // Assuming the backend supports PATCH or PUT for updating a vehicle by ID.
+    return Stream.fromFuture(
+      patch('/api/vehicles/$id/', payload),
+    ).doOnDone(() => _isLoadingSubject.add(false));
+  }
+
   // --- PROFILE API ---
   Stream<Response> getProfile() {
     _isLoadingSubject.add(true);
@@ -174,6 +306,13 @@ class ApiService extends GetConnect {
     _isLoadingSubject.add(true);
     return Stream.fromFuture(
       patch('/api/user/me/', payload),
+    ).doOnDone(() => _isLoadingSubject.add(false));
+  }
+
+  Stream<Response> updateProfileWithImage(FormData formData) {
+    _isLoadingSubject.add(true);
+    return Stream.fromFuture(
+      patch('/api/user/me/', formData),
     ).doOnDone(() => _isLoadingSubject.add(false));
   }
 

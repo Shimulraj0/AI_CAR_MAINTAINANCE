@@ -44,8 +44,8 @@ class LoginController extends GetxController {
           .listen(
             (response) {
               isLoading.value = false;
-              print('Login API Status Code: ${response.statusCode}');
-              print('Login API Response Body: ${response.body}');
+              debugPrint('Login API Status Code: ${response.statusCode}');
+              debugPrint('Login API Response Body: ${response.body}');
 
               if (response.statusCode == 200) {
                 final responseData = response.body;
@@ -61,15 +61,40 @@ class LoginController extends GetxController {
                   resetToken ??= responseData['refresh'] ?? responseData['reset_token'];
                 }
 
-                print('Extracted Token: $token');
-                print('Extracted Reset Token: $resetToken');
+                debugPrint('Extracted Token: $token');
+                debugPrint('Extracted Reset Token: $resetToken');
                 if (token != null) {
                   apiService.saveToken(token.toString());
                 }
                 if (resetToken != null) {
                   apiService.saveResetToken(resetToken.toString());
                 }
-                Get.offAllNamed(Routes.vehicleRegistration);
+                
+                // Fetch vehicles to decide routing
+                apiService.getVehicles().listen((vehResponse) {
+                  if (vehResponse.statusCode == 200) {
+                    final data = vehResponse.body;
+                    bool hasVehicles = false;
+                    
+                    if (data != null && data['results'] != null) {
+                      hasVehicles = (data['results'] as List).isNotEmpty;
+                    } else if (data is List) {
+                      hasVehicles = data.isNotEmpty;
+                    }
+
+                    if (hasVehicles) {
+                      Get.offAllNamed(Routes.home);
+                    } else {
+                      Get.offAllNamed(Routes.vehicleRegistration);
+                    }
+                  } else {
+                    // Default to registration if we can't fetch vehicles
+                    Get.offAllNamed(Routes.vehicleRegistration);
+                  }
+                }, onError: (_) {
+                    Get.offAllNamed(Routes.vehicleRegistration);
+                });
+                
               } else {
                 Get.snackbar(
                   'Login Failed',
@@ -82,7 +107,7 @@ class LoginController extends GetxController {
             },
             onError: (error) {
               isLoading.value = false;
-              print('Login API Error: $error');
+              debugPrint('Login API Error: $error');
               Get.snackbar('Error', 'An unexpected error occurred: $error');
             },
           );
@@ -101,7 +126,29 @@ class LoginController extends GetxController {
           (response) {
             isLoading.value = false;
             if (response.statusCode == 200) {
-              Get.offAllNamed(Routes.vehicleRegistration);
+              // Fetch vehicles to decide routing
+              apiService.getVehicles().listen((vehResponse) {
+                if (vehResponse.statusCode == 200) {
+                  final data = vehResponse.body;
+                  bool hasVehicles = false;
+                  
+                  if (data != null && data['results'] != null) {
+                    hasVehicles = (data['results'] as List).isNotEmpty;
+                  } else if (data is List) {
+                    hasVehicles = data.isNotEmpty;
+                  }
+
+                  if (hasVehicles) {
+                    Get.offAllNamed(Routes.home);
+                  } else {
+                    Get.offAllNamed(Routes.vehicleRegistration);
+                  }
+                } else {
+                  Get.offAllNamed(Routes.vehicleRegistration);
+                }
+              }, onError: (_) {
+                  Get.offAllNamed(Routes.vehicleRegistration);
+              });
             } else {
               Get.snackbar(
                 'Google Login Failed',
@@ -128,7 +175,29 @@ class LoginController extends GetxController {
           (response) {
             isLoading.value = false;
             if (response.statusCode == 200) {
-              Get.offAllNamed(Routes.vehicleRegistration);
+              // Fetch vehicles to decide routing
+              apiService.getVehicles().listen((vehResponse) {
+                if (vehResponse.statusCode == 200) {
+                  final data = vehResponse.body;
+                  bool hasVehicles = false;
+                  
+                  if (data != null && data['results'] != null) {
+                    hasVehicles = (data['results'] as List).isNotEmpty;
+                  } else if (data is List) {
+                    hasVehicles = data.isNotEmpty;
+                  }
+
+                  if (hasVehicles) {
+                    Get.offAllNamed(Routes.home);
+                  } else {
+                    Get.offAllNamed(Routes.vehicleRegistration);
+                  }
+                } else {
+                  Get.offAllNamed(Routes.vehicleRegistration);
+                }
+              }, onError: (_) {
+                  Get.offAllNamed(Routes.vehicleRegistration);
+              });
             } else {
               Get.snackbar(
                 'Apple Login Failed',

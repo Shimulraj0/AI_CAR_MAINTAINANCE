@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../routes/app_routes.dart';
 import '../../controllers/diagnostic_result_controller.dart';
+import '../../controllers/save_reports_controller.dart';
 
 class DiagnosticResultView extends GetView<DiagnosticResultController> {
   const DiagnosticResultView({super.key});
@@ -33,328 +34,396 @@ class DiagnosticResultView extends GetView<DiagnosticResultController> {
           onPressed: () => Get.back(),
         ),
       ),
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(24.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Top Info
-              Row(
-                children: [
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 6,
-                    ),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFFF6900),
-                      borderRadius: BorderRadius.circular(100),
-                    ),
-                    child: const Text(
-                      'MODERATE SEVERITY',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 12,
-                        fontFamily: 'Inter',
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
+      body: Obx(() {
+        if (controller.isLoading.value && controller.result.isEmpty) {
+          return const Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                CircularProgressIndicator(color: Color(0xFF2B63A8)),
+                SizedBox(height: 16),
+                Text(
+                  'Collecting diagnostic data...',
+                  style: TextStyle(
+                    color: Color(0xFF64748B),
+                    fontFamily: 'Inter',
                   ),
-                  const SizedBox(width: 12),
-                  const Text(
-                    'Confidence: 94%',
-                    style: TextStyle(
-                      color: Color(0xFF62748E),
-                      fontSize: 14,
-                      fontFamily: 'Inter',
-                      fontWeight: FontWeight.w400,
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 12),
-              const Text(
-                'O2 Sensor Circuit Slow Response (Bank 1 Sensor 1)',
-                style: TextStyle(
-                  color: Color(0xFF0F172B),
-                  fontSize: 24,
-                  fontFamily: 'Archivo',
-                  fontWeight: FontWeight.w700,
-                  height: 1.33,
                 ),
-              ),
-              const SizedBox(height: 4),
-              const Text(
-                'P0133 • Powertrain System',
-                style: TextStyle(
-                  color: Color(0xFF62748E),
-                  fontSize: 14,
-                  fontFamily: 'Inter',
-                  fontWeight: FontWeight.w400,
-                ),
-              ),
+              ],
+            ),
+          );
+        }
 
-              const SizedBox(height: 24),
+        if (controller.result.isEmpty) {
+          return const Center(
+            child: Text('No diagnostic data found'),
+          );
+        }
 
-              // AI Assessment Card
-              _buildCard(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        const Icon(
-                          Icons.info_outline,
-                          color: Color(0xFF2B63A8),
-                          size: 20,
-                        ),
-                        const SizedBox(width: 8),
-                        const Text(
-                          'AI Assessment',
-                          style: TextStyle(
-                            color: Color(0xFF0F172B),
-                            fontSize: 16,
-                            fontFamily: 'Archivo',
-                            fontWeight: FontWeight.w700,
+        return SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.all(24.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                ...controller.resultsList.asMap().entries.map((resultEntry) {
+                  final resultIndex = resultEntry.key;
+                  final result = resultEntry.value;
+                  final isMultiPart = controller.resultsList.length > 1;
+
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      if (isMultiPart) ...[
+                        Container(
+                          margin: const EdgeInsets.only(top: 8, bottom: 16),
+                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFF2B63A8).withOpacity(0.1),
+                            borderRadius: BorderRadius.circular(8),
+                            border: Border.all(color: const Color(0xFF2B63A8).withOpacity(0.2)),
+                          ),
+                          child: Text(
+                            'PART ${resultIndex + 1} OF ${controller.resultsList.length}',
+                            style: const TextStyle(
+                              color: Color(0xFF2B63A8),
+                              fontSize: 12,
+                              fontWeight: FontWeight.w700,
+                              letterSpacing: 0.5,
+                            ),
                           ),
                         ),
                       ],
-                    ),
-                    const SizedBox(height: 12),
-                    const Text(
-                      "The oxygen sensor is reacting too slowly to the changes in the air/fuel mixture. This usually indicates the sensor is aging and becoming 'lazy', or there's an exhaust leak near the sensor.",
-                      style: TextStyle(
-                        color: Color(0xFF45556C),
-                        fontSize: 14,
-                        fontFamily: 'Inter',
-                        height: 1.5,
+                      // Top Info
+                      Row(
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 6,
+                            ),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFFF6900),
+                              borderRadius: BorderRadius.circular(100),
+                            ),
+                            child: Text(
+                              result['severity_label']?.toString().toUpperCase() ?? 'MODERATE SEVERITY',
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 12,
+                                fontFamily: 'Inter',
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Text(
+                            'Confidence: ' + (result['confidence'] ?? '94').toString() + '%',
+                            style: const TextStyle(
+                              color: Color(0xFF62748E),
+                              fontSize: 14,
+                              fontFamily: 'Inter',
+                              fontWeight: FontWeight.w400,
+                            ),
+                          ),
+                        ],
                       ),
-                    ),
-                    const SizedBox(height: 16),
-                    const Text(
-                      'REPORTED SYMPTOMS',
-                      style: TextStyle(
-                        color: Color(0xFF0F172B),
-                        fontSize: 12,
-                        fontFamily: 'Inter',
-                        fontWeight: FontWeight.w700,
-                        letterSpacing: 0.30,
+                      const SizedBox(height: 12),
+                      Text(
+                        result['title'] ?? 'Diagnostic Result',
+                        style: const TextStyle(
+                          color: Color(0xFF1E293B), // Matches design's dark blue/slate
+                          fontSize: 24,
+                          fontFamily: 'Archivo',
+                          fontWeight: FontWeight.w700,
+                          height: 1.2,
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: 8),
-                    Wrap(
-                      spacing: 8,
-                      runSpacing: 8,
-                      children: [
-                        _buildSymptomChip('Check Engine Light'),
-                        _buildSymptomChip('Reduced Fuel Economy'),
-                        _buildSymptomChip('Rough Idle'),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
+                      const SizedBox(height: 4),
+                      Text(
+                        (result['primary_code'] ?? result['code'] ?? result['diagnostic_code'] ?? 'P0133').toString() + ' • ' + (result['system'] ?? result['vehicle_system'] ?? 'Vehicle System').toString(),
+                        style: const TextStyle(
+                          color: Color(0xFF62748E),
+                          fontSize: 14,
+                          fontFamily: 'Inter',
+                          fontWeight: FontWeight.w400,
+                        ),
+                      ),
 
-              const SizedBox(height: 24),
+                      const SizedBox(height: 24),
 
-              // Possible Causes Header
-              const Opacity(
-                opacity: 0.80,
-                child: Text(
-                  'Possible Causes',
-                  style: TextStyle(
-                    color: Color(0xFF0F172B),
-                    fontSize: 16,
-                    fontFamily: 'Archivo',
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-              ),
-              const SizedBox(height: 16),
+                      // Vehicle Assessment Card
+                      _buildAssessmentCard(
+                        assessment: result['ai_assessment'] ?? result['assessment'] ?? result['analysis'] ?? "No detailed assessment available.",
+                        symptoms: (result['reported_symptoms'] ?? result['symptoms']) as List? ?? [],
+                      ),
 
-              // Cause 1: Faulty O2 Sensor (High Prob)
-              _buildCauseCard(
-                index: 0,
-                title: 'Faulty O2 Sensor',
-                probLabel: 'High Prob.',
-                probColor: const Color(0xFFE7000B),
-                probBgColor: const Color(0xFFFEF2F2),
-                meaning:
-                    'The oxygen sensor is not responding quickly enough to changes in the air/fuel mixture. This often happens as the sensor ages.',
-                whyMatch:
-                    'Your symptoms (check engine light + reduced fuel economy) are commonly caused by slow O2 sensor response.',
-                action:
-                    "Inspect the O2 sensor for any signs of damage or wear. Replace if it's aged or faulty.",
-              ),
-              const SizedBox(height: 16),
+                      const SizedBox(height: 28),
 
-              // Cause 2: Exhaust Leak (Medium Prob)
-              _buildCauseCard(
-                index: 1,
-                title: 'Exhaust Leak',
-                probLabel: 'Medium Prob.',
-                probColor: const Color(0xFFF54900),
-                probBgColor: const Color(0xFFFFF7ED),
-                meaning:
-                    'There may be a leak in the exhaust system near the oxygen sensor. This can allow extra air to enter the system, causing inaccurate sensor readings and triggering the check engine light.',
-                whyMatch:
-                    '• An exhaust leak can cause irregular air/fuel ratio readings.\n• This may result in reduced fuel economy and rough engine performance.\n• Your reported symptoms are commonly associated with exhaust system leaks.',
-                action:
-                    '• Inspect the exhaust manifold and nearby pipes for cracks or loose connections.\n• Check for unusual exhaust noise or smell.\n• Repair or replace damaged exhaust components if necessary.',
-              ),
-              const SizedBox(height: 16),
+                      // Possible Causes Header
+                      const Text(
+                        'Possible Causes',
+                        style: TextStyle(
+                          color: Color(0xFF1E293B),
+                          fontSize: 16,
+                          fontFamily: 'Archivo',
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                      const SizedBox(height: 16),
 
-              // Cause 3: Wiring Issue (Low Prob)
-              _buildCauseCard(
-                index: 2,
-                title: 'Wiring Issue',
-                probLabel: 'Low Prob.',
-                probColor: const Color(0xFFD08700),
-                probBgColor: const Color(0xFFFEFCE8),
-                meaning:
-                    'There could be a problem with the wiring or connector linked to the O2 sensor. Damaged or loose wiring can interrupt signal transmission between the sensor and the engine control module (ECM).',
-                whyMatch:
-                    '• Faulty wiring can delay or distort sensor readings.\n• This may occasionally trigger diagnostic code P0133.\n• Although less common, electrical issues can mimic sensor failure symptoms.',
-                action:
-                    '• Inspect the O2 sensor wiring harness for damage or corrosion.\n• Ensure connectors are securely attached.\n• Repair or replace any damaged wires if found.',
-              ),
+                      // Dynamic Possible Causes
+                      ... ((result['possible_causes'] ?? result['causes'] ?? result['potential_causes'] ?? []) as List).asMap().entries.map((entry) {
+                        final causeIndex = entry.key;
+                        final cause = entry.value as Map<String, dynamic>;
+                        final globalIndex = (resultIndex * 100) + causeIndex;
+                        
+                        return Padding(
+                          padding: const EdgeInsets.only(bottom: 16),
+                          child: _buildCauseCard(
+                            index: globalIndex,
+                            title: cause['title'] ?? cause['name'] ?? 'Generic Cause',
+                            probLabel: (cause['probability'] ?? cause['likelihood'] ?? 'Possible').toString() + ' Prob.',
+                            probColor: causeIndex == 0 ? const Color(0xFFEF4444) : 
+                                       causeIndex == 1 ? const Color(0xFFF97316) : const Color(0xFFEAB308),
+                            probBgColor: causeIndex == 0 ? const Color(0xFFFEF2F2) : 
+                                        causeIndex == 1 ? const Color(0xFFFFF7ED) : const Color(0xFFFEFCE8),
+                            meaning: cause['description'] ?? cause['meaning'] ?? cause['what_this_means'] ?? '',
+                            whyMatch: cause['how_it_matches'] ?? cause['reasoning'] ?? cause['match_reason'] ?? '',
+                            action: cause['recommended_action'] ?? cause['action'] ?? cause['fix'] ?? '',
+                          ),
+                        );
+                      }),
 
-              const SizedBox(height: 24),
+                      const SizedBox(height: 12),
 
-              // Recommended Next Steps
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: const Color(
-                    0xFFF1F5F9,
-                  ), // lightly tinted blue/gray per design
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: const Color(0xFFDBEAFE)),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                      // Recommended Next Steps
+                      Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.all(20),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFEFF6FF), // Soft light blue from design
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text(
+                              'Recommended Next Steps',
+                              style: TextStyle(
+                                color: Color(0xFF2B63A8),
+                                fontSize: 16,
+                                fontFamily: 'Archivo',
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                            const SizedBox(height: 16),
+                            ... ((result['recommended_next_steps'] ?? result['next_steps'] ?? result['recommendations'] ?? []) as List).asMap().entries.map((entry) {
+                              return Padding(
+                                padding: const EdgeInsets.only(bottom: 12),
+                                child: _buildStepRow((entry.key + 1).toString(), entry.value.toString()),
+                              );
+                            }),
+                          ],
+                        ),
+                      ),
+                      
+                      if (resultIndex < controller.resultsList.length - 1) 
+                        const Padding(
+                          padding: EdgeInsets.symmetric(vertical: 32),
+                          child: Divider(thickness: 2, color: Color(0xFFE2E8F0)),
+                        ),
+                    ],
+                  );
+                }),
+
+                const SizedBox(height: 32),
+
+                // Bottom Buttons
+                Row(
                   children: [
-                    const Text(
-                      'Recommended Next Steps',
-                      style: TextStyle(
-                        color: Color(0xFF2B63A8),
-                        fontSize: 16,
-                        fontFamily: 'Archivo',
-                        fontWeight: FontWeight.w700,
+                    Expanded(
+                      child: Obx(() {
+                        final saveReportsController = Get.isRegistered<SaveReportsController>() 
+                            ? Get.find<SaveReportsController>() 
+                            : Get.put(SaveReportsController());
+                            
+                        return OutlinedButton.icon(
+                          onPressed: saveReportsController.isLoading.value 
+                              ? null 
+                              : () {
+                                  final result = controller.result;
+                                  final sessionId = result['session_id'] ?? result['id'] ?? result['uuid'];
+                                  
+                                  if (sessionId != null) {
+                                    saveReportsController.exportAndSaveDiagnosticPdf(
+                                      sessionId: sessionId.toString(),
+                                      diagnosticTitle: result['title'] ?? 'Diagnostic Result',
+                                    );
+                                  } else {
+                                    saveReportsController.generateAndSaveDiagnosticReport(
+                                      diagnosticTitle: result['title'] ?? 'Diagnostic Result',
+                                      severity: result['severity_label'] ?? 'MODERATE SEVERITY',
+                                      confidence: (result['confidence'] ?? '94').toString() + '%',
+                                      details: result['ai_assessment'] ?? '',
+                                      symptoms: (result['reported_symptoms'] as List? ?? []).map((e) => e.toString()).toList(),
+                                    );
+                                  }
+                                },
+                          icon: saveReportsController.isLoading.value 
+                              ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2))
+                              : const Icon(Icons.file_download_outlined, size: 20),
+                          label: Text(
+                            saveReportsController.isLoading.value ? 'Saving...' : 'Save Report',
+                            style: const TextStyle(fontWeight: FontWeight.w600),
+                          ),
+                          style: OutlinedButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(vertical: 14),
+                            foregroundColor: const Color(0xFF314158),
+                            side: const BorderSide(
+                              color: Color(0xFFE2E8F0),
+                              width: 1.5,
+                            ),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
+                        );
+                      }),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: ElevatedButton.icon(
+                        onPressed: () {
+                          Get.toNamed(Routes.aiChat);
+                        },
+                        icon: const Icon(Icons.chat_bubble_outline, size: 20),
+                        label: const Text(
+                          'Live Chat Support',
+                          style: TextStyle(fontWeight: FontWeight.w600),
+                        ),
+                        style: ElevatedButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(vertical: 14),
+                          backgroundColor: const Color(0xFF2B63A8),
+                          foregroundColor: Colors.white,
+                          elevation: 0,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
                       ),
                     ),
-                    const SizedBox(height: 16),
-                    _buildStepRow('1', 'Inspect the exhaust system for leaks'),
-                    const SizedBox(height: 12),
-                    _buildStepRow('2', 'Check O2 sensor wiring harness'),
-                    const SizedBox(height: 12),
-                    _buildStepRow('3', 'Replace Upstream O2 Sensor'),
                   ],
                 ),
-              ),
-
-              const SizedBox(height: 32),
-
-              // Bottom Buttons
-              Row(
-                children: [
-                  Expanded(
-                    child: OutlinedButton.icon(
-                      onPressed: () {
-                        Get.toNamed(Routes.saveReports);
-                      },
-                      icon: const Icon(Icons.file_download_outlined, size: 20),
-                      label: const Text(
-                        'Save Report',
-                        style: TextStyle(fontWeight: FontWeight.w600),
-                      ),
-                      style: OutlinedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(vertical: 14),
-                        foregroundColor: const Color(0xFF314158),
-                        side: const BorderSide(
-                          color: Color(0xFFE2E8F0),
-                          width: 1.5,
-                        ),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                      ),
+                const SizedBox(height: 12),
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton.icon(
+                    onPressed: () {
+                      Get.toNamed(Routes.addMaintenance);
+                    },
+                    icon: const Icon(Icons.calendar_today_outlined, size: 20),
+                    label: const Text(
+                      'Schedule Service',
+                      style: TextStyle(fontWeight: FontWeight.w600),
                     ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: ElevatedButton.icon(
-                      onPressed: () {
-                        Get.toNamed(Routes.aiChat);
-                      },
-                      icon: const Icon(Icons.chat_bubble_outline, size: 20),
-                      label: const Text(
-                        'Live Chat Support',
-                        style: TextStyle(fontWeight: FontWeight.w600),
+                    style: ElevatedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      backgroundColor: const Color(0xFF1D293D),
+                      foregroundColor: Colors.white,
+                      elevation: 0,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
                       ),
-                      style: ElevatedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(vertical: 14),
-                        backgroundColor: const Color(0xFF2B63A8),
-                        foregroundColor: Colors.white,
-                        elevation: 0,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 12),
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton.icon(
-                  onPressed: () {
-                    Get.toNamed(Routes.addMaintenance);
-                  },
-                  icon: const Icon(Icons.calendar_today_outlined, size: 20),
-                  label: const Text(
-                    'Schedule Service',
-                    style: TextStyle(fontWeight: FontWeight.w600),
-                  ),
-                  style: ElevatedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: 14),
-                    backgroundColor: const Color(0xFF1D293D),
-                    foregroundColor: Colors.white,
-                    elevation: 0,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
                     ),
                   ),
                 ),
-              ),
 
-              const SizedBox(height: 48),
-            ],
+                const SizedBox(height: 48),
+              ],
+            ),
           ),
-        ),
-      ),
+        );
+      }),
     );
   }
 
-  Widget _buildCard({required Widget child}) {
+  Widget _buildAssessmentCard({required String assessment, required List symptoms}) {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: const Color(0xFFE2E8F0)),
         boxShadow: const [
           BoxShadow(
-            color: Color(0x19000000),
-            blurRadius: 3,
-            offset: Offset(0, 1),
+            color: Color(0x0A000000),
+            blurRadius: 10,
+            offset: Offset(0, 4),
           ),
         ],
       ),
-      child: child,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(4),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFEFF6FF),
+                  borderRadius: BorderRadius.circular(6),
+                ),
+                child: const Icon(
+                  Icons.info_outline,
+                  color: Color(0xFF2B63A8),
+                  size: 18,
+                ),
+              ),
+              const SizedBox(width: 8),
+              const Text(
+                'Vehicle Assessment',
+                style: TextStyle(
+                  color: Color(0xFF1E293B),
+                  fontSize: 16,
+                  fontFamily: 'Archivo',
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          Text(
+            assessment,
+            style: const TextStyle(
+              color: Color(0xFF64748B),
+              fontSize: 14,
+              fontFamily: 'Inter',
+              height: 1.6,
+            ),
+          ),
+          if (symptoms.isNotEmpty) ...[
+            const SizedBox(height: 20),
+            const Text(
+              'REPORTED SYMPTOMS',
+              style: TextStyle(
+                color: Color(0xFF1E293B),
+                fontSize: 10,
+                fontFamily: 'Inter',
+                fontWeight: FontWeight.w800,
+                letterSpacing: 0.5,
+              ),
+            ),
+            const SizedBox(height: 12),
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: symptoms.map((s) => _buildSymptomChip(s.toString())).toList(),
+            ),
+          ],
+        ],
+      ),
     );
   }
 
@@ -363,14 +432,15 @@ class DiagnosticResultView extends GetView<DiagnosticResultController> {
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
         color: const Color(0xFFF1F5F9),
-        borderRadius: BorderRadius.circular(10),
+        borderRadius: BorderRadius.circular(8),
       ),
       child: Text(
         label,
         style: const TextStyle(
-          color: Color(0xFF45556C),
+          color: Color(0xFF475569),
           fontSize: 12,
           fontFamily: 'Inter',
+          fontWeight: FontWeight.w500,
         ),
       ),
     );
@@ -393,20 +463,13 @@ class DiagnosticResultView extends GetView<DiagnosticResultController> {
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(12),
-          boxShadow: const [
-            BoxShadow(
-              color: Color(0x19000000),
-              blurRadius: 3,
-              offset: Offset(0, 1),
-            ),
-          ],
+          border: Border.all(color: const Color(0xFFE2E8F0)),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             InkWell(
               onTap: () => controller.toggleExpansion(index),
-              borderRadius: BorderRadius.circular(12),
               child: Padding(
                 padding: const EdgeInsets.all(16),
                 child: Row(
@@ -415,7 +478,7 @@ class DiagnosticResultView extends GetView<DiagnosticResultController> {
                     Text(
                       title,
                       style: const TextStyle(
-                        color: Color(0xFF0A0A0A),
+                        color: Color(0xFF1E293B),
                         fontSize: 16,
                         fontFamily: 'Inter',
                         fontWeight: FontWeight.w600,
@@ -424,29 +487,26 @@ class DiagnosticResultView extends GetView<DiagnosticResultController> {
                     Row(
                       children: [
                         Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 8,
-                            vertical: 4,
-                          ),
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                           decoration: BoxDecoration(
                             color: probBgColor,
-                            borderRadius: BorderRadius.circular(8),
+                            borderRadius: BorderRadius.circular(6),
                           ),
                           child: Text(
                             probLabel,
                             style: TextStyle(
                               color: probColor,
-                              fontSize: 12,
+                              fontSize: 11,
                               fontFamily: 'Inter',
+                              fontWeight: FontWeight.w700,
                             ),
                           ),
                         ),
                         const SizedBox(width: 8),
                         Icon(
-                          isExpanded
-                              ? Icons.keyboard_arrow_up
-                              : Icons.keyboard_arrow_down,
-                          color: Colors.grey,
+                          isExpanded ? Icons.keyboard_arrow_up : Icons.keyboard_arrow_down,
+                          color: const Color(0xFF64748B),
+                          size: 20,
                         ),
                       ],
                     ),
@@ -454,28 +514,25 @@ class DiagnosticResultView extends GetView<DiagnosticResultController> {
                 ),
               ),
             ),
-            AnimatedCrossFade(
-              firstChild: const SizedBox(width: double.infinity),
-              secondChild: Padding(
+            if (isExpanded)
+              Padding(
                 padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
                 child: Column(
                   children: [
-                    const Divider(height: 1, color: Color(0xFFF1F5F9)),
-                    const SizedBox(height: 16),
                     _buildCauseSection(
                       Icons.info_outline,
                       'What This Means',
                       meaning,
                       const Color(0xFF2B63A8),
                     ),
-                    const SizedBox(height: 12),
+                    const SizedBox(height: 16),
                     _buildCauseSection(
                       Icons.check_circle_outline,
                       'Why This Matches Your Issue',
                       whyMatch,
-                      Colors.green,
+                      const Color(0xFF10B981),
                     ),
-                    const SizedBox(height: 12),
+                    const SizedBox(height: 16),
                     _buildCauseSection(
                       Icons.build_circle_outlined,
                       'Recommended Action',
@@ -485,23 +542,13 @@ class DiagnosticResultView extends GetView<DiagnosticResultController> {
                   ],
                 ),
               ),
-              crossFadeState: isExpanded
-                  ? CrossFadeState.showSecond
-                  : CrossFadeState.showFirst,
-              duration: const Duration(milliseconds: 300),
-            ),
           ],
         ),
       );
     });
   }
 
-  Widget _buildCauseSection(
-    IconData icon,
-    String title,
-    String text,
-    Color iconColor,
-  ) {
+  Widget _buildCauseSection(IconData icon, String title, String text, Color iconColor) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -512,7 +559,7 @@ class DiagnosticResultView extends GetView<DiagnosticResultController> {
             Text(
               title,
               style: const TextStyle(
-                color: Color(0xFF0A0A0A),
+                color: Color(0xFF1E293B),
                 fontSize: 14,
                 fontFamily: 'Inter',
                 fontWeight: FontWeight.w600,
@@ -520,16 +567,16 @@ class DiagnosticResultView extends GetView<DiagnosticResultController> {
             ),
           ],
         ),
-        const SizedBox(height: 4),
+        const SizedBox(height: 6),
         Padding(
-          padding: const EdgeInsets.only(left: 26.0),
+          padding: const EdgeInsets.only(left: 26),
           child: Text(
             text,
             style: const TextStyle(
-              color: Color(0xFF62748E),
+              color: Color(0xFF64748B),
               fontSize: 13,
               fontFamily: 'Inter',
-              height: 1.4,
+              height: 1.5,
             ),
           ),
         ),
@@ -539,29 +586,22 @@ class DiagnosticResultView extends GetView<DiagnosticResultController> {
 
   Widget _buildStepRow(String number, String text) {
     return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Container(
-          width: 24,
-          height: 24,
+          width: 22,
+          height: 22,
           alignment: Alignment.center,
-          decoration: BoxDecoration(
+          decoration: const BoxDecoration(
             color: Colors.white,
             shape: BoxShape.circle,
-            border: Border.all(color: const Color(0xFFDBEAFE)),
-            boxShadow: const [
-              BoxShadow(
-                color: Color(0x19000000),
-                blurRadius: 2,
-                offset: Offset(0, 1),
-              ),
-            ],
           ),
           child: Text(
             number,
             style: const TextStyle(
               color: Color(0xFF2B63A8),
-              fontSize: 12,
-              fontWeight: FontWeight.w700,
+              fontSize: 11,
+              fontWeight: FontWeight.w800,
             ),
           ),
         ),
@@ -570,9 +610,11 @@ class DiagnosticResultView extends GetView<DiagnosticResultController> {
           child: Text(
             text,
             style: const TextStyle(
-              color: Color(0xFF0A0A0A),
+              color: Color(0xFF1E293B),
               fontSize: 14,
               fontFamily: 'Inter',
+              fontWeight: FontWeight.w500,
+              height: 1.4,
             ),
           ),
         ),

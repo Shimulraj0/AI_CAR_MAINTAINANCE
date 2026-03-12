@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../services/api_service.dart';
+import 'home_controller.dart';
 
 class AddMaintenanceController extends GetxController {
   final GlobalKey<FormState> formKey = GlobalKey<FormState>();
@@ -12,9 +13,24 @@ class AddMaintenanceController extends GetxController {
   final TextEditingController nextDueDateController = TextEditingController();
 
   var isLoading = false.obs;
+  var isValid = false.obs;
+
+  @override
+  void onInit() {
+    super.onInit();
+    serviceTypeController.addListener(checkValidation);
+    dateController.addListener(checkValidation);
+  }
+
+  void checkValidation() {
+    isValid.value = serviceTypeController.text.trim().isNotEmpty && 
+                    dateController.text.trim().isNotEmpty;
+  }
 
   @override
   void onClose() {
+    serviceTypeController.removeListener(checkValidation);
+    dateController.removeListener(checkValidation);
     serviceTypeController.dispose();
     dateController.dispose();
     mileageController.dispose();
@@ -30,13 +46,24 @@ class AddMaintenanceController extends GetxController {
         return;
       }
 
-      final payload = {
+      final homeController = Get.find<HomeController>();
+      final payload = <String, dynamic>{
         'service_type': serviceTypeController.text.trim(),
         'mileage': int.tryParse(mileageController.text.replaceAll(RegExp(r'[^0-9]'), '')) ?? 0,
-        'next_due_date': nextDueDateController.text.trim(),
-        'vehicle': 'Toyota Camry', // Hardcoded for now based on example
-        'notes': notesController.text.trim(),
+        'vehicle': homeController.activeVehicleId.value,
       };
+
+      if (nextDueDateController.text.trim().isNotEmpty) {
+        payload['next_due_date'] = nextDueDateController.text.trim();
+      } else if (dateController.text.trim().isNotEmpty) {
+        // Fallback to the 'Date' field if 'Next Due Date' is empty, 
+        // as the user's snippet uses next_due_date.
+        payload['next_due_date'] = dateController.text.trim();
+      }
+
+      if (notesController.text.trim().isNotEmpty) {
+        payload['notes'] = notesController.text.trim();
+      }
 
       isLoading.value = true;
       final apiService = Get.find<ApiService>();
@@ -44,18 +71,31 @@ class AddMaintenanceController extends GetxController {
       apiService.createMaintenanceTask(payload).listen(
         (response) {
           isLoading.value = false;
-          print('CreateMaintenance API Status Code: ${response.statusCode}');
-          print('CreateMaintenance API Payload Submitted: $payload');
-          print('CreateMaintenance API Response Body: ${response.body}');
           
           if (response.statusCode == 200 || response.statusCode == 201) {
             Get.snackbar('Success', 'Maintenance task added successfully');
             Get.back(); // Go back to the maintenance list
           } else {
+            String errorMsg = 'Failed to add task';
+            if (response.body != null) {
+              if (response.body is Map) {
+                if (response.body['message'] != null) {
+                  errorMsg = response.body['message'].toString();
+                } else if (response.body['detail'] != null) {
+                  errorMsg = response.body['detail'].toString();
+                } else {
+                  errorMsg = response.body.toString();
+                }
+              } else {
+                errorMsg = response.body.toString();
+              }
+            }
             Get.snackbar(
               'Error',
-              response.body?['message'] ?? response.body?['detail'] ?? 'Failed to add task',
+              errorMsg,
+              snackPosition: SnackPosition.BOTTOM,
             );
+            debugPrint('AddMaintenance API Error: ${response.statusCode} - $errorMsg');
           }
         },
         onError: (error) {

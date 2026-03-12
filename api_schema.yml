@@ -1,0 +1,4788 @@
+openapi: 3.0.3
+info:
+  title: Autointel Diagnostics API
+  version: 1.0.1
+  description: API for Autointel Diagnostics - Vehicle Maintenance and Diagnostic
+    Management System
+  contact:
+    email: maruf.bshs@gmail.com
+  license:
+    name: BSD License
+paths:
+  /api/user/auth/google/login/:
+    post:
+      operationId: user_auth_google_login_create
+      description: Handle Google OAuth mobile login and return authentication tokens.
+      summary: Google OAuth Mobile Login
+      tags:
+      - user
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GoogleOAuthRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/GoogleOAuthRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/GoogleOAuthRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          description: Google login successful
+        '400':
+          description: OAuth validation failed
+  /api/user/auth/apple/login/:
+    post:
+      operationId: user_auth_apple_login_create
+      description: Accepts Apple ID token and returns JWT tokens.
+      summary: Apple mobile login
+      tags:
+      - user
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AppleOAuthRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/AppleOAuthRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/AppleOAuthRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          description: Login successful
+  /api/user/register/initiate/:
+    post:
+      operationId: user_register_initiate_create
+      description: Send OTP to email for user registration verification
+      summary: Initiate user registration
+      tags:
+      - user
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InitiateRegistrationRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/InitiateRegistrationRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/InitiateRegistrationRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InitiateRegistration'
+          description: ''
+  /api/user/register/verify/:
+    post:
+      operationId: user_register_verify_create
+      description: Verifies the OTP sent during registration and completes user registration.
+      summary: Verify registration OTP
+      tags:
+      - user
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/VerifyRegistrationOTPRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/VerifyRegistrationOTPRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/VerifyRegistrationOTPRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VerifyRegistrationOTP'
+          description: ''
+  /api/user/password-reset/initiate/:
+    post:
+      operationId: user_password_reset_initiate_create
+      description: Send OTP to email for password reset
+      summary: Initiate password reset
+      tags:
+      - user
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InitiatePasswordResetRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/InitiatePasswordResetRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/InitiatePasswordResetRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InitiatePasswordReset'
+          description: ''
+  /api/user/password-reset/verify/:
+    post:
+      operationId: user_password_reset_verify_create
+      description: Verify OTP and receive reset token for password change
+      summary: Verify password reset OTP
+      tags:
+      - user
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/VerifyPasswordResetOTPRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/VerifyPasswordResetOTPRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/VerifyPasswordResetOTPRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VerifyPasswordResetOTP'
+          description: ''
+  /api/user/password-reset/confirm/:
+    post:
+      operationId: user_password_reset_confirm_create
+      description: Reset password using the reset token
+      summary: Reset password
+      tags:
+      - user
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ResetPasswordRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ResetPasswordRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ResetPasswordRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResetPassword'
+          description: ''
+  /api/user/login/:
+    post:
+      operationId: user_login_create
+      description: Authenticate user and return access and refresh tokens.
+      summary: User login
+      tags:
+      - user
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserLoginRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/UserLoginRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/UserLoginRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserLogin'
+          description: ''
+  /api/user/logout/:
+    post:
+      operationId: user_logout_create
+      description: Logout user by blacklisting refresh token and clearing session.
+      summary: User logout
+      tags:
+      - user
+      security:
+      - jwtAuth: []
+      responses:
+        '205':
+          description: Logged out successfully
+  /api/user/me/:
+    get:
+      operationId: user_me_retrieve
+      description: Retrieve currently authenticated user's profile.
+      summary: Retrieve my profile
+      tags:
+      - user
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserProfile'
+          description: ''
+    put:
+      operationId: user_me_update
+      description: Fully update your profile.
+      summary: Update my profile
+      tags:
+      - user
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserProfileRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/UserProfileRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/UserProfileRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserProfile'
+          description: ''
+    patch:
+      operationId: user_me_partial_update
+      description: Partially update your profile fields.
+      summary: Partially update my profile
+      tags:
+      - user
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedUserProfileRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedUserProfileRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedUserProfileRequest'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserProfile'
+          description: ''
+    delete:
+      operationId: user_me_destroy
+      description: Delete currently authenticated user's account.
+      summary: Delete my account
+      tags:
+      - user
+      security:
+      - jwtAuth: []
+      responses:
+        '204':
+          description: Account deleted
+  /api/user/profile/{id}/:
+    get:
+      operationId: user_profile_retrieve
+      description: Retrieve public profile information of a user by ID.
+      summary: Retrieve public user profile
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - user
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserProfile'
+          description: ''
+  /api/user/approve/{id}/:
+    get:
+      operationId: user_approve_retrieve
+      description: Retrieve a single user by ID for approval review
+      summary: Retrieve user for approval
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - admin
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserApproval'
+          description: ''
+    put:
+      operationId: user_approve_update
+      description: Fully update user approval status (admin use)
+      summary: Update user approval
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - admin
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserApprovalRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/UserApprovalRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/UserApprovalRequest'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserApproval'
+          description: ''
+    patch:
+      operationId: user_approve_partial_update
+      description: Partially update approval-related fields
+      summary: Partially update user approval
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - admin
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedUserApprovalRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedUserApprovalRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedUserApprovalRequest'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserApproval'
+          description: ''
+    delete:
+      operationId: user_approve_destroy
+      description: Delete user account permanently
+      summary: Delete user
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - admin
+      security:
+      - jwtAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/user/total/:
+    get:
+      operationId: user_total_retrieve
+      description: Return total number of registered users.
+      summary: Total users count
+      tags:
+      - admin
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TotalUsersCountResponse'
+          description: ''
+  /api/user/admin/login/:
+    post:
+      operationId: user_admin_login_create
+      description: Authenticate admin user and return JWT tokens.
+      summary: Admin login
+      tags:
+      - admin
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AdminLoginRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/AdminLoginRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/AdminLoginRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminLogin'
+          description: ''
+  /api/user/admin/profile/:
+    get:
+      operationId: user_admin_profile_retrieve
+      description: Retrieve currently authenticated admin profile.
+      summary: Retrieve admin profile
+      tags:
+      - admin
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminProfile'
+          description: ''
+    put:
+      operationId: user_admin_profile_update
+      description: Fully update admin profile.
+      summary: Update admin profile
+      tags:
+      - admin
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AdminProfileRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/AdminProfileRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/AdminProfileRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminProfile'
+          description: ''
+    patch:
+      operationId: user_admin_profile_partial_update
+      description: Partially update admin profile fields.
+      summary: Partially update admin profile
+      tags:
+      - admin
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedAdminProfileRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedAdminProfileRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedAdminProfileRequest'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminProfile'
+          description: ''
+  /api/user/admin/userlist/:
+    get:
+      operationId: user_admin_userlist_list
+      description: Retrieve a list of all registered users with filtering and ordering
+        options.
+      summary: Admin user list
+      parameters:
+      - in: query
+        name: is_active
+        schema:
+          type: boolean
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - in: query
+        name: provider
+        schema:
+          type: string
+          enum:
+          - apple
+          - google
+          - self
+        description: |-
+          * `self` - Self
+          * `google` - Google
+          * `apple` - Apple
+      - name: search
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
+      - in: query
+        name: tier
+        schema:
+          type: string
+          enum:
+          - free
+          - premium
+        description: |-
+          * `free` - Free
+          * `premium` - Premium
+      tags:
+      - admin
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedUserList'
+          description: ''
+  /api/user/stats/:
+    get:
+      operationId: user_stats_retrieve
+      description: Return monthly user registration statistics for a given year.
+      summary: Yearly user growth statistics
+      parameters:
+      - in: query
+        name: year
+        schema:
+          type: integer
+        description: Year for statistics (e.g., 2025)
+        required: true
+      tags:
+      - admin
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/YearlyUserGrowth'
+          description: ''
+        '400':
+          description: Invalid or missing year parameter
+  /api/maintenance/tasks/:
+    post:
+      operationId: maintenance_tasks_create
+      description: Create a new manual maintenance task for the authenticated user.
+        A notification will be triggered upon successful creation.
+      summary: Create maintenance task
+      tags:
+      - maintenance
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ManualMaintenanceTaskCreateRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ManualMaintenanceTaskCreateRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ManualMaintenanceTaskCreateRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ManualMaintenanceTaskCreate'
+          description: ''
+    get:
+      operationId: maintenance_tasks_list
+      description: Retrieve a paginated list of maintenance tasks belonging to the
+        authenticated user. Supports filtering by status, vehicle, and completion
+        state. Supports search by service type and ordering by next due date or creation
+        date.
+      summary: List maintenance tasks
+      parameters:
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: search
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
+      tags:
+      - maintenance
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedManualMaintenanceTaskListList'
+          description: ''
+  /api/maintenance/tasks/stats/:
+    get:
+      operationId: maintenance_tasks_stats_retrieve
+      description: Retrieve statistics for the authenticated user's maintenance tasks,
+        including total, upcoming, overdue, and completed counts.
+      summary: Get maintenance statistics
+      tags:
+      - maintenance
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  total:
+                    type: integer
+                  upcoming:
+                    type: integer
+                  overdue:
+                    type: integer
+                  completed:
+                    type: integer
+          description: ''
+  /api/maintenance/tasks/{id}/:
+    patch:
+      operationId: maintenance_tasks_partial_update
+      description: Partially update fields of an existing maintenance task.
+      summary: Partially update maintenance task
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      tags:
+      - maintenance
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedManualMaintenanceTaskUpdateRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedManualMaintenanceTaskUpdateRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedManualMaintenanceTaskUpdateRequest'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ManualMaintenanceTaskUpdate'
+          description: ''
+    get:
+      operationId: maintenance_tasks_retrieve
+      description: Retrieve detailed information about a specific maintenance task
+        owned by the authenticated user.
+      summary: Retrieve maintenance task
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      tags:
+      - maintenance
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ManualMaintenanceTask'
+          description: ''
+    put:
+      operationId: maintenance_tasks_update
+      description: Fully update an existing maintenance task. Only tasks belonging
+        to the authenticated user can be modified.
+      summary: Update maintenance task
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      tags:
+      - maintenance
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ManualMaintenanceTaskUpdateRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ManualMaintenanceTaskUpdateRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ManualMaintenanceTaskUpdateRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ManualMaintenanceTaskUpdate'
+          description: ''
+    delete:
+      operationId: maintenance_tasks_destroy
+      description: Delete a maintenance task owned by the authenticated user.
+      summary: Delete maintenance task
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      tags:
+      - maintenance
+      security:
+      - jwtAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/maintenance/tasks/{id}/mark-completed/:
+    patch:
+      operationId: maintenance_tasks_mark_completed_partial_update
+      description: Mark a specific maintenance task as completed or incomplete. Triggers
+        a completion notification if marked as completed. Returns the full updated
+        task details.
+      summary: Mark task as completed
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      tags:
+      - maintenance
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedMarkTaskCompletedRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedMarkTaskCompletedRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedMarkTaskCompletedRequest'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MarkTaskCompleted'
+          description: ''
+  /api/supports/contact/:
+    get:
+      operationId: supports_contact_list
+      description: Admin can retrieve a list of all support tickets submitted by users.
+        Supports filtering by user or email, searching by email/username, and ordering
+        by creation date.
+      summary: List all support requests
+      parameters:
+      - in: query
+        name: email
+        schema:
+          type: string
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: search
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
+      - in: query
+        name: user
+        schema:
+          type: string
+          format: uuid
+      tags:
+      - admin
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedListContactSupportList'
+          description: ''
+  /api/supports/contact/{id}/:
+    get:
+      operationId: supports_contact_retrieve
+      description: Retrieve the details of a specific support ticket by its ID. Admin
+        only.
+      summary: Get a specific support request
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this Contact Support.
+        required: true
+      tags:
+      - admin
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListContactSupport'
+          description: ''
+  /api/supports/faqs/:
+    get:
+      operationId: supports_faqs_list
+      description: Retrieve a list of frequently asked questions. Supports searching
+        by question/answer and ordering by creation or update date.
+      summary: List FAQs
+      parameters:
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: search
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
+      tags:
+      - supports
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedFAQListList'
+          description: ''
+  /api/supports/faqs/{id}/:
+    get:
+      operationId: supports_faqs_retrieve
+      description: Retrieve the details of a specific FAQ entry by its ID. Authenticated
+        users can view.
+      summary: Get a specific FAQ
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this FAQ.
+        required: true
+      tags:
+      - supports
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FAQList'
+          description: ''
+  /api/supports/faq/manage/:
+    post:
+      operationId: supports_faq_manage_create
+      description: Admin can create a new FAQ.
+      summary: Create FAQ
+      tags:
+      - admin
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FAQRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/FAQRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/FAQRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FAQ'
+          description: ''
+    get:
+      operationId: supports_faq_manage_list
+      description: Admin view to list all FAQs.
+      summary: List FAQs (Admin)
+      parameters:
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: search
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
+      tags:
+      - admin
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedFAQList'
+          description: ''
+  /api/supports/faq/manage/{id}/:
+    patch:
+      operationId: supports_faq_manage_partial_update
+      description: Admin can partially update an existing FAQ.
+      summary: Partially update FAQ
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this FAQ.
+        required: true
+      tags:
+      - admin
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedFAQRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedFAQRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedFAQRequest'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FAQ'
+          description: ''
+    get:
+      operationId: supports_faq_manage_retrieve
+      description: Retrieve details of a specific FAQ.
+      summary: Retrieve FAQ
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this FAQ.
+        required: true
+      tags:
+      - admin
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FAQ'
+          description: ''
+    put:
+      operationId: supports_faq_manage_update
+      description: Admin can fully update an existing FAQ.
+      summary: Update FAQ
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this FAQ.
+        required: true
+      tags:
+      - admin
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FAQRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/FAQRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/FAQRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FAQ'
+          description: ''
+    delete:
+      operationId: supports_faq_manage_destroy
+      description: Admin can delete an FAQ.
+      summary: Delete FAQ
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this FAQ.
+        required: true
+      tags:
+      - admin
+      security:
+      - jwtAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/supports/contactus/create/:
+    post:
+      operationId: supports_contactus_create_create
+      description: Authenticated users can submit a support request. A notification
+        is sent to the admin upon creation.
+      summary: Create a support request
+      tags:
+      - supports
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateContactSupportRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/CreateContactSupportRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/CreateContactSupportRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreateContactSupport'
+          description: ''
+  /api/supports/about-us/:
+    get:
+      operationId: supports_about_us_retrieve
+      description: Retrieve the About Us information for public or authenticated users.
+      summary: Get About Us content
+      tags:
+      - supports
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AboutUs'
+          description: ''
+  /api/supports/admin/about-us/:
+    patch:
+      operationId: supports_admin_about_us_partial_update
+      description: Admin can update the About Us content. Only PATCH requests are
+        allowed.
+      summary: Update About Us
+      tags:
+      - admin
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedAboutUsRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedAboutUsRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedAboutUsRequest'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AboutUs'
+          description: ''
+  /api/supports/terms/:
+    get:
+      operationId: supports_terms_retrieve
+      description: Retrieve the Terms and Conditions content for public or authenticated
+        users.
+      summary: Get Terms and Conditions
+      tags:
+      - supports
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TermsAndConditions'
+          description: ''
+  /api/supports/admin/terms/:
+    patch:
+      operationId: supports_admin_terms_partial_update
+      description: Admin can update the Terms and Conditions content. Only PATCH requests
+        are allowed.
+      summary: Update Terms and Conditions
+      tags:
+      - admin
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedTermsAndConditionsRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedTermsAndConditionsRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedTermsAndConditionsRequest'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TermsAndConditions'
+          description: ''
+  /api/supports/privacy/:
+    get:
+      operationId: supports_privacy_retrieve
+      description: Retrieve the Privacy Policy content for public or authenticated
+        users.
+      summary: Get Privacy Policy
+      tags:
+      - supports
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PrivacyPolicy'
+          description: ''
+  /api/supports/admin/privacy/:
+    patch:
+      operationId: supports_admin_privacy_partial_update
+      description: Admin can update the Privacy Policy content. Only PATCH requests
+        are allowed.
+      summary: Update Privacy Policy
+      tags:
+      - admin
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedPrivacyPolicyRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedPrivacyPolicyRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedPrivacyPolicyRequest'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PrivacyPolicy'
+          description: ''
+  /api/notification/:
+    get:
+      operationId: notification_list
+      description: Get all notifications for the authenticated user, with optional
+        filtering by read status, type, and priority.
+      summary: List notifications
+      parameters:
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: search
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
+      tags:
+      - notification
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedNotificationList'
+          description: ''
+  /api/notification/clear-read/:
+    delete:
+      operationId: notification_clear_read_destroy
+      description: Delete all notifications that have been marked as read for the
+        authenticated user.
+      summary: Clear read notifications
+      tags:
+      - notification
+      security:
+      - jwtAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/notification/mark-all-read/:
+    post:
+      operationId: notification_mark_all_read_create
+      description: Mark all notifications for the authenticated user as read.
+      summary: Mark all notifications as read
+      tags:
+      - notification
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Notification'
+          description: ''
+  /api/notification/unread-count/:
+    get:
+      operationId: notification_unread_count_retrieve
+      description: Return the total number of unread notifications for the authenticated
+        user.
+      summary: Get unread notifications count
+      tags:
+      - notification
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Notification'
+          description: ''
+  /api/notification/{id}/:
+    get:
+      operationId: notification_retrieve
+      description: Retrieve the details of a specific notification by its ID.
+      summary: Get a single notification
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      tags:
+      - notification
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Notification'
+          description: ''
+  /api/notification/{id}/mark-read/:
+    post:
+      operationId: notification_mark_read_create
+      description: Mark a single notification as read. POST /api/notifications/{id}/mark-read/
+      summary: Mark a notification as read
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      tags:
+      - notification
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Notification'
+          description: ''
+  /api/notification/fcm/register/:
+    post:
+      operationId: notification_fcm_register_create
+      description: Register a device token to receive push notifications via FCM.
+      summary: Register FCM token
+      tags:
+      - notification
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FCMTokenRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/FCMTokenRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/FCMTokenRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          description: FCM token registered successfully
+  /api/notification/fcm/unregister/:
+    post:
+      operationId: notification_fcm_unregister_create
+      description: Remove a device token to stop receiving push notifications.
+      summary: Unregister FCM token
+      tags:
+      - notification
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FCMTokenDeleteRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/FCMTokenDeleteRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/FCMTokenDeleteRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          description: FCM token unregistered successfully
+        '404':
+          description: Token not found
+  /api/vehicles/health/:
+    get:
+      operationId: vehicles_health_retrieve
+      description: Checks AI diagnostic service health
+      summary: AI Health Check
+      tags:
+      - vehicles
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+  /api/vehicles/:
+    post:
+      operationId: vehicles_create
+      description: Create a new vehicle (subject to tier limits)
+      summary: Add a new vehicle
+      tags:
+      - vehicles
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/VehicleCreateRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/VehicleCreateRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/VehicleCreateRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VehicleCreate'
+          description: ''
+    get:
+      operationId: vehicles_list
+      description: Get all vehicles for the authenticated user
+      summary: List user's vehicles
+      parameters:
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: search
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
+      tags:
+      - vehicles
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedVehicleListList'
+          description: ''
+  /api/vehicles/stats/:
+    get:
+      operationId: vehicles_stats_retrieve
+      description: Get statistics about user's vehicles
+      summary: Get vehicle statistics
+      tags:
+      - vehicles
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  total_vehicles:
+                    type: integer
+                  vehicle_limit:
+                    type: integer
+                  can_add_more:
+                    type: boolean
+                  by_manufacturer:
+                    type: object
+                  by_fuel_type:
+                    type: object
+                  oldest_year:
+                    type: integer
+                  newest_year:
+                    type: integer
+          description: ''
+  /api/vehicles/{id}/:
+    get:
+      operationId: vehicles_retrieve
+      description: Retrieve detailed information about a specific vehicle
+      summary: Get vehicle details
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      tags:
+      - vehicles
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Vehicle'
+          description: ''
+    patch:
+      operationId: vehicles_partial_update
+      description: Update specific fields of a vehicle
+      summary: Partially update vehicle
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      tags:
+      - vehicles
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedVehicleUpdateRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedVehicleUpdateRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedVehicleUpdateRequest'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VehicleUpdate'
+          description: ''
+    delete:
+      operationId: vehicles_destroy
+      description: Delete a vehicle from your account
+      summary: Delete vehicle
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      tags:
+      - vehicles
+      security:
+      - jwtAuth: []
+      responses:
+        '204':
+          description: No response body
+    put:
+      operationId: vehicles_update
+      description: Update all fields of a vehicle
+      summary: Update vehicle
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      tags:
+      - vehicles
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/VehicleUpdateRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/VehicleUpdateRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/VehicleUpdateRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VehicleUpdate'
+          description: ''
+  /api/vehicles/admin/list/:
+    get:
+      operationId: vehicles_admin_list_list
+      description: Get all vehicles in the system (Admin only)
+      summary: 'Admin: List all vehicles'
+      parameters:
+      - in: query
+        name: manufacturer
+        schema:
+          type: string
+        description: Filter by manufacturer
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: search
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
+      - in: query
+        name: user
+        schema:
+          type: string
+        description: Filter by user ID
+      - in: query
+        name: year
+        schema:
+          type: integer
+      tags:
+      - admin
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedAdminVehicleListList'
+          description: ''
+  /api/vehicles/admin/list/stats/:
+    get:
+      operationId: vehicles_admin_list_stats_retrieve
+      description: Get system-wide vehicle statistics (Admin only)
+      summary: 'Admin: Get vehicle statistics'
+      tags:
+      - admin
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  total_vehicles:
+                    type: integer
+                  total_users_with_vehicles:
+                    type: integer
+                  by_manufacturer:
+                    type: object
+                  by_year_range:
+                    type: object
+          description: ''
+  /api/vehicles/admin/list/{id}/:
+    get:
+      operationId: vehicles_admin_list_retrieve
+      description: Get detailed information about any vehicle (Admin only)
+      summary: 'Admin: Get vehicle details'
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this Vehicle.
+        required: true
+      tags:
+      - admin
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminVehicleList'
+          description: ''
+  /api/vehicles/admin/users/{id}/:
+    get:
+      operationId: vehicles_admin_users_retrieve
+      description: Admin can retrieve a user and all vehicles belonging to that user
+        by user ID
+      summary: 'Admin: Get user with all vehicles'
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - admin
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminUserVehicleList'
+          description: ''
+  /api/diagnostics/chat/:
+    post:
+      operationId: diagnostics_chat_create
+      description: Send follow-up questions about a diagnostic session (Premium/Unlocked)
+      summary: Chat with AI about diagnosis
+      tags:
+      - Diagnostics - Premium Features
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChatRequestRequest'
+            examples:
+              ExampleChatQuestion:
+                value:
+                  session_id: full_443968bc9a70
+                  message: What could be causing the P0300 code?
+                summary: Example Chat Question
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ChatRequestRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ChatRequestRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChatMessage'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                upgrade_required:
+                  type: boolean
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+          description: ''
+        '503':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+          description: ''
+  /api/diagnostics/reanalyze/:
+    post:
+      operationId: diagnostics_reanalyze_create
+      description: Get refined analysis based on narrowing answers (Premium/Unlocked)
+      summary: Reanalyze diagnosis
+      tags:
+      - Diagnostics - Premium Features
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReanalysisRequestRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ReanalysisRequestRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ReanalysisRequestRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+          description: ''
+  /api/diagnostics/export/text/:
+    post:
+      operationId: diagnostics_export_text_create
+      description: Export diagnostic as text report (Premium/Unlocked)
+      summary: Get text report
+      tags:
+      - Diagnostics - Premium Features
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TextReportRequestRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/TextReportRequestRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/TextReportRequestRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+          description: ''
+  /api/diagnostics/export/pdf/:
+    post:
+      operationId: diagnostics_export_pdf_create
+      description: Generate and download PDF report (Premium ONLY)
+      summary: Generate PDF report
+      tags:
+      - Diagnostics - Premium Features
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TextReportRequestRequest'
+            examples:
+              ExamplePDFRequest:
+                value:
+                  session_id: full_443968bc9a70
+                summary: Example PDF Request
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/TextReportRequestRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/TextReportRequestRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: string
+                format: binary
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+          description: ''
+  /api/diagnostics/admin/:
+    get:
+      operationId: diagnostics_admin_list
+      description: Get all diagnostic requests in the system (Admin only)
+      summary: 'Admin: List all diagnostics'
+      parameters:
+      - in: query
+        name: is_unlocked
+        schema:
+          type: boolean
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: search
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
+      - in: query
+        name: tier
+        schema:
+          type: string
+          enum:
+          - free
+          - full
+        description: |-
+          Tier used for this diagnosis (free or full)
+
+          * `free` - Free
+          * `full` - Full
+      - in: query
+        name: user
+        schema:
+          type: string
+          format: uuid
+      - in: query
+        name: vehicle
+        schema:
+          type: string
+          format: uuid
+      tags:
+      - diagnostics
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedDiagnosticRequestList'
+          description: ''
+  /api/diagnostics/admin/stats/:
+    get:
+      operationId: diagnostics_admin_stats_retrieve
+      description: Get system-wide diagnostic statistics (Admin only)
+      summary: 'Admin: Get diagnostic statistics'
+      tags:
+      - diagnostics
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DiagnosticRequest'
+          description: ''
+  /api/diagnostics/admin/{id}/:
+    get:
+      operationId: diagnostics_admin_retrieve
+      description: Get detailed information about any diagnostic (Admin only)
+      summary: 'Admin: Get diagnostic details'
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this Diagnostic Request.
+        required: true
+      tags:
+      - diagnostics
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DiagnosticRequest'
+          description: ''
+  /api/diagnostics/:
+    post:
+      operationId: diagnostics_create
+      description: |-
+        Create a new diagnostic request. System automatically detects your tier:
+        - Free users get basic diagnosis
+        - Premium users get full detailed diagnosis
+
+        Provide vehicle, diagnostic codes, and symptoms.
+      summary: Create diagnostic request
+      tags:
+      - diagnostics
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DiagnosticRequestCreateRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/DiagnosticRequestCreateRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/DiagnosticRequestCreateRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DiagnosticRequest'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+        '503':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+    get:
+      operationId: diagnostics_list
+      description: Get all diagnostic requests for authenticated user. Free users
+        see last 3 reports, Premium users see unlimited.
+      summary: List diagnostic requests
+      parameters:
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: search
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
+      tags:
+      - diagnostics
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedDiagnosticRequestListList'
+          description: ''
+  /api/diagnostics/stats/:
+    get:
+      operationId: diagnostics_stats_retrieve
+      description: Get user's diagnostic statistics
+      summary: Get diagnostic statistics
+      tags:
+      - diagnostics
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DiagnosticRequest'
+          description: ''
+  /api/diagnostics/{id}/:
+    get:
+      operationId: diagnostics_retrieve
+      description: Retrieve detailed information about a specific diagnostic session
+      summary: Get diagnostic details
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      tags:
+      - diagnostics
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DiagnosticRequest'
+          description: ''
+  /api/subscriptions/verify/:
+    post:
+      operationId: subscriptions_verify_create
+      description: Verify App Store or Play Store purchase (subscription or unlock)
+      summary: Verify purchase
+      tags:
+      - subscriptions
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PurchaseVerificationRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PurchaseVerificationRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PurchaseVerificationRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  message:
+                    type: string
+                  data:
+                    type: object
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+          description: ''
+  /api/subscriptions/tier/:
+    get:
+      operationId: subscriptions_tier_retrieve
+      description: Get user tier, premium status, and limits
+      summary: Get user tier info
+      tags:
+      - Subscriptions
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserTierInfo'
+          description: ''
+  /api/subscriptions/subscriptions/:
+    get:
+      operationId: subscriptions_subscriptions_list
+      description: |-
+        ViewSet for viewing user's subscriptions
+
+        Rate Limit: 100/hour per user
+      parameters:
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      tags:
+      - subscriptions
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedSubscriptionList'
+          description: ''
+  /api/subscriptions/subscriptions/active/:
+    get:
+      operationId: subscriptions_subscriptions_active_retrieve
+      description: Get user's currently active subscription
+      summary: Get active subscription
+      tags:
+      - subscriptions
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Subscription'
+          description: ''
+  /api/subscriptions/subscriptions/{id}/:
+    get:
+      operationId: subscriptions_subscriptions_retrieve
+      description: |-
+        ViewSet for viewing user's subscriptions
+
+        Rate Limit: 100/hour per user
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      tags:
+      - subscriptions
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Subscription'
+          description: ''
+  /api/subscriptions/unlocked-sessions/:
+    get:
+      operationId: subscriptions_unlocked_sessions_list
+      description: |-
+        ViewSet for viewing user's unlocked sessions
+
+        Rate Limit: 100/hour per user
+      parameters:
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: search
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
+      tags:
+      - subscriptions
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedUnlockedSessionList'
+          description: ''
+  /api/subscriptions/unlocked-sessions/{id}/:
+    get:
+      operationId: subscriptions_unlocked_sessions_retrieve
+      description: |-
+        ViewSet for viewing user's unlocked sessions
+
+        Rate Limit: 100/hour per user
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      tags:
+      - subscriptions
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UnlockedSession'
+          description: ''
+  /api/subscriptions/purchase-history/:
+    get:
+      operationId: subscriptions_purchase_history_list
+      description: |-
+        ViewSet for viewing purchase history
+
+        Rate Limit: 100/hour per user
+      parameters:
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      tags:
+      - subscriptions
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedPurchaseHistoryList'
+          description: ''
+  /api/subscriptions/purchase-history/{id}/:
+    get:
+      operationId: subscriptions_purchase_history_retrieve
+      description: |-
+        ViewSet for viewing purchase history
+
+        Rate Limit: 100/hour per user
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      tags:
+      - subscriptions
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PurchaseHistory'
+          description: ''
+  /api/token/refresh/:
+    post:
+      operationId: token_refresh_create
+      description: |-
+        Takes a refresh type JSON web token and returns an access type JSON web
+        token if the refresh token is valid.
+      tags:
+      - token
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TokenRefreshRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/TokenRefreshRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/TokenRefreshRequest'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokenRefresh'
+          description: ''
+components:
+  schemas:
+    AboutUs:
+      type: object
+      properties:
+        content:
+          type: string
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - content
+      - updated_at
+    AdminLogin:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+      required:
+      - email
+    AdminLoginRequest:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+          minLength: 1
+        password:
+          type: string
+          writeOnly: true
+          minLength: 1
+      required:
+      - email
+      - password
+    AdminProfile:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        full_name:
+          type: string
+          maxLength: 40
+        email:
+          type: string
+          format: email
+          readOnly: true
+        phone:
+          type: string
+          nullable: true
+          title: Phone Number
+          maxLength: 128
+        profile_picture:
+          type: string
+          format: uri
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - created_at
+      - email
+      - full_name
+      - id
+      - updated_at
+    AdminProfileRequest:
+      type: object
+      properties:
+        full_name:
+          type: string
+          minLength: 1
+          maxLength: 40
+        phone:
+          type: string
+          nullable: true
+          title: Phone Number
+          maxLength: 128
+        profile_picture:
+          type: string
+          format: binary
+          nullable: true
+      required:
+      - full_name
+    AdminUserVehicleList:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        full_name:
+          type: string
+          maxLength: 40
+        email:
+          type: string
+          format: email
+          maxLength: 254
+        profile_picture:
+          type: string
+          format: uri
+          nullable: true
+        user_vehicles:
+          type: array
+          items:
+            $ref: '#/components/schemas/VehicleList'
+      required:
+      - email
+      - full_name
+      - id
+      - user_vehicles
+    AdminVehicleList:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        user_email:
+          type: string
+          format: email
+          readOnly: true
+        user_name:
+          type: string
+          readOnly: true
+        manufacturer:
+          type: string
+          readOnly: true
+        model:
+          type: string
+          readOnly: true
+        year:
+          type: integer
+          readOnly: true
+        fuel_type:
+          type: string
+          readOnly: true
+        engine_size:
+          type: string
+          readOnly: true
+          description: e.g., 2.0L, 1500cc
+        vehicle_name:
+          type: string
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - created_at
+      - engine_size
+      - fuel_type
+      - id
+      - manufacturer
+      - model
+      - user_email
+      - user_name
+      - vehicle_name
+      - year
+    AppleOAuthRequest:
+      type: object
+      properties:
+        id_token:
+          type: string
+          minLength: 1
+        user: {}
+      required:
+      - id_token
+    ChatMessage:
+      type: object
+      description: Serializer for chat messages
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        user_message:
+          type: string
+          readOnly: true
+        ai_response:
+          type: string
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - ai_response
+      - created_at
+      - id
+      - user_message
+    ChatRequestRequest:
+      type: object
+      description: Serializer for creating chat message
+      properties:
+        session_id:
+          type: string
+          minLength: 1
+        message:
+          type: string
+          minLength: 1
+      required:
+      - message
+      - session_id
+    CreateContactSupport:
+      type: object
+      properties:
+        subject:
+          type: string
+          description: Short title of your issue
+          maxLength: 255
+        email:
+          type: string
+          format: email
+          description: Write your email
+          maxLength: 254
+        message:
+          type: string
+          description: Please explain what happened...
+      required:
+      - email
+      - message
+      - subject
+    CreateContactSupportRequest:
+      type: object
+      properties:
+        subject:
+          type: string
+          minLength: 1
+          description: Short title of your issue
+          maxLength: 255
+        email:
+          type: string
+          format: email
+          minLength: 1
+          description: Write your email
+          maxLength: 254
+        message:
+          type: string
+          minLength: 1
+          description: Please explain what happened...
+      required:
+      - email
+      - message
+      - subject
+    DeviceTypeEnum:
+      enum:
+      - ios
+      - android
+      type: string
+      description: |-
+        * `ios` - iOS
+        * `android` - Android
+    DiagnosticRequest:
+      type: object
+      description: Serializer for diagnostic request with response
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        vehicle:
+          type: string
+          format: uuid
+        vehicle_name:
+          type: string
+          readOnly: true
+        session_id:
+          type: string
+          readOnly: true
+          description: Session ID from AI diagnostic service
+        diagnostic_codes:
+          description: OBD-II codes (e.g., ["P0300", "P0171"])
+        symptoms:
+          description: User-described symptoms
+        tier:
+          allOf:
+          - $ref: '#/components/schemas/Tier8a9Enum'
+          readOnly: true
+          description: |-
+            Tier used for this diagnosis (free or full)
+
+            * `free` - Free
+            * `full` - Full
+        tier_display:
+          type: string
+          readOnly: true
+        is_unlocked:
+          type: boolean
+          readOnly: true
+          description: True if user paid to unlock this specific session
+        has_full_access:
+          type: boolean
+          readOnly: true
+        response:
+          allOf:
+          - $ref: '#/components/schemas/DiagnosticResponse'
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - created_at
+      - diagnostic_codes
+      - has_full_access
+      - id
+      - is_unlocked
+      - response
+      - session_id
+      - symptoms
+      - tier
+      - tier_display
+      - vehicle
+      - vehicle_name
+    DiagnosticRequestCreateRequest:
+      type: object
+      description: |-
+        Serializer for creating diagnostic request
+        User provides: vehicle, codes, symptoms
+      properties:
+        vehicle:
+          type: string
+          format: uuid
+          description: Vehicle ID
+        diagnostic_codes:
+          type: array
+          items:
+            type: string
+            minLength: 1
+            maxLength: 20
+          description: List of OBD-II codes
+          minItems: 1
+        symptoms:
+          type: string
+          minLength: 5
+          description: Description of symptoms
+      required:
+      - diagnostic_codes
+      - symptoms
+      - vehicle
+    DiagnosticRequestList:
+      type: object
+      description: Simplified serializer for diagnostic list
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        vehicle:
+          type: string
+          format: uuid
+        vehicle_name:
+          type: string
+          readOnly: true
+        session_id:
+          type: string
+          description: Session ID from AI diagnostic service
+          maxLength: 255
+        diagnostic_codes:
+          description: OBD-II codes (e.g., ["P0300", "P0171"])
+        tier:
+          allOf:
+          - $ref: '#/components/schemas/Tier8a9Enum'
+          description: |-
+            Tier used for this diagnosis (free or full)
+
+            * `free` - Free
+            * `full` - Full
+        tier_display:
+          type: string
+          readOnly: true
+        is_unlocked:
+          type: boolean
+          description: True if user paid to unlock this specific session
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - created_at
+      - diagnostic_codes
+      - id
+      - session_id
+      - tier_display
+      - vehicle
+      - vehicle_name
+    DiagnosticResponse:
+      type: object
+      description: Serializer for diagnostic response
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        response:
+          readOnly: true
+          description: Complete AI response stored as JSON
+        tier:
+          type: string
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - created_at
+      - id
+      - response
+      - tier
+    FAQ:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        question:
+          type: string
+          maxLength: 500
+        answer:
+          type: string
+      required:
+      - answer
+      - id
+      - question
+    FAQList:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        question:
+          type: string
+          readOnly: true
+        answer:
+          type: string
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - answer
+      - created_at
+      - id
+      - question
+      - updated_at
+    FAQRequest:
+      type: object
+      properties:
+        question:
+          type: string
+          minLength: 1
+          maxLength: 500
+        answer:
+          type: string
+          minLength: 1
+      required:
+      - answer
+      - question
+    FCMTokenDeleteRequest:
+      type: object
+      properties:
+        token:
+          type: string
+          minLength: 1
+      required:
+      - token
+    FCMTokenRequest:
+      type: object
+      properties:
+        token:
+          type: string
+          minLength: 1
+          maxLength: 255
+        device_type:
+          $ref: '#/components/schemas/DeviceTypeEnum'
+        device_name:
+          type: string
+          maxLength: 100
+      required:
+      - device_type
+      - token
+    GoogleOAuthRequest:
+      type: object
+      properties:
+        id_token:
+          type: string
+          minLength: 1
+      required:
+      - id_token
+    InitiatePasswordReset:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+      required:
+      - email
+    InitiatePasswordResetRequest:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+          minLength: 1
+      required:
+      - email
+    InitiateRegistration:
+      type: object
+      properties:
+        full_name:
+          type: string
+          maxLength: 40
+        email:
+          type: string
+          format: email
+      required:
+      - email
+      - full_name
+    InitiateRegistrationRequest:
+      type: object
+      properties:
+        full_name:
+          type: string
+          minLength: 1
+          maxLength: 40
+        email:
+          type: string
+          format: email
+          minLength: 1
+        password:
+          type: string
+          writeOnly: true
+          minLength: 8
+        confirm_password:
+          type: string
+          writeOnly: true
+          minLength: 8
+      required:
+      - confirm_password
+      - email
+      - full_name
+      - password
+    ListContactSupport:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        user:
+          type: string
+          format: uuid
+          readOnly: true
+        user_details:
+          allOf:
+          - $ref: '#/components/schemas/User'
+          readOnly: true
+        subject:
+          type: string
+          readOnly: true
+          description: Short title of your issue
+        email:
+          type: string
+          format: email
+          readOnly: true
+          description: Write your email
+        message:
+          type: string
+          readOnly: true
+          description: Please explain what happened...
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - created_at
+      - email
+      - id
+      - message
+      - subject
+      - user
+      - user_details
+    ManualMaintenanceTask:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        vehicle:
+          type: string
+          format: uuid
+        vehicle_details:
+          allOf:
+          - $ref: '#/components/schemas/VehicleList'
+          readOnly: true
+        service_type:
+          type: string
+          description: e.g., Oil Change, Tire Rotation, Brake Inspection
+          maxLength: 255
+        mileage:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: 0
+          format: int64
+        notes:
+          type: string
+          nullable: true
+        next_due_date:
+          type: string
+          format: date
+        is_completed:
+          type: boolean
+        status:
+          type: string
+          readOnly: true
+        days_until_due:
+          type: integer
+          readOnly: true
+        is_overdue:
+          type: boolean
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+        completed_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+      required:
+      - completed_at
+      - created_at
+      - days_until_due
+      - id
+      - is_overdue
+      - mileage
+      - next_due_date
+      - service_type
+      - status
+      - updated_at
+      - vehicle
+      - vehicle_details
+    ManualMaintenanceTaskCreate:
+      type: object
+      properties:
+        vehicle:
+          type: string
+          format: uuid
+        service_type:
+          type: string
+          description: e.g., Oil Change, Tire Rotation, Brake Inspection
+          maxLength: 255
+        mileage:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: 0
+          format: int64
+        notes:
+          type: string
+          nullable: true
+        next_due_date:
+          type: string
+          format: date
+      required:
+      - mileage
+      - next_due_date
+      - service_type
+      - vehicle
+    ManualMaintenanceTaskCreateRequest:
+      type: object
+      properties:
+        vehicle:
+          type: string
+          format: uuid
+        service_type:
+          type: string
+          minLength: 1
+          description: e.g., Oil Change, Tire Rotation, Brake Inspection
+          maxLength: 255
+        mileage:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: 0
+          format: int64
+        notes:
+          type: string
+          nullable: true
+        next_due_date:
+          type: string
+          format: date
+      required:
+      - mileage
+      - next_due_date
+      - service_type
+      - vehicle
+    ManualMaintenanceTaskList:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        vehicle:
+          type: string
+          format: uuid
+        vehicle_name:
+          type: string
+          readOnly: true
+        service_type:
+          type: string
+          description: e.g., Oil Change, Tire Rotation, Brake Inspection
+          maxLength: 255
+        mileage:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: 0
+          format: int64
+        next_due_date:
+          type: string
+          format: date
+        is_completed:
+          type: boolean
+        status:
+          type: string
+          readOnly: true
+        days_until_due:
+          type: integer
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - created_at
+      - days_until_due
+      - id
+      - mileage
+      - next_due_date
+      - service_type
+      - status
+      - vehicle
+      - vehicle_name
+    ManualMaintenanceTaskUpdate:
+      type: object
+      properties:
+        service_type:
+          type: string
+          description: e.g., Oil Change, Tire Rotation, Brake Inspection
+          maxLength: 255
+        mileage:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: 0
+          format: int64
+        notes:
+          type: string
+          nullable: true
+        next_due_date:
+          type: string
+          format: date
+      required:
+      - mileage
+      - next_due_date
+      - service_type
+    ManualMaintenanceTaskUpdateRequest:
+      type: object
+      properties:
+        service_type:
+          type: string
+          minLength: 1
+          description: e.g., Oil Change, Tire Rotation, Brake Inspection
+          maxLength: 255
+        mileage:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: 0
+          format: int64
+        notes:
+          type: string
+          nullable: true
+        next_due_date:
+          type: string
+          format: date
+      required:
+      - mileage
+      - next_due_date
+      - service_type
+    MarkTaskCompleted:
+      type: object
+      properties:
+        is_completed:
+          type: boolean
+          description: Set to true to mark as completed, false to mark as incomplete
+      required:
+      - is_completed
+    MonthlyUserCount:
+      type: object
+      properties:
+        month:
+          type: integer
+        month_name:
+          type: string
+        count:
+          type: integer
+      required:
+      - count
+      - month
+      - month_name
+    Notification:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        notification_type:
+          allOf:
+          - $ref: '#/components/schemas/NotificationTypeEnum'
+          readOnly: true
+        title:
+          type: string
+          readOnly: true
+        body:
+          type: string
+          readOnly: true
+        data:
+          readOnly: true
+        priority:
+          allOf:
+          - $ref: '#/components/schemas/PriorityEnum'
+          readOnly: true
+        is_read:
+          type: boolean
+          readOnly: true
+        read_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - body
+      - created_at
+      - data
+      - id
+      - is_read
+      - notification_type
+      - priority
+      - read_at
+      - title
+    NotificationTypeEnum:
+      enum:
+      - welcome
+      - pass_updated
+      - pass_changed
+      - vehicle_registered
+      - maintenance_added
+      - maintenance_completed
+      - maintenance_due
+      - diagnostic_saved
+      - subs_purchased
+      - subs_expiring
+      - subs_expired
+      - app_update
+      - new_user
+      - milestone_achieved
+      - support_request
+      type: string
+      description: |-
+        * `welcome` - Welcome
+        * `pass_updated` - Password Updated
+        * `pass_changed` - Password Changed
+        * `vehicle_registered` - Vehicle Registered
+        * `maintenance_added` - Maintenance Added
+        * `maintenance_completed` - Maintenance Completed
+        * `maintenance_due` - Maintenance Due
+        * `diagnostic_saved` - Diagnostic Report Saved
+        * `subs_purchased` - Subscription Purchased
+        * `subs_expiring` - Subscription Expiring
+        * `subs_expired` - Subscription Expired
+        * `app_update` - App Update Available
+        * `new_user` - New User Joined
+        * `milestone_achieved` - Milestone Achieved
+        * `support_request` - Support Request
+    PaginatedAdminVehicleListList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/AdminVehicleList'
+    PaginatedDiagnosticRequestList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/DiagnosticRequest'
+    PaginatedDiagnosticRequestListList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/DiagnosticRequestList'
+    PaginatedFAQList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/FAQ'
+    PaginatedFAQListList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/FAQList'
+    PaginatedListContactSupportList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/ListContactSupport'
+    PaginatedManualMaintenanceTaskListList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/ManualMaintenanceTaskList'
+    PaginatedNotificationList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Notification'
+    PaginatedPurchaseHistoryList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/PurchaseHistory'
+    PaginatedSubscriptionList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Subscription'
+    PaginatedUnlockedSessionList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/UnlockedSession'
+    PaginatedUserList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/User'
+    PaginatedVehicleListList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/VehicleList'
+    PatchedAboutUsRequest:
+      type: object
+      properties:
+        content:
+          type: string
+          minLength: 1
+    PatchedAdminProfileRequest:
+      type: object
+      properties:
+        full_name:
+          type: string
+          minLength: 1
+          maxLength: 40
+        phone:
+          type: string
+          nullable: true
+          title: Phone Number
+          maxLength: 128
+        profile_picture:
+          type: string
+          format: binary
+          nullable: true
+    PatchedFAQRequest:
+      type: object
+      properties:
+        question:
+          type: string
+          minLength: 1
+          maxLength: 500
+        answer:
+          type: string
+          minLength: 1
+    PatchedManualMaintenanceTaskUpdateRequest:
+      type: object
+      properties:
+        service_type:
+          type: string
+          minLength: 1
+          description: e.g., Oil Change, Tire Rotation, Brake Inspection
+          maxLength: 255
+        mileage:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: 0
+          format: int64
+        notes:
+          type: string
+          nullable: true
+        next_due_date:
+          type: string
+          format: date
+    PatchedMarkTaskCompletedRequest:
+      type: object
+      properties:
+        is_completed:
+          type: boolean
+          description: Set to true to mark as completed, false to mark as incomplete
+    PatchedPrivacyPolicyRequest:
+      type: object
+      properties:
+        content:
+          type: string
+          minLength: 1
+    PatchedTermsAndConditionsRequest:
+      type: object
+      properties:
+        content:
+          type: string
+          minLength: 1
+    PatchedUserApprovalRequest:
+      type: object
+      properties:
+        is_active:
+          type: boolean
+    PatchedUserProfileRequest:
+      type: object
+      properties:
+        full_name:
+          type: string
+          minLength: 1
+          maxLength: 40
+        profile_picture:
+          type: string
+          format: binary
+          nullable: true
+        phone:
+          type: string
+          nullable: true
+          title: Phone Number
+          maxLength: 128
+    PatchedVehicleUpdateRequest:
+      type: object
+      properties:
+        manufacturer:
+          type: string
+          minLength: 1
+          maxLength: 100
+        model:
+          type: string
+          minLength: 1
+          maxLength: 100
+        year:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: 0
+          format: int64
+        fuel_type:
+          type: string
+          minLength: 1
+          maxLength: 50
+        engine_size:
+          type: string
+          minLength: 1
+          description: e.g., 2.0L, 1500cc
+          maxLength: 50
+        diagnostic_codes:
+          nullable: true
+          description: Store OBD-II diagnostic codes
+    PaymentStatusEnum:
+      enum:
+      - pending
+      - verified
+      - failed
+      - refunded
+      type: string
+      description: |-
+        * `pending` - Pending
+        * `verified` - Verified
+        * `failed` - Failed
+        * `refunded` - Refunded
+    PlatformEnum:
+      enum:
+      - ios
+      - android
+      type: string
+      description: |-
+        * `ios` - iOS
+        * `android` - Android
+    PriorityEnum:
+      enum:
+      - low
+      - normal
+      - high
+      - urgent
+      type: string
+      description: |-
+        * `low` - Low
+        * `normal` - Normal
+        * `high` - High
+        * `urgent` - Urgent
+    PrivacyPolicy:
+      type: object
+      properties:
+        content:
+          type: string
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - content
+      - updated_at
+    ProductTypeEnum:
+      enum:
+      - monthly
+      - yearly
+      - unlock_report
+      type: string
+      description: |-
+        * `monthly` - Monthly Subscription
+        * `yearly` - Yearly Subscription
+        * `unlock_report` - One-Time Report Unlock
+    ProviderEnum:
+      enum:
+      - self
+      - google
+      - apple
+      type: string
+      description: |-
+        * `self` - Self
+        * `google` - Google
+        * `apple` - Apple
+    PurchaseHistory:
+      type: object
+      description: Serializer for purchase history
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        product_type:
+          allOf:
+          - $ref: '#/components/schemas/ProductTypeEnum'
+          readOnly: true
+        product_type_display:
+          type: string
+          readOnly: true
+        product_id:
+          type: string
+          readOnly: true
+        platform:
+          allOf:
+          - $ref: '#/components/schemas/PlatformEnum'
+          readOnly: true
+        transaction_id:
+          type: string
+          readOnly: true
+        amount:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+          readOnly: true
+          nullable: true
+          description: Amount in USD (for analytics only)
+        status:
+          allOf:
+          - $ref: '#/components/schemas/Status9a2Enum'
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - amount
+      - created_at
+      - id
+      - platform
+      - product_id
+      - product_type
+      - product_type_display
+      - status
+      - transaction_id
+    PurchaseVerificationRequest:
+      type: object
+      description: |-
+        Serializer for purchase verification request
+        Used for BOTH subscriptions and one-time unlocks
+      properties:
+        platform:
+          $ref: '#/components/schemas/PlatformEnum'
+        product_id:
+          type: string
+          minLength: 1
+          description: Product ID from store (e.g., com.yourapp.monthly)
+          maxLength: 255
+        transaction_id:
+          type: string
+          minLength: 1
+          maxLength: 255
+        receipt_data:
+          type: string
+          description: Base64 encoded receipt (iOS only)
+        purchase_token:
+          type: string
+          description: Purchase token (Android only)
+        order_id:
+          type: string
+          description: Order ID (Android only)
+        session_id:
+          type: string
+          description: AI session ID (for unlock_report only)
+      required:
+      - platform
+      - product_id
+      - transaction_id
+    ReanalysisRequestRequest:
+      type: object
+      description: Serializer for reanalysis request
+      properties:
+        session_id:
+          type: string
+          minLength: 1
+        narrowing_answers:
+          type: string
+          minLength: 5
+      required:
+      - narrowing_answers
+      - session_id
+    ResetPassword:
+      type: object
+      properties:
+        reset_token:
+          type: string
+      required:
+      - reset_token
+    ResetPasswordRequest:
+      type: object
+      properties:
+        reset_token:
+          type: string
+          minLength: 1
+        new_password:
+          type: string
+          writeOnly: true
+          minLength: 8
+        confirm_new_password:
+          type: string
+          writeOnly: true
+          minLength: 8
+      required:
+      - confirm_new_password
+      - new_password
+      - reset_token
+    Status9a2Enum:
+      enum:
+      - pending
+      - verified
+      - failed
+      - refunded
+      type: string
+      description: |-
+        * `pending` - Pending
+        * `verified` - Verified
+        * `failed` - Failed
+        * `refunded` - Refunded
+    Subscription:
+      type: object
+      description: Serializer for subscription details
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        product_type:
+          allOf:
+          - $ref: '#/components/schemas/ProductTypeEnum'
+          readOnly: true
+        product_type_display:
+          type: string
+          readOnly: true
+        product_id:
+          type: string
+          readOnly: true
+          description: Product ID from App Store/Play Console (e.g., com.yourapp.monthly)
+        platform:
+          allOf:
+          - $ref: '#/components/schemas/PlatformEnum'
+          readOnly: true
+        platform_display:
+          type: string
+          readOnly: true
+        start_date:
+          type: string
+          format: date-time
+          readOnly: true
+        end_date:
+          type: string
+          format: date-time
+          readOnly: true
+        status:
+          allOf:
+          - $ref: '#/components/schemas/SubscriptionStatusEnum'
+          readOnly: true
+        status_display:
+          type: string
+          readOnly: true
+        payment_status:
+          allOf:
+          - $ref: '#/components/schemas/PaymentStatusEnum'
+          readOnly: true
+        is_active:
+          type: boolean
+          readOnly: true
+        days_remaining:
+          type: integer
+          readOnly: true
+        auto_renew:
+          type: boolean
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - auto_renew
+      - created_at
+      - days_remaining
+      - end_date
+      - id
+      - is_active
+      - payment_status
+      - platform
+      - platform_display
+      - product_id
+      - product_type
+      - product_type_display
+      - start_date
+      - status
+      - status_display
+    SubscriptionStatusEnum:
+      enum:
+      - active
+      - expired
+      - cancelled
+      - pending
+      type: string
+      description: |-
+        * `active` - Active
+        * `expired` - Expired
+        * `cancelled` - Cancelled
+        * `pending` - Pending Verification
+    TermsAndConditions:
+      type: object
+      properties:
+        content:
+          type: string
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - content
+      - updated_at
+    TextReportRequestRequest:
+      type: object
+      description: Serializer for text report request
+      properties:
+        session_id:
+          type: string
+          minLength: 1
+      required:
+      - session_id
+    Tier8a9Enum:
+      enum:
+      - free
+      - full
+      type: string
+      description: |-
+        * `free` - Free
+        * `full` - Full
+    TierF35Enum:
+      enum:
+      - free
+      - premium
+      type: string
+      description: |-
+        * `free` - Free
+        * `premium` - Premium
+    TokenRefresh:
+      type: object
+      properties:
+        access:
+          type: string
+          readOnly: true
+        refresh:
+          type: string
+      required:
+      - access
+      - refresh
+    TokenRefreshRequest:
+      type: object
+      properties:
+        refresh:
+          type: string
+          minLength: 1
+      required:
+      - refresh
+    TotalUsersCountResponse:
+      type: object
+      properties:
+        total_users:
+          type: integer
+      required:
+      - total_users
+    UnlockedSession:
+      type: object
+      description: Serializer for unlocked session details
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        session_id:
+          type: string
+          readOnly: true
+          description: Session ID from AI diagnostic service
+        platform:
+          allOf:
+          - $ref: '#/components/schemas/PlatformEnum'
+          readOnly: true
+        payment_status:
+          allOf:
+          - $ref: '#/components/schemas/PaymentStatusEnum'
+          readOnly: true
+        is_unlocked:
+          type: boolean
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - created_at
+      - id
+      - is_unlocked
+      - payment_status
+      - platform
+      - session_id
+    User:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        full_name:
+          type: string
+          maxLength: 40
+        email:
+          type: string
+          format: email
+          readOnly: true
+        phone:
+          type: string
+          nullable: true
+          title: Phone Number
+          maxLength: 128
+        profile_picture:
+          type: string
+          format: uri
+          nullable: true
+        is_active:
+          type: boolean
+          readOnly: true
+        tier:
+          allOf:
+          - $ref: '#/components/schemas/TierF35Enum'
+          readOnly: true
+        provider:
+          allOf:
+          - $ref: '#/components/schemas/ProviderEnum'
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - created_at
+      - email
+      - full_name
+      - id
+      - is_active
+      - provider
+      - tier
+      - updated_at
+    UserApproval:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        full_name:
+          type: string
+          readOnly: true
+        email:
+          type: string
+          format: email
+          readOnly: true
+        profile_picture:
+          type: string
+          format: uri
+          readOnly: true
+          nullable: true
+        phone:
+          type: string
+          readOnly: true
+          nullable: true
+          title: Phone Number
+        is_active:
+          type: boolean
+        tier:
+          allOf:
+          - $ref: '#/components/schemas/TierF35Enum'
+          readOnly: true
+        provider:
+          allOf:
+          - $ref: '#/components/schemas/ProviderEnum'
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - created_at
+      - email
+      - full_name
+      - id
+      - phone
+      - profile_picture
+      - provider
+      - tier
+      - updated_at
+    UserApprovalRequest:
+      type: object
+      properties:
+        is_active:
+          type: boolean
+    UserLogin:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+      required:
+      - email
+    UserLoginRequest:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+          minLength: 1
+        password:
+          type: string
+          writeOnly: true
+          minLength: 1
+      required:
+      - email
+      - password
+    UserProfile:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        full_name:
+          type: string
+          maxLength: 40
+        email:
+          type: string
+          format: email
+          readOnly: true
+        profile_picture:
+          type: string
+          format: uri
+          nullable: true
+        is_active:
+          type: boolean
+          readOnly: true
+        tier:
+          allOf:
+          - $ref: '#/components/schemas/TierF35Enum'
+          readOnly: true
+        phone:
+          type: string
+          nullable: true
+          title: Phone Number
+          maxLength: 128
+        provider:
+          allOf:
+          - $ref: '#/components/schemas/ProviderEnum'
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+        settings:
+          allOf:
+          - $ref: '#/components/schemas/UserSettings'
+          readOnly: true
+      required:
+      - created_at
+      - email
+      - full_name
+      - id
+      - is_active
+      - provider
+      - settings
+      - tier
+      - updated_at
+    UserProfileRequest:
+      type: object
+      properties:
+        full_name:
+          type: string
+          minLength: 1
+          maxLength: 40
+        profile_picture:
+          type: string
+          format: binary
+          nullable: true
+        phone:
+          type: string
+          nullable: true
+          title: Phone Number
+          maxLength: 128
+      required:
+      - full_name
+    UserSettings:
+      type: object
+      properties:
+        notification_enabled:
+          type: boolean
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - updated_at
+    UserSettingsRequest:
+      type: object
+      properties:
+        notification_enabled:
+          type: boolean
+    UserTierInfo:
+      type: object
+      description: Serializer for user tier information
+      properties:
+        tier:
+          type: string
+        is_premium:
+          type: boolean
+        premium_expires_at:
+          type: string
+          format: date-time
+          nullable: true
+        vehicle_limit:
+          type: integer
+        can_add_vehicle:
+          type: boolean
+        active_subscription:
+          allOf:
+          - $ref: '#/components/schemas/Subscription'
+          nullable: true
+      required:
+      - active_subscription
+      - can_add_vehicle
+      - is_premium
+      - premium_expires_at
+      - tier
+      - vehicle_limit
+    Vehicle:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        manufacturer:
+          type: string
+          maxLength: 100
+        model:
+          type: string
+          maxLength: 100
+        year:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: 0
+          format: int64
+        fuel_type:
+          type: string
+          maxLength: 50
+        engine_size:
+          type: string
+          description: e.g., 2.0L, 1500cc
+          maxLength: 50
+        diagnostic_codes:
+          nullable: true
+          description: Store OBD-II diagnostic codes
+        vehicle_name:
+          type: string
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - created_at
+      - engine_size
+      - fuel_type
+      - id
+      - manufacturer
+      - model
+      - updated_at
+      - vehicle_name
+      - year
+    VehicleCreate:
+      type: object
+      properties:
+        manufacturer:
+          type: string
+          maxLength: 100
+        model:
+          type: string
+          maxLength: 100
+        year:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: 0
+          format: int64
+        fuel_type:
+          type: string
+          maxLength: 50
+        engine_size:
+          type: string
+          description: e.g., 2.0L, 1500cc
+          maxLength: 50
+        diagnostic_codes:
+          nullable: true
+          description: Store OBD-II diagnostic codes
+      required:
+      - engine_size
+      - fuel_type
+      - manufacturer
+      - model
+      - year
+    VehicleCreateRequest:
+      type: object
+      properties:
+        manufacturer:
+          type: string
+          minLength: 1
+          maxLength: 100
+        model:
+          type: string
+          minLength: 1
+          maxLength: 100
+        year:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: 0
+          format: int64
+        fuel_type:
+          type: string
+          minLength: 1
+          maxLength: 50
+        engine_size:
+          type: string
+          minLength: 1
+          description: e.g., 2.0L, 1500cc
+          maxLength: 50
+        vin_number:
+          type: string
+          writeOnly: true
+          minLength: 10
+          maxLength: 30
+        diagnostic_codes:
+          nullable: true
+          description: Store OBD-II diagnostic codes
+      required:
+      - engine_size
+      - fuel_type
+      - manufacturer
+      - model
+      - vin_number
+      - year
+    VehicleList:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        manufacturer:
+          type: string
+          maxLength: 100
+        model:
+          type: string
+          maxLength: 100
+        year:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: 0
+          format: int64
+        fuel_type:
+          type: string
+          maxLength: 50
+        engine_size:
+          type: string
+          description: e.g., 2.0L, 1500cc
+          maxLength: 50
+        vehicle_name:
+          type: string
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - created_at
+      - engine_size
+      - fuel_type
+      - id
+      - manufacturer
+      - model
+      - vehicle_name
+      - year
+    VehicleUpdate:
+      type: object
+      properties:
+        manufacturer:
+          type: string
+          maxLength: 100
+        model:
+          type: string
+          maxLength: 100
+        year:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: 0
+          format: int64
+        fuel_type:
+          type: string
+          maxLength: 50
+        engine_size:
+          type: string
+          description: e.g., 2.0L, 1500cc
+          maxLength: 50
+        diagnostic_codes:
+          nullable: true
+          description: Store OBD-II diagnostic codes
+      required:
+      - engine_size
+      - fuel_type
+      - manufacturer
+      - model
+      - year
+    VehicleUpdateRequest:
+      type: object
+      properties:
+        manufacturer:
+          type: string
+          minLength: 1
+          maxLength: 100
+        model:
+          type: string
+          minLength: 1
+          maxLength: 100
+        year:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: 0
+          format: int64
+        fuel_type:
+          type: string
+          minLength: 1
+          maxLength: 50
+        engine_size:
+          type: string
+          minLength: 1
+          description: e.g., 2.0L, 1500cc
+          maxLength: 50
+        diagnostic_codes:
+          nullable: true
+          description: Store OBD-II diagnostic codes
+      required:
+      - engine_size
+      - fuel_type
+      - manufacturer
+      - model
+      - year
+    VerifyPasswordResetOTP:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+        otp:
+          type: string
+          maxLength: 6
+          minLength: 6
+      required:
+      - email
+      - otp
+    VerifyPasswordResetOTPRequest:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+          minLength: 1
+        otp:
+          type: string
+          minLength: 6
+          maxLength: 6
+      required:
+      - email
+      - otp
+    VerifyRegistrationOTP:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+        otp:
+          type: string
+          maxLength: 6
+          minLength: 6
+      required:
+      - email
+      - otp
+    VerifyRegistrationOTPRequest:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+          minLength: 1
+        otp:
+          type: string
+          minLength: 6
+          maxLength: 6
+      required:
+      - email
+      - otp
+    YearlyUserGrowth:
+      type: object
+      properties:
+        year:
+          type: integer
+        total_users:
+          type: integer
+        monthly_counts:
+          type: array
+          items:
+            $ref: '#/components/schemas/MonthlyUserCount'
+      required:
+      - monthly_counts
+      - total_users
+      - year
+  securitySchemes:
+    jwtAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT

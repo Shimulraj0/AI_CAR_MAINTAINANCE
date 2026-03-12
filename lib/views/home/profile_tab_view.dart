@@ -86,35 +86,37 @@ class ProfileTabView extends GetView<HomeController> {
       ),
       child: Row(
         children: [
-          Container(
+          Obx(() => Container(
             width: 56,
             height: 56,
-            decoration: const BoxDecoration(
+            decoration: BoxDecoration(
               shape: BoxShape.circle,
               image: DecorationImage(
-                image: AssetImage('assets/images/profile.png'),
+                image: controller.userProfileImage.value.isNotEmpty
+                    ? NetworkImage(controller.userProfileImage.value)
+                    : const AssetImage('assets/images/profile.png') as ImageProvider,
                 fit: BoxFit.cover,
               ),
             ),
-          ),
+          )),
           const SizedBox(width: 16),
-          const Expanded(
-            child: Column(
+          Expanded(
+            child: Obx(() => Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Alex Johnson',
-                  style: TextStyle(
+                  controller.userName.value.isNotEmpty ? controller.userName.value : 'Loading...',
+                  style: const TextStyle(
                     color: Color(0xFF1A1D23),
                     fontSize: 18,
                     fontFamily: 'Archivo',
                     fontWeight: FontWeight.w600,
                   ),
                 ),
-                SizedBox(height: 4),
+                const SizedBox(height: 4),
                 Text(
-                  'alex.johnson@email.com',
-                  style: TextStyle(
+                  controller.userEmail.value.isNotEmpty ? controller.userEmail.value : 'Loading...',
+                  style: const TextStyle(
                     color: Color(0xFF6B7280),
                     fontSize: 14,
                     fontFamily: 'Inter',
@@ -122,7 +124,7 @@ class ProfileTabView extends GetView<HomeController> {
                   ),
                 ),
               ],
-            ),
+            )),
           ),
         ],
       ),

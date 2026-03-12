@@ -127,7 +127,9 @@ class EditProfileView extends GetView<EditProfileController> {
                     image: controller.pickedImagePath.value.isNotEmpty
                         ? FileImage(File(controller.pickedImagePath.value))
                               as ImageProvider
-                        : const AssetImage('assets/images/profile.png'),
+                        : controller.currentImageUrl.value.isNotEmpty
+                            ? NetworkImage(controller.currentImageUrl.value) as ImageProvider
+                            : const AssetImage('assets/images/profile.png') as ImageProvider,
                     fit: BoxFit.cover,
                   ),
                 ),

@@ -1,7 +1,5 @@
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
-import '../../routes/app_routes.dart';
 
 class AnalyzingView extends StatefulWidget {
   const AnalyzingView({super.key});
@@ -14,9 +12,6 @@ class _AnalyzingViewState extends State<AnalyzingView> {
   @override
   void initState() {
     super.initState();
-    Future.delayed(const Duration(seconds: 3), () {
-      Get.offNamed(Routes.diagnosticResult);
-    });
   }
 
   @override

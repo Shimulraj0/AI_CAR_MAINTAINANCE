@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
 import '../routes/app_routes.dart';
 import '../services/api_service.dart';
@@ -33,7 +34,7 @@ class VerifyEmailController extends GetxController {
                 isLoading.value = false;
                 if (response.statusCode == 200) {
                   Get.snackbar('Success', 'Email verified successfully!');
-                  Get.offAllNamed(Routes.home);
+                  Get.offAllNamed(Routes.vehicleRegistration);
                 } else {
                   Get.snackbar(
                     'Verification Failed',
@@ -64,8 +65,8 @@ class VerifyEmailController extends GetxController {
             .listen(
               (response) {
                 isLoading.value = false;
-                print('VerifyPasswordReset API Status Code: ${response.statusCode}');
-                print('VerifyPasswordReset API Response Body: ${response.body}');
+                debugPrint('VerifyPasswordReset API Status Code: ${response.statusCode}');
+                debugPrint('VerifyPasswordReset API Response Body: ${response.body}');
                 
                 if (response.statusCode == 200) {
                   // The API might return the token in different keys
@@ -84,7 +85,7 @@ class VerifyEmailController extends GetxController {
                     token = responseData;
                   }
                                
-                  print('Password Reset token extracted: $token');
+                  debugPrint('Password Reset token extracted: $token');
                   
                   if (token != null) {
                     apiService.saveResetToken(token.toString());

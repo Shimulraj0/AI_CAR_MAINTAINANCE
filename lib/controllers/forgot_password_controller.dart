@@ -54,8 +54,8 @@ class ForgotPasswordController extends GetxController {
                   'email': emailController.text.trim(),
                 });
               } else {
-                print('ForgotPassword API Error Status Code: ${response.statusCode}');
-                print('ForgotPassword API Error Body: ${response.body}');
+                debugPrint('ForgotPassword API Error Status Code: ${response.statusCode}');
+                debugPrint('ForgotPassword API Error Body: ${response.body}');
                 Get.snackbar(
                   'Failed',
                   response.body?['message'] ?? response.body?['detail'] ??

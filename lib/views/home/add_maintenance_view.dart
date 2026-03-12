@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import '../../controllers/add_maintenance_controller.dart';
 import '../../controllers/home_controller.dart';
+import '../../controllers/add_maintenance_controller.dart';
 import '../../widgets/custom_bottom_nav_bar.dart';
 import '../../routes/app_routes.dart';
 
@@ -72,11 +72,14 @@ class AddMaintenanceView extends GetView<AddMaintenanceController> {
               SizedBox(
                 width: double.infinity,
                 child: Obx(() => ElevatedButton(
-                  onPressed: controller.isLoading.value ? null : controller.saveServiceRecord,
+                  onPressed: (!controller.isLoading.value && controller.isValid.value) 
+                      ? controller.saveServiceRecord
+                      : null,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(
-                      0xFF8FB1D6,
-                    ), // Disabled looking blue from design
+                    backgroundColor: controller.isValid.value 
+                        ? const Color(0xFF2B63A8) // Active color
+                        : const Color(0xFF8FB1D6), // Disabled looking blue from design
+                    disabledBackgroundColor: const Color(0xFF8FB1D6),
                     padding: const EdgeInsets.symmetric(vertical: 16),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),

@@ -3,6 +3,7 @@ import '../views/home/home_view.dart';
 import '../views/home/analyzing_view.dart';
 import '../views/home/diagnostic_result_view.dart';
 import '../views/home/save_reports_view.dart';
+import '../controllers/save_reports_controller.dart';
 import '../views/home/ai_chat_view.dart';
 import '../views/home/task_details_view.dart';
 import '../views/home/add_maintenance_view.dart';
@@ -14,6 +15,7 @@ import '../views/auth/login/login_view.dart';
 import '../views/home/subscription_view.dart';
 import '../views/home/edit_profile_view.dart';
 import '../views/home/my_vehicles_view.dart';
+import '../controllers/my_vehicles_controller.dart';
 import '../views/home/add_vehicles_view.dart';
 import '../controllers/login_controller.dart';
 import '../views/auth/signup/signup_view.dart';
@@ -134,7 +136,13 @@ class AppPages {
         );
       }),
     ),
-    GetPage(name: Routes.saveReports, page: () => const SaveReportsView()),
+    GetPage(
+      name: Routes.saveReports,
+      page: () => const SaveReportsView(),
+      binding: BindingsBuilder(() {
+        Get.lazyPut<SaveReportsController>(() => SaveReportsController());
+      }),
+    ),
     GetPage(name: Routes.aiChat, page: () => const AiChatView()),
     GetPage(name: Routes.taskDetails, page: () => const TaskDetailsView()),
     GetPage(
@@ -146,7 +154,13 @@ class AppPages {
     ),
     GetPage(name: Routes.subscription, page: () => const SubscriptionView()),
     GetPage(name: Routes.editProfile, page: () => const EditProfileView()),
-    GetPage(name: Routes.myVehicles, page: () => const MyVehiclesView()),
+    GetPage(
+      name: Routes.myVehicles, 
+      page: () => const MyVehiclesView(),
+      binding: BindingsBuilder(() {
+        Get.lazyPut<MyVehiclesController>(() => MyVehiclesController());
+      }),
+    ),
     GetPage(name: Routes.addVehicles, page: () => const AddVehiclesView()),
     GetPage(
       name: Routes.notifications,

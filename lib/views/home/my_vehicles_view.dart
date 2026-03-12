@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../controllers/home_controller.dart';
+import '../../controllers/my_vehicles_controller.dart';
 import '../../routes/app_routes.dart';
 import '../../widgets/custom_bottom_nav_bar.dart';
 
-class MyVehiclesView extends GetView<HomeController> {
+class MyVehiclesView extends GetView<MyVehiclesController> {
   const MyVehiclesView({super.key});
 
   @override
@@ -55,25 +56,57 @@ class MyVehiclesView extends GetView<HomeController> {
           ),
         ),
       ),
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 26, vertical: 24),
-          child: Column(
-            children: [
-              _buildActiveVehicleCard(),
-              const SizedBox(height: 16),
-              _buildSecondaryVehicleCard(),
-              const SizedBox(height: 32),
-              _buildAddVehicleButton(),
-              const SizedBox(height: 100), // Space for bottom nav
-            ],
+      body: Obx(() {
+        if (controller.isLoading.value) {
+          return const Center(
+            child: CircularProgressIndicator(color: Color(0xFF2F5EA8)),
+          );
+        }
+
+        return SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 26, vertical: 24),
+            child: Column(
+              children: [
+                if (controller.vehicles.isEmpty) ...[
+                  const Padding(
+                    padding: EdgeInsets.symmetric(vertical: 40),
+                    child: Text(
+                      'No vehicles registered yet.',
+                      style: TextStyle(
+                        color: Color(0xFF6B7280),
+                        fontSize: 16,
+                        fontFamily: 'Inter',
+                      ),
+                    ),
+                  )
+                ] else ...[
+                  ...controller.vehicles.asMap().entries.map((entry) {
+                    final index = entry.key;
+                    final vehicle = entry.value;
+                    final isActive = index == 0; // Primary/first is "active"
+                    return Padding(
+                      padding: const EdgeInsets.only(bottom: 16),
+                      child: isActive
+                          ? _buildActiveVehicleCard(vehicle)
+                          : _buildSecondaryVehicleCard(vehicle),
+                    );
+                  }),
+                ],
+                const SizedBox(height: 16),
+                _buildAddVehicleButton(),
+                const SizedBox(height: 100), // Space for bottom nav
+              ],
+            ),
           ),
-        ),
-      ),
+        );
+      }),
       bottomNavigationBar: CustomBottomNavBar(
         currentIndex: 3, // Profile Tab index
         onTap: (index) {
-          controller.changeTabIndex(index);
+          if (Get.isRegistered<HomeController>()) {
+            Get.find<HomeController>().changeTabIndex(index);
+          }
           Get.offAllNamed(Routes.home);
         },
         onFabTap: () {
@@ -84,7 +117,10 @@ class MyVehiclesView extends GetView<HomeController> {
     );
   }
 
-  Widget _buildActiveVehicleCard() {
+  Widget _buildActiveVehicleCard(dynamic vehicle) {
+    final title = '${vehicle['year']} ${vehicle['manufacturer']} ${vehicle['model']}';
+    final subtitle = '${vehicle['fuel_type']} · ${vehicle['engine_size']}';
+    
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
@@ -125,9 +161,9 @@ class MyVehiclesView extends GetView<HomeController> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text(
-                        '2021 Toyota Camry',
-                        style: TextStyle(
+                      Text(
+                        title,
+                        style: const TextStyle(
                           color: Color(0xFF1A1D23),
                           fontSize: 16,
                           fontFamily: 'Archivo',
@@ -135,9 +171,9 @@ class MyVehiclesView extends GetView<HomeController> {
                         ),
                       ),
                       const SizedBox(height: 2),
-                      const Text(
-                        'Gasoline · 2.5L',
-                        style: TextStyle(
+                      Text(
+                        subtitle,
+                        style: const TextStyle(
                           color: Color(0xFF6B7280),
                           fontSize: 13,
                           fontFamily: 'Inter',
@@ -170,7 +206,12 @@ class MyVehiclesView extends GetView<HomeController> {
                     ),
                     const SizedBox(width: 8),
                     InkWell(
-                      onTap: () {},
+                      onTap: () async {
+                        final result = await Get.toNamed(Routes.addVehicles, arguments: {'vehicle': vehicle});
+                        if (result == true) {
+                          controller.fetchVehicles();
+                        }
+                      },
                       borderRadius: BorderRadius.circular(8),
                       child: Container(
                         padding: const EdgeInsets.all(6),
@@ -208,7 +249,10 @@ class MyVehiclesView extends GetView<HomeController> {
     );
   }
 
-  Widget _buildSecondaryVehicleCard() {
+  Widget _buildSecondaryVehicleCard(dynamic vehicle) {
+    final title = '${vehicle['year']} ${vehicle['manufacturer']} ${vehicle['model']}';
+    final subtitle = '${vehicle['fuel_type']} · ${vehicle['engine_size']}';
+    
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
@@ -242,9 +286,9 @@ class MyVehiclesView extends GetView<HomeController> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
-                    '2023 Honda CR-V',
-                    style: TextStyle(
+                  Text(
+                    title,
+                    style: const TextStyle(
                       color: Color(0xFF1A1D23),
                       fontSize: 16,
                       fontFamily: 'Archivo',
@@ -252,9 +296,9 @@ class MyVehiclesView extends GetView<HomeController> {
                     ),
                   ),
                   const SizedBox(height: 2),
-                  const Text(
-                    'Hybrid · 2.0L',
-                    style: TextStyle(
+                  Text(
+                    subtitle,
+                    style: const TextStyle(
                       color: Color(0xFF6B7280),
                       fontSize: 13,
                       fontFamily: 'Inter',
@@ -287,7 +331,12 @@ class MyVehiclesView extends GetView<HomeController> {
                 ),
                 const SizedBox(width: 8),
                 InkWell(
-                  onTap: () {},
+                  onTap: () async {
+                    final result = await Get.toNamed(Routes.addVehicles, arguments: {'vehicle': vehicle});
+                    if (result == true) {
+                      controller.fetchVehicles();
+                    }
+                  },
                   borderRadius: BorderRadius.circular(8),
                   child: Container(
                     padding: const EdgeInsets.all(6),

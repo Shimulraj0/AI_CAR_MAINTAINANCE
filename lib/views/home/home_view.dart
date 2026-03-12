@@ -94,9 +94,9 @@ class HomeView extends GetView<HomeController> {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                const Text(
-                                  'Welcome Back, Mugdho',
-                                  style: TextStyle(
+                                Text(
+                                  'Welcome Back, ${controller.userName.value}',
+                                  style: const TextStyle(
                                     color: Color(0xFF0F0F0F),
                                     fontSize: 20,
                                     fontFamily: 'Archivo',
@@ -108,9 +108,9 @@ class HomeView extends GetView<HomeController> {
                                   children: [
                                     const Icon(Icons.directions_car, size: 20),
                                     const SizedBox(width: 8),
-                                    const Text(
-                                      'Toyota Corolla 2020',
-                                      style: TextStyle(
+                                  Text(
+                                      controller.vehicleName.value,
+                                      style: const TextStyle(
                                         color: Color(0xFF0F0F0F),
                                         fontSize: 14,
                                         fontFamily: 'Inter',

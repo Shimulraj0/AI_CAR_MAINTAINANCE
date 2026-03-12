@@ -2,14 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../widgets/custom_bottom_nav_bar.dart';
 import '../../controllers/home_controller.dart';
+import '../../controllers/save_reports_controller.dart';
 import '../../routes/app_routes.dart';
-
 class SaveReportsView extends StatelessWidget {
   const SaveReportsView({super.key});
 
   @override
   Widget build(BuildContext context) {
     final HomeController homeController = Get.find<HomeController>();
+    // Controller is initialized via AppPages binding
+    final SaveReportsController saveReportsController = Get.find<SaveReportsController>();
 
     return Scaffold(
       backgroundColor: const Color(0xFFF8FAFC),
@@ -30,27 +32,90 @@ class SaveReportsView extends StatelessWidget {
           icon: const Icon(Icons.arrow_back, color: Colors.white),
           onPressed: () => Get.back(),
         ),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.add, color: Colors.white),
+            onPressed: () => saveReportsController.pickAndSaveReport(),
+          ),
+        ],
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 24.0),
-        child: Column(
-          children: [
-            _buildReportCard(
-              title: 'O2 Sensor Circuit Slow Re...',
-              subtitle: 'P0133 • 2023-10-15',
-              iconBgColor: const Color(0xFFFFF7ED),
-              iconColor: const Color(0xFFFF6900),
+      body: Obx(() {
+        if (saveReportsController.isLoading.value && saveReportsController.savedReports.isEmpty) {
+          return const Center(child: CircularProgressIndicator());
+        }
+
+        if (saveReportsController.savedReports.isEmpty) {
+          return Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(Icons.description_outlined, size: 64, color: Colors.grey.shade400),
+                const SizedBox(height: 16),
+                Text(
+                  'No saved reports yet',
+                  style: TextStyle(
+                    color: Colors.grey.shade600,
+                    fontSize: 16,
+                    fontFamily: 'Inter',
+                  ),
+                ),
+                const SizedBox(height: 16),
+                ElevatedButton.icon(
+                  onPressed: () => saveReportsController.pickAndSaveReport(),
+                  icon: const Icon(Icons.add),
+                  label: const Text('Add Document'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF2B63A8),
+                    foregroundColor: Colors.white,
+                  ),
+                )
+              ],
             ),
-            const SizedBox(height: 16),
-            _buildReportCard(
-              title: 'Random/Multiple Cylinder...',
-              subtitle: 'P0300 • 2023-08-22',
-              iconBgColor: const Color(0xFFFEF2F2),
-              iconColor: const Color(0xFFE7000B),
-            ),
-          ],
-        ),
-      ),
+          );
+        }
+
+        return ListView.builder(
+          padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 24.0),
+          itemCount: saveReportsController.savedReports.length,
+          itemBuilder: (context, index) {
+            final report = saveReportsController.savedReports[index];
+            final String dateFormat = "\${report.date.year}-\${report.date.month.toString().padLeft(2, '0')}-\${report.date.day.toString().padLeft(2, '0')}";
+            
+            // Alternate colors for standard look
+            final isOdd = index % 2 != 0;
+            final iconBgColor = isOdd ? const Color(0xFFFEF2F2) : const Color(0xFFFFF7ED);
+            final iconColor = isOdd ? const Color(0xFFE7000B) : const Color(0xFFFF6900);
+            final String subtitleText = '\${report.subtitle} • $dateFormat';
+
+            return Padding(
+              padding: const EdgeInsets.only(bottom: 16.0),
+              child: Dismissible(
+                key: Key(report.id),
+                direction: DismissDirection.endToStart,
+                background: Container(
+                  alignment: Alignment.centerRight,
+                  padding: const EdgeInsets.only(right: 20.0),
+                  decoration: BoxDecoration(
+                    color: Colors.red.shade400,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: const Icon(Icons.delete, color: Colors.white),
+                ),
+                onDismissed: (_) => saveReportsController.deleteReport(report),
+                child: GestureDetector(
+                  onTap: () => saveReportsController.openReport(report),
+                  child: _buildReportCard(
+                    title: report.title,
+                    subtitle: subtitleText,
+                    iconBgColor: iconBgColor,
+                    iconColor: iconColor,
+                  ),
+                ),
+              ),
+            );
+          },
+        );
+      }),
       bottomNavigationBar: CustomBottomNavBar(
         currentIndex: 3, // Assuming 3 is Profile
         onTap: (index) {

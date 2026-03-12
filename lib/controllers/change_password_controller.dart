@@ -44,9 +44,9 @@ class ChangePasswordController extends GetxController {
         apiService.confirmPasswordReset(payload).listen(
           (response) {
             isLoading.value = false;
-            print('ChangePassword API Status Code: ${response.statusCode}');
-            print('ChangePassword API Payload Submitted: $payload');
-            print('ChangePassword API Response Body: ${response.body}');
+            debugPrint('ChangePassword API Status Code: ${response.statusCode}');
+            debugPrint('ChangePassword API Payload Submitted: $payload');
+            debugPrint('ChangePassword API Response Body: ${response.body}');
             if (response.statusCode == 200) {
               Get.snackbar('Success', 'Password reset successfully');
               Get.offAllNamed(Routes.changePasswordSuccess);
