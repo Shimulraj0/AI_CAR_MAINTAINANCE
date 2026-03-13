@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import '../../routes/app_routes.dart';
 import '../../controllers/diagnostic_result_controller.dart';
 import '../../controllers/save_reports_controller.dart';
+import '../../services/api_service.dart';
 
 class DiagnosticResultView extends GetView<DiagnosticResultController> {
   const DiagnosticResultView({super.key});
@@ -55,9 +56,7 @@ class DiagnosticResultView extends GetView<DiagnosticResultController> {
         }
 
         if (controller.result.isEmpty) {
-          return const Center(
-            child: Text('No diagnostic data found'),
-          );
+          return const Center(child: Text('No diagnostic data found'));
         }
 
         return SingleChildScrollView(
@@ -77,11 +76,16 @@ class DiagnosticResultView extends GetView<DiagnosticResultController> {
                       if (isMultiPart) ...[
                         Container(
                           margin: const EdgeInsets.only(top: 8, bottom: 16),
-                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 6,
+                          ),
                           decoration: BoxDecoration(
-                            color: const Color(0xFF2B63A8).withOpacity(0.1),
+                            color: const Color(0xFF2B63A8).withValues(alpha: 0.1),
                             borderRadius: BorderRadius.circular(8),
-                            border: Border.all(color: const Color(0xFF2B63A8).withOpacity(0.2)),
+                            border: Border.all(
+                              color: const Color(0xFF2B63A8).withValues(alpha: 0.2),
+                            ),
                           ),
                           child: Text(
                             'PART ${resultIndex + 1} OF ${controller.resultsList.length}',
@@ -107,7 +111,10 @@ class DiagnosticResultView extends GetView<DiagnosticResultController> {
                               borderRadius: BorderRadius.circular(100),
                             ),
                             child: Text(
-                              result['severity_label']?.toString().toUpperCase() ?? 'MODERATE SEVERITY',
+                              result['safety_rating'] ??
+                              result['severity_label'] ??
+                              result['severity']?.toString().toUpperCase() ??
+                              'MODERATE SEVERITY',
                               style: const TextStyle(
                                 color: Colors.white,
                                 fontSize: 12,
@@ -117,13 +124,16 @@ class DiagnosticResultView extends GetView<DiagnosticResultController> {
                             ),
                           ),
                           const SizedBox(width: 12),
-                          Text(
-                            'Confidence: ' + (result['confidence'] ?? '94').toString() + '%',
-                            style: const TextStyle(
-                              color: Color(0xFF62748E),
-                              fontSize: 14,
-                              fontFamily: 'Inter',
-                              fontWeight: FontWeight.w400,
+                          Expanded(
+                            child: Text(
+                              'Confidence: ${result['confidence_level'] ?? result['confidence'] ?? '94'}%',
+                              style: const TextStyle(
+                                color: Color(0xFF62748E),
+                                fontSize: 14,
+                                fontFamily: 'Inter',
+                                fontWeight: FontWeight.w400,
+                              ),
+                              overflow: TextOverflow.ellipsis,
                             ),
                           ),
                         ],
@@ -132,7 +142,9 @@ class DiagnosticResultView extends GetView<DiagnosticResultController> {
                       Text(
                         result['title'] ?? 'Diagnostic Result',
                         style: const TextStyle(
-                          color: Color(0xFF1E293B), // Matches design's dark blue/slate
+                          color: Color(
+                            0xFF1E293B,
+                          ), // Matches design's dark blue/slate
                           fontSize: 24,
                           fontFamily: 'Archivo',
                           fontWeight: FontWeight.w700,
@@ -141,7 +153,7 @@ class DiagnosticResultView extends GetView<DiagnosticResultController> {
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        (result['primary_code'] ?? result['code'] ?? result['diagnostic_code'] ?? 'P0133').toString() + ' • ' + (result['system'] ?? result['vehicle_system'] ?? 'Vehicle System').toString(),
+                        '${result['diagnostic_codes'] is List && (result['diagnostic_codes'] as List).isNotEmpty ? (result['diagnostic_codes'] as List).join(', ') : (result['primary_code'] ?? result['code'] ?? result['diagnostic_code'] ?? 'P0133')} • ${result['system'] ?? result['vehicle_system'] ?? 'Vehicle System'}',
                         style: const TextStyle(
                           color: Color(0xFF62748E),
                           fontSize: 14,
@@ -154,8 +166,13 @@ class DiagnosticResultView extends GetView<DiagnosticResultController> {
 
                       // Vehicle Assessment Card
                       _buildAssessmentCard(
-                        assessment: result['ai_assessment'] ?? result['assessment'] ?? result['analysis'] ?? "No detailed assessment available.",
-                        symptoms: (result['reported_symptoms'] ?? result['symptoms']) as List? ?? [],
+                        assessment: result['summary'] ??
+                            result['ai_assessment'] ??
+                            result['assessment'] ??
+                            result['analysis'] ??
+                            "No detailed assessment available.",
+                        symptoms: _ensureList(
+                            result['symptoms'] ?? result['reported_symptoms']),
                       ),
 
                       const SizedBox(height: 28),
@@ -173,27 +190,54 @@ class DiagnosticResultView extends GetView<DiagnosticResultController> {
                       const SizedBox(height: 16),
 
                       // Dynamic Possible Causes
-                      ... ((result['possible_causes'] ?? result['causes'] ?? result['potential_causes'] ?? []) as List).asMap().entries.map((entry) {
-                        final causeIndex = entry.key;
-                        final cause = entry.value as Map<String, dynamic>;
-                        final globalIndex = (resultIndex * 100) + causeIndex;
-                        
-                        return Padding(
-                          padding: const EdgeInsets.only(bottom: 16),
-                          child: _buildCauseCard(
-                            index: globalIndex,
-                            title: cause['title'] ?? cause['name'] ?? 'Generic Cause',
-                            probLabel: (cause['probability'] ?? cause['likelihood'] ?? 'Possible').toString() + ' Prob.',
-                            probColor: causeIndex == 0 ? const Color(0xFFEF4444) : 
-                                       causeIndex == 1 ? const Color(0xFFF97316) : const Color(0xFFEAB308),
-                            probBgColor: causeIndex == 0 ? const Color(0xFFFEF2F2) : 
-                                        causeIndex == 1 ? const Color(0xFFFFF7ED) : const Color(0xFFFEFCE8),
-                            meaning: cause['description'] ?? cause['meaning'] ?? cause['what_this_means'] ?? '',
-                            whyMatch: cause['how_it_matches'] ?? cause['reasoning'] ?? cause['match_reason'] ?? '',
-                            action: cause['recommended_action'] ?? cause['action'] ?? cause['fix'] ?? '',
-                          ),
-                        );
-                      }),
+                      ...(_ensureList(result['likely_causes'] ??
+                                  result['possible_causes'] ??
+                                  result['causes'] ??
+                                  result['potential_causes']))
+                          .asMap()
+                          .entries
+                          .map((entry) {
+                            final causeIndex = entry.key;
+                            final cause = entry.value as Map<String, dynamic>;
+                            final int globalIndex =
+                                (resultIndex * 100 + causeIndex).toInt();
+
+                            return Padding(
+                              padding: const EdgeInsets.only(bottom: 16),
+                              child: _buildCauseCard(
+                                index: globalIndex,
+                                title:
+                                    cause['title'] ??
+                                    cause['name'] ??
+                                    'Generic Cause',
+                                probLabel:
+                                    '${cause['probability'] ?? cause['likelihood'] ?? 'Possible'} Prob.',
+                                probColor: causeIndex == 0
+                                    ? const Color(0xFFEF4444)
+                                    : causeIndex == 1
+                                    ? const Color(0xFFF97316)
+                                    : const Color(0xFFEAB308),
+                                probBgColor: causeIndex == 0
+                                    ? const Color(0xFFFEF2F2)
+                                    : causeIndex == 1
+                                    ? const Color(0xFFFFF7ED)
+                                    : const Color(0xFFFEFCE8),
+                                meaning: cause['what_it_means'] ??
+                                    cause['description'] ??
+                                    cause['meaning'] ??
+                                    '',
+                                whyMatch: cause['why_it_matches'] ??
+                                    cause['how_it_matches'] ??
+                                    cause['reasoning'] ??
+                                    cause['match_reason'] ??
+                                    '',
+                                action: cause['recommended_action'] ??
+                                    cause['action'] ??
+                                    cause['fix'] ??
+                                    '',
+                              ),
+                            );
+                          }),
 
                       const SizedBox(height: 12),
 
@@ -202,7 +246,9 @@ class DiagnosticResultView extends GetView<DiagnosticResultController> {
                         width: double.infinity,
                         padding: const EdgeInsets.all(20),
                         decoration: BoxDecoration(
-                          color: const Color(0xFFEFF6FF), // Soft light blue from design
+                          color: const Color(
+                            0xFFEFF6FF,
+                          ), // Soft light blue from design
                           borderRadius: BorderRadius.circular(12),
                         ),
                         child: Column(
@@ -218,20 +264,31 @@ class DiagnosticResultView extends GetView<DiagnosticResultController> {
                               ),
                             ),
                             const SizedBox(height: 16),
-                            ... ((result['recommended_next_steps'] ?? result['next_steps'] ?? result['recommendations'] ?? []) as List).asMap().entries.map((entry) {
-                              return Padding(
-                                padding: const EdgeInsets.only(bottom: 12),
-                                child: _buildStepRow((entry.key + 1).toString(), entry.value.toString()),
-                              );
-                            }),
+                            ...(_ensureList(result['recommended_next_steps'] ??
+                                        result['next_steps'] ??
+                                        result['recommendations']))
+                                .asMap()
+                                .entries
+                                .map((entry) {
+                                  return Padding(
+                                    padding: const EdgeInsets.only(bottom: 12),
+                                    child: _buildStepRow(
+                                      (entry.key + 1).toString(),
+                                      entry.value.toString(),
+                                    ),
+                                  );
+                                }),
                           ],
                         ),
                       ),
-                      
-                      if (resultIndex < controller.resultsList.length - 1) 
+
+                      if (resultIndex < controller.resultsList.length - 1)
                         const Padding(
                           padding: EdgeInsets.symmetric(vertical: 32),
-                          child: Divider(thickness: 2, color: Color(0xFFE2E8F0)),
+                          child: Divider(
+                            thickness: 2,
+                            color: Color(0xFFE2E8F0),
+                          ),
                         ),
                     ],
                   );
@@ -244,38 +301,75 @@ class DiagnosticResultView extends GetView<DiagnosticResultController> {
                   children: [
                     Expanded(
                       child: Obx(() {
-                        final saveReportsController = Get.isRegistered<SaveReportsController>() 
-                            ? Get.find<SaveReportsController>() 
+                        final saveReportsController =
+                            Get.isRegistered<SaveReportsController>()
+                            ? Get.find<SaveReportsController>()
                             : Get.put(SaveReportsController());
-                            
+
                         return OutlinedButton.icon(
-                          onPressed: saveReportsController.isLoading.value 
-                              ? null 
+                          onPressed: saveReportsController.isLoading.value
+                              ? null
                               : () {
                                   final result = controller.result;
-                                  final sessionId = result['session_id'] ?? result['id'] ?? result['uuid'];
-                                  
+                                  final apiService = Get.find<ApiService>();
+                                  final sessionId =
+                                      apiService.recursiveSearch(result, 'session_id') ??
+                                      apiService.recursiveSearch(result, 'id') ??
+                                      apiService.recursiveSearch(result, 'uuid');
+
+                                  debugPrint('Extracted Session ID for Export: $sessionId');
+
                                   if (sessionId != null) {
-                                    saveReportsController.exportAndSaveDiagnosticPdf(
-                                      sessionId: sessionId.toString(),
-                                      diagnosticTitle: result['title'] ?? 'Diagnostic Result',
-                                    );
+                                    saveReportsController
+                                        .exportAndSaveDiagnosticPdf(
+                                          sessionId: sessionId.toString(),
+                                          diagnosticTitle:
+                                              result['title'] ??
+                                              'Diagnostic Result',
+                                        );
                                   } else {
-                                    saveReportsController.generateAndSaveDiagnosticReport(
-                                      diagnosticTitle: result['title'] ?? 'Diagnostic Result',
-                                      severity: result['severity_label'] ?? 'MODERATE SEVERITY',
-                                      confidence: (result['confidence'] ?? '94').toString() + '%',
-                                      details: result['ai_assessment'] ?? '',
-                                      symptoms: (result['reported_symptoms'] as List? ?? []).map((e) => e.toString()).toList(),
-                                    );
+                                    saveReportsController
+                                        .generateAndSaveDiagnosticReport(
+                                          diagnosticTitle:
+                                              result['title'] ??
+                                              'Diagnostic Result',
+                                           severity: result['safety_rating'] ??
+                                               result['severity_label'] ??
+                                               result['severity']?.toString().toUpperCase() ??
+                                               'MODERATE SEVERITY',
+                                           confidence:
+                                               '${result['confidence_level'] ?? result['confidence'] ?? '94'}%',
+                                           details: result['summary'] ??
+                                               result['ai_assessment'] ??
+                                               '',
+                                           symptoms: _ensureList(
+                                                   result['symptoms'] ??
+                                                       result['reported_symptoms'])
+                                               .map((e) => e.toString())
+                                               .toList(),
+                                        );
                                   }
                                 },
-                          icon: saveReportsController.isLoading.value 
-                              ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2))
-                              : const Icon(Icons.file_download_outlined, size: 20),
-                          label: Text(
-                            saveReportsController.isLoading.value ? 'Saving...' : 'Save Report',
-                            style: const TextStyle(fontWeight: FontWeight.w600),
+                          icon: saveReportsController.isLoading.value
+                              ? const SizedBox(
+                                  width: 20,
+                                  height: 20,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                  ),
+                                )
+                              : const Icon(
+                                  Icons.file_download_outlined,
+                                  size: 20,
+                                ),
+                          label: Flexible(
+                            child: Text(
+                              saveReportsController.isLoading.value
+                                  ? 'Saving...'
+                                  : 'Save Report',
+                              style: const TextStyle(fontWeight: FontWeight.w600),
+                              overflow: TextOverflow.ellipsis,
+                            ),
                           ),
                           style: OutlinedButton.styleFrom(
                             padding: const EdgeInsets.symmetric(vertical: 14),
@@ -298,9 +392,12 @@ class DiagnosticResultView extends GetView<DiagnosticResultController> {
                           Get.toNamed(Routes.aiChat);
                         },
                         icon: const Icon(Icons.chat_bubble_outline, size: 20),
-                        label: const Text(
-                          'Live Chat Support',
-                          style: TextStyle(fontWeight: FontWeight.w600),
+                        label: const Flexible(
+                          child: Text(
+                            'Live Chat Support',
+                            style: TextStyle(fontWeight: FontWeight.w600),
+                            overflow: TextOverflow.ellipsis,
+                          ),
                         ),
                         style: ElevatedButton.styleFrom(
                           padding: const EdgeInsets.symmetric(vertical: 14),
@@ -348,7 +445,10 @@ class DiagnosticResultView extends GetView<DiagnosticResultController> {
     );
   }
 
-  Widget _buildAssessmentCard({required String assessment, required List symptoms}) {
+  Widget _buildAssessmentCard({
+    required String assessment,
+    required List symptoms,
+  }) {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(20),
@@ -419,7 +519,9 @@ class DiagnosticResultView extends GetView<DiagnosticResultController> {
             Wrap(
               spacing: 8,
               runSpacing: 8,
-              children: symptoms.map((s) => _buildSymptomChip(s.toString())).toList(),
+              children: symptoms
+                  .map((s) => _buildSymptomChip(s.toString()))
+                  .toList(),
             ),
           ],
         ],
@@ -475,19 +577,26 @@ class DiagnosticResultView extends GetView<DiagnosticResultController> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text(
-                      title,
-                      style: const TextStyle(
-                        color: Color(0xFF1E293B),
-                        fontSize: 16,
-                        fontFamily: 'Inter',
-                        fontWeight: FontWeight.w600,
+                    Expanded(
+                      child: Text(
+                        title,
+                        style: const TextStyle(
+                          color: Color(0xFF1E293B),
+                          fontSize: 16,
+                          fontFamily: 'Inter',
+                          fontWeight: FontWeight.w600,
+                        ),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
                       ),
                     ),
                     Row(
                       children: [
                         Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 4,
+                          ),
                           decoration: BoxDecoration(
                             color: probBgColor,
                             borderRadius: BorderRadius.circular(6),
@@ -504,7 +613,9 @@ class DiagnosticResultView extends GetView<DiagnosticResultController> {
                         ),
                         const SizedBox(width: 8),
                         Icon(
-                          isExpanded ? Icons.keyboard_arrow_up : Icons.keyboard_arrow_down,
+                          isExpanded
+                              ? Icons.keyboard_arrow_up
+                              : Icons.keyboard_arrow_down,
                           color: const Color(0xFF64748B),
                           size: 20,
                         ),
@@ -548,7 +659,12 @@ class DiagnosticResultView extends GetView<DiagnosticResultController> {
     });
   }
 
-  Widget _buildCauseSection(IconData icon, String title, String text, Color iconColor) {
+  Widget _buildCauseSection(
+    IconData icon,
+    String title,
+    String text,
+    Color iconColor,
+  ) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -556,13 +672,15 @@ class DiagnosticResultView extends GetView<DiagnosticResultController> {
           children: [
             Icon(icon, size: 18, color: iconColor),
             const SizedBox(width: 8),
-            Text(
-              title,
-              style: const TextStyle(
-                color: Color(0xFF1E293B),
-                fontSize: 14,
-                fontFamily: 'Inter',
-                fontWeight: FontWeight.w600,
+            Expanded(
+              child: Text(
+                title,
+                style: const TextStyle(
+                  color: Color(0xFF1E293B),
+                  fontSize: 14,
+                  fontFamily: 'Inter',
+                  fontWeight: FontWeight.w600,
+                ),
               ),
             ),
           ],
@@ -620,5 +738,11 @@ class DiagnosticResultView extends GetView<DiagnosticResultController> {
         ),
       ],
     );
+  }
+
+  List _ensureList(dynamic value) {
+    if (value == null) return [];
+    if (value is List) return value;
+    return [value];
   }
 }

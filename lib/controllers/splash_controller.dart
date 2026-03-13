@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../routes/app_routes.dart';
+import '../services/api_service.dart';
 
 class SplashController extends GetxController
     with GetSingleTickerProviderStateMixin {
@@ -12,7 +13,7 @@ class SplashController extends GetxController
     super.onInit();
     animationController = AnimationController(
       vsync: this,
-      duration: const Duration(seconds: 2),
+      duration: const Duration(seconds: 1),
     );
     animation = CurvedAnimation(
       parent: animationController,
@@ -26,7 +27,15 @@ class SplashController extends GetxController
     super.onReady();
     // Simulate loading process
     Future.delayed(const Duration(seconds: 3), () {
-      Get.offNamed(Routes.onboarding);
+      final apiService = Get.find<ApiService>();
+      final token = apiService.getToken();
+      final rememberMe = apiService.getRememberMe();
+
+      if (rememberMe && token != null && token.isNotEmpty) {
+        Get.offAllNamed(Routes.home);
+      } else {
+        Get.offNamed(Routes.onboarding);
+      }
     });
   }
 

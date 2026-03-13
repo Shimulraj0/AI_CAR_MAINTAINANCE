@@ -26,4 +26,5 @@ abstract class Routes {
   static const String termsConditions = '/terms-conditions';
   static const String faqs = '/faqs';
   static const String contactSupport = '/contact-support';
+  static const String paymentSuccess = '/payment-success';
 }

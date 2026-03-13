@@ -15,17 +15,35 @@ class DiagnosticResultController extends GetxController {
     
     List<Map<String, dynamic>> aggregatedResults = [];
     
-    void processItem(dynamic item) {
+    void processItem(dynamic item, [Map<String, dynamic>? parentData]) {
       if (item is Map<String, dynamic>) {
-        // Check for wrapping
-        if (item.containsKey('data') && item['data'] is Map<String, dynamic>) {
-          aggregatedResults.add(item['data']);
+        // Collect current data to pass down
+        Map<String, dynamic> currentData = parentData != null ? Map.from(parentData) : {};
+        item.forEach((key, value) {
+          if (key != 'response' && key != 'data' && key != 'results') {
+            currentData[key] = value;
+          }
+        });
+
+        if (item.containsKey('response')) {
+          processItem(item['response'], currentData);
+        } else if (item.containsKey('data') && item['data'] is Map<String, dynamic>) {
+          processItem(item['data'], currentData);
         } else if (item.containsKey('results') && item['results'] is List) {
           for (var r in item['results']) {
-            if (r is Map<String, dynamic>) aggregatedResults.add(r);
+            if (r is Map<String, dynamic>) {
+              Map<String, dynamic> merged = Map.from(currentData)..addAll(r);
+              aggregatedResults.add(merged);
+            }
           }
+        } else if (item.containsKey('likely_causes') || item.containsKey('causes') || item.containsKey('summary')) {
+          Map<String, dynamic> merged = Map.from(currentData)..addAll(item);
+          aggregatedResults.add(merged);
         } else {
-          aggregatedResults.add(item);
+          if (item.isNotEmpty) {
+            Map<String, dynamic> merged = Map.from(currentData)..addAll(item);
+            aggregatedResults.add(merged);
+          }
         }
       }
     }
@@ -69,7 +87,7 @@ class DiagnosticResultController extends GetxController {
       
       if (response.statusCode == 200) {
         final body = json.decode(response.body);
-        print('DIAGNOSTIC DATA RECEIVED: \$body');
+        // Data received
         
         if (body is Map<String, dynamic>) {
           _localResult.value = body;
@@ -80,11 +98,11 @@ class DiagnosticResultController extends GetxController {
           }
         }
       } else {
-        Get.snackbar('Error', 'Failed to fetch details: \${response.reasonPhrase}');
+        Get.snackbar('Error', 'Failed to fetch details: ${response.reasonPhrase}');
       }
     } catch (error) {
       isLoading.value = false;
-      Get.snackbar('Error', 'An error occurred: \$error');
+      Get.snackbar('Error', 'An error occurred: $error');
     }
   }
 

@@ -10,6 +10,8 @@ class HomeController extends GetxController {
   final currentIndex = 0.obs;
   final autoStartDiagnose = false.obs;
   final isLoadingLogout = false.obs;
+  final selectedPlanIndex = 1.obs; // 0 for Starter, 1 for Pro
+  final isProcessingPayment = false.obs;
 
   var userName = '...'.obs;
   var userEmail = '...'.obs;
@@ -114,6 +116,8 @@ class HomeController extends GetxController {
     try {
       _apiService.logout();
       await _apiService.clearToken();
+      // Explicitly ensuring rememberMe is also cleared if they logout
+      await _apiService.saveRememberMe(false);
     } catch (e) {
       Get.snackbar('Error', 'Failed to logout: \${e.toString()}');
     } finally {

@@ -75,20 +75,13 @@ class DiagnoseController extends GetxController {
       
       if (response.statusCode == 200 || response.statusCode == 201) {
         final dynamic body = json.decode(response.body);
-        print('ANALYSIS RESULT: $body');
+        // Result received
         
         diagnosticResult.value = body;
         
-        // Save session_id for PDF export if present
-        dynamic sessionId;
-        if (body is Map) {
-          sessionId = body['session_id'] ?? body['id'] ?? body['uuid'];
-        } else if (body is List && body.isNotEmpty) {
-          final first = body[0];
-          if (first is Map) {
-            sessionId = first['session_id'] ?? first['id'] ?? first['uuid'];
-          }
-        }
+        final sessionId = _apiService.recursiveSearch(body, 'session_id') ?? 
+                        _apiService.recursiveSearch(body, 'id') ?? 
+                        _apiService.recursiveSearch(body, 'uuid');
 
         if (sessionId != null) {
           await _apiService.saveSessionId(sessionId.toString());

@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:path_provider/path_provider.dart';
@@ -10,6 +11,7 @@ import 'dart:convert';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import '../services/api_service.dart';
+import '../routes/app_routes.dart';
 
 class SaveReportsController extends GetxController {
   final ApiService _apiService = Get.find<ApiService>();
@@ -76,7 +78,7 @@ class SaveReportsController extends GetxController {
         }
             
         final String fileName = result.files.single.name;
-        final String fileExt = '\${DateTime.now().millisecondsSinceEpoch}_$fileName';
+        final String fileExt = '${DateTime.now().millisecondsSinceEpoch}_$fileName';
         final String pathPart = appDocsDir.path;
         final String newPath = '$pathPart/$fileExt';
         
@@ -106,7 +108,7 @@ class SaveReportsController extends GetxController {
   Future<void> openReport(SaveReportModel report) async {
     final result = await OpenFile.open(report.filePath);
     if (result.type != ResultType.done) {
-      Get.snackbar('Error', 'Could not open file: \${result.message}');
+      Get.snackbar('Error', 'Could not open file: ${result.message}');
     }
   }
 
@@ -206,7 +208,7 @@ class SaveReportsController extends GetxController {
 
       await _saveReportsToStorage();
       Get.snackbar('Success', 'Diagnostic Report generated and saved');
-      Get.toNamed('/save-reports');
+      Get.toNamed(Routes.saveReports);
       
     } catch (e) {
       Get.snackbar('Error', 'Failed to generate diagnostic report: $e');
@@ -228,6 +230,7 @@ class SaveReportsController extends GetxController {
         final List<int> bytes = response.bodyBytes;
         
         if (bytes.isEmpty) {
+          debugPrint('PDF Export Error: Received empty bytes from server');
           Get.snackbar('Error', 'Received empty PDF data from server');
           return;
         }
@@ -259,11 +262,27 @@ class SaveReportsController extends GetxController {
 
         await _saveReportsToStorage();
         Get.snackbar('Success', 'Diagnostic Report downloaded and saved');
-        Get.toNamed('/save-reports');
+        Get.toNamed(Routes.saveReports);
       } else {
-        Get.snackbar('Error', 'Failed to export PDF: \${response.reasonPhrase}');
+        debugPrint('PDF Export Error Status: ${response.statusCode}');
+        debugPrint('PDF Export Error Body: ${response.body}');
+        
+        String errorDetail = '';
+        try {
+          final errorBody = response.body;
+          if (errorBody.isNotEmpty) {
+            final decoded = json.decode(errorBody);
+            errorDetail = ': ${decoded['error'] ?? decoded['message'] ?? errorBody}';
+          }
+        } catch (_) {
+          errorDetail = ': ${response.reasonPhrase}';
+        }
+        
+        Get.snackbar('Error', 'Failed to export PDF$errorDetail');
       }
-    } catch (e) {
+    } catch (e, stack) {
+      debugPrint('PDF Export Exception: $e');
+      debugPrint('PDF Export StackTrace: $stack');
       Get.snackbar('Error', 'An unexpected error occurred: $e');
     } finally {
       isLoading.value = false;

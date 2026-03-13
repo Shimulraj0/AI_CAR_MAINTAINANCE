@@ -26,6 +26,7 @@ import '../views/auth/verify_email/verify_email_view.dart';
 import '../controllers/verify_email_controller.dart';
 import '../views/auth/change_password/change_password_view.dart';
 import '../views/auth/change_password/password_reset_success_view.dart';
+import '../views/home/payment_success_view.dart';
 import '../controllers/change_password_controller.dart';
 import '../views/vehicle_registration/vehicle_registration_view.dart';
 import '../controllers/vehicle_registration_controller.dart';
@@ -152,7 +153,7 @@ class AppPages {
         Get.lazyPut<AddMaintenanceController>(() => AddMaintenanceController());
       }),
     ),
-    GetPage(name: Routes.subscription, page: () => const SubscriptionView()),
+    GetPage(name: Routes.subscription, page: () => SubscriptionView()),
     GetPage(name: Routes.editProfile, page: () => const EditProfileView()),
     GetPage(
       name: Routes.myVehicles, 
@@ -205,6 +206,14 @@ class AppPages {
       binding: BindingsBuilder(() {
         Get.lazyPut<ContactSupportController>(() => ContactSupportController());
       }),
+    ),
+    GetPage(
+      name: Routes.paymentSuccess,
+      page: () => PaymentSuccessView(
+        revealOffset: Get.arguments is Map ? (Get.arguments as Map)['revealOffset'] : null,
+      ),
+      transition: Transition.circularReveal,
+      transitionDuration: const Duration(milliseconds: 800),
     ),
   ];
 }

@@ -117,36 +117,40 @@ class LoginView extends GetView<LoginController> {
                             Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
-                                Row(
-                                  children: [
-                                    Obx(
-                                      () => SizedBox(
-                                        width: 24,
-                                        height: 24,
-                                        child: Checkbox(
-                                          value: controller.rememberMe.value,
-                                          onChanged: (val) =>
-                                              controller.toggleRememberMe(),
-                                          activeColor: Colors.black,
-                                          checkColor: Colors.white,
-                                          shape: RoundedRectangleBorder(
-                                            borderRadius: BorderRadius.circular(
-                                              4,
+                                Flexible(
+                                  child: Row(
+                                    children: [
+                                      Obx(
+                                        () => SizedBox(
+                                          width: 24,
+                                          height: 24,
+                                          child: Checkbox(
+                                            value: controller.rememberMe.value,
+                                            onChanged: (val) =>
+                                                controller.toggleRememberMe(),
+                                            activeColor: Colors.black,
+                                            checkColor: Colors.white,
+                                            shape: RoundedRectangleBorder(
+                                              borderRadius:
+                                                  BorderRadius.circular(4),
                                             ),
                                           ),
                                         ),
                                       ),
-                                    ),
-                                    const SizedBox(width: 8),
-                                    const Text(
-                                      'Remember me',
-                                      style: TextStyle(
-                                        color: Color(0xFF0F0F0F),
-                                        fontSize: 14,
-                                        fontFamily: 'Inter',
+                                      const SizedBox(width: 8),
+                                      const Flexible(
+                                        child: Text(
+                                          'Remember me',
+                                          style: TextStyle(
+                                            color: Color(0xFF0F0F0F),
+                                            fontSize: 14,
+                                            fontFamily: 'Inter',
+                                          ),
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
                                       ),
-                                    ),
-                                  ],
+                                    ],
+                                  ),
                                 ),
                                 TextButton(
                                   onPressed:

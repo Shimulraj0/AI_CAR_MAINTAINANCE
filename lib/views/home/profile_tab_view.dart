@@ -4,6 +4,9 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 import '../../controllers/home_controller.dart';
 import '../../routes/app_routes.dart';
+import 'package:animations/animations.dart';
+import 'subscription_view.dart'; // Import the view directly for OpenContainer
+
 
 class ProfileTabView extends GetView<HomeController> {
   const ProfileTabView({super.key});
@@ -132,63 +135,73 @@ class ProfileTabView extends GetView<HomeController> {
   }
 
   Widget _buildSubscriptionCard() {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: const Color(0xFFEDF2F9),
+    return OpenContainer(
+      transitionType: ContainerTransitionType.fadeThrough,
+      openBuilder: (context, _) => SubscriptionView(),
+      closedElevation: 0,
+      closedShape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: const Color(0x192F5EA8), width: 0.8),
       ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          const Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Current Plan',
-                style: TextStyle(
-                  color: Color(0xFF2F5EA8),
-                  fontSize: 12,
-                  fontFamily: 'Inter',
-                  fontWeight: FontWeight.w500,
+      closedColor: const Color(0xFFEDF2F9),
+      closedBuilder: (context, openContainer) {
+        return InkWell(
+          onTap: openContainer,
+          child: Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: const Color(0xFFEDF2F9),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: const Color(0x192F5EA8), width: 0.8),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Current Plan',
+                      style: TextStyle(
+                        color: Color(0xFF2F5EA8),
+                        fontSize: 12,
+                        fontFamily: 'Inter',
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                    SizedBox(height: 4),
+                    Text(
+                      'Pro Plan',
+                      style: TextStyle(
+                        color: Color(0xFF2F5EA8),
+                        fontSize: 18,
+                        fontFamily: 'Archivo',
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ],
                 ),
-              ),
-              SizedBox(height: 4),
-              Text(
-                'Pro Plan',
-                style: TextStyle(
-                  color: Color(0xFF2F5EA8),
-                  fontSize: 18,
-                  fontFamily: 'Archivo',
-                  fontWeight: FontWeight.w600,
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF2F5EA8),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: const Text(
+                    'Manage',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 13,
+                      fontFamily: 'Inter',
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
                 ),
-              ),
-            ],
-          ),
-          InkWell(
-            onTap: () => Get.toNamed(Routes.subscription),
-            borderRadius: BorderRadius.circular(8),
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              decoration: BoxDecoration(
-                color: const Color(0xFF2F5EA8),
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: const Text(
-                'Manage',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 13,
-                  fontFamily: 'Inter',
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
+              ],
             ),
           ),
-        ],
-      ),
+        );
+      },
     );
   }
 

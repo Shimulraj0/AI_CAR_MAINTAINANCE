@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../routes/app_routes.dart';
 import '../services/api_service.dart';
+import '../widgets/custom_glass_toast.dart';
 
 class LoginController extends GetxController {
   final GlobalKey<FormState> loginFormKey = GlobalKey<FormState>();
@@ -12,6 +13,14 @@ class LoginController extends GetxController {
   var rememberMe = false.obs;
 
   var isLoading = false.obs;
+  
+  final ApiService _apiService = Get.find<ApiService>();
+
+  @override
+  void onInit() {
+    super.onInit();
+    rememberMe.value = _apiService.getRememberMe();
+  }
 
   @override
   void onClose() {
@@ -30,7 +39,7 @@ class LoginController extends GetxController {
 
   void login() {
     if (loginFormKey.currentState!.validate()) {
-      final apiService = Get.find<ApiService>();
+      final apiService = _apiService;
 
       final payload = {
         'email': emailController.text.trim(),
@@ -70,6 +79,9 @@ class LoginController extends GetxController {
                   apiService.saveResetToken(resetToken.toString());
                 }
                 
+                // Save Remember Me status
+                apiService.saveRememberMe(rememberMe.value);
+                
                 // Fetch vehicles to decide routing
                 apiService.getVehicles().listen((vehResponse) {
                   if (vehResponse.statusCode == 200) {
@@ -96,19 +108,37 @@ class LoginController extends GetxController {
                 });
                 
               } else {
-                Get.snackbar(
-                  'Login Failed',
-                  response.body?['message'] ??
-                      response.body?['detail'] ??
-                      'Invalid credentials',
-                  snackPosition: SnackPosition.BOTTOM,
-                );
+                var rawMessage = response.body?['message'] ??
+                    response.body?['detail'] ??
+                    'Invalid credentials';
+
+                String message = (rawMessage is List && rawMessage.isNotEmpty)
+                    ? rawMessage.first.toString()
+                    : rawMessage.toString();
+
+                if (message.toLowerCase().contains('inactive')) {
+                  CustomGlassToast.showInactiveUser();
+                } else if (message.toLowerCase().contains('disabled')) {
+                  CustomGlassToast.show(
+                    title: 'Account Disabled',
+                    message: 'User is disabled',
+                    icon: Icons.block_flipped,
+                  );
+                } else {
+                  CustomGlassToast.show(
+                    title: 'Login Failed',
+                    message: message,
+                  );
+                }
               }
             },
             onError: (error) {
               isLoading.value = false;
               debugPrint('Login API Error: $error');
-              Get.snackbar('Error', 'An unexpected error occurred: $error');
+              CustomGlassToast.show(
+                title: 'Error',
+                message: 'An unexpected error occurred',
+              );
             },
           );
     }
@@ -150,15 +180,18 @@ class LoginController extends GetxController {
                   Get.offAllNamed(Routes.vehicleRegistration);
               });
             } else {
-              Get.snackbar(
-                'Google Login Failed',
-                'Request failed: ${response.statusCode}',
+              CustomGlassToast.show(
+                title: 'Google Login Failed',
+                message: 'Request failed: ${response.statusCode}',
               );
             }
           },
           onError: (error) {
             isLoading.value = false;
-            Get.snackbar('Error', 'An unexpected error occurred: $error');
+            CustomGlassToast.show(
+              title: 'Error',
+              message: 'An unexpected error occurred',
+            );
           },
         );
   }
@@ -199,15 +232,18 @@ class LoginController extends GetxController {
                   Get.offAllNamed(Routes.vehicleRegistration);
               });
             } else {
-              Get.snackbar(
-                'Apple Login Failed',
-                'Request failed: ${response.statusCode}',
+              CustomGlassToast.show(
+                title: 'Apple Login Failed',
+                message: 'Request failed: ${response.statusCode}',
               );
             }
           },
           onError: (error) {
             isLoading.value = false;
-            Get.snackbar('Error', 'An unexpected error occurred: $error');
+            CustomGlassToast.show(
+              title: 'Error',
+              message: 'An unexpected error occurred',
+            );
           },
         );
   }

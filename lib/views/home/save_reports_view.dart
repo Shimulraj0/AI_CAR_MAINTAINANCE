@@ -79,13 +79,13 @@ class SaveReportsView extends StatelessWidget {
           itemCount: saveReportsController.savedReports.length,
           itemBuilder: (context, index) {
             final report = saveReportsController.savedReports[index];
-            final String dateFormat = "\${report.date.year}-\${report.date.month.toString().padLeft(2, '0')}-\${report.date.day.toString().padLeft(2, '0')}";
+            final String dateFormat = "${report.date.year}-${report.date.month.toString().padLeft(2, '0')}-${report.date.day.toString().padLeft(2, '0')}";
             
             // Alternate colors for standard look
             final isOdd = index % 2 != 0;
             final iconBgColor = isOdd ? const Color(0xFFFEF2F2) : const Color(0xFFFFF7ED);
             final iconColor = isOdd ? const Color(0xFFE7000B) : const Color(0xFFFF6900);
-            final String subtitleText = '\${report.subtitle} • $dateFormat';
+            final String subtitleText = '${report.subtitle} • $dateFormat';
 
             return Padding(
               padding: const EdgeInsets.only(bottom: 16.0),

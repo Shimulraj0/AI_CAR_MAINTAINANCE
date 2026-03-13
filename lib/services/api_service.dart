@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -14,6 +15,7 @@ class ApiService extends GetConnect {
   String? _resetToken;
   String? _csrfToken;
   String? _sessionId;
+  late final String apiBaseUrl;
 
   // Expose stream for listeners
   Stream<bool> get isLoadingStream => _isLoadingSubject.stream;
@@ -24,7 +26,26 @@ class ApiService extends GetConnect {
     _resetToken = prefs.getString('reset_token');
     _csrfToken = prefs.getString('csrf_token') ?? 'JzRi4cSVcW79ODedGqUV7PoqbctoDGR3';
     _sessionId = prefs.getString('last_session_id');
+    _rememberMe = prefs.getBool('remember_me') ?? false;
+
+    // Base URL for API requests
+    apiBaseUrl = 'http://10.10.7.120:8000';
+    baseUrl = apiBaseUrl;
+    httpClient.baseUrl = apiBaseUrl;
+    httpClient.timeout = const Duration(seconds: 30);
+    httpClient.defaultContentType = 'application/json';
+
     return this;
+  }
+
+  bool _rememberMe = false;
+
+  bool getRememberMe() => _rememberMe;
+
+  Future<void> saveRememberMe(bool value) async {
+    _rememberMe = value;
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('remember_me', value);
   }
 
   String? getToken() => _token;
@@ -72,19 +93,12 @@ class ApiService extends GetConnect {
     await prefs.remove('reset_token');
     await prefs.remove('csrf_token');
     await prefs.remove('last_session_id');
+    await prefs.remove('remember_me');
+    _rememberMe = false;
   }
 
   @override
   void onInit() {
-    // Base URL for API requests
-    httpClient.baseUrl = 'http://10.10.7.120:8000';
-
-    // Default timeouts
-    httpClient.timeout = const Duration(seconds: 30);
-
-    // Default content type
-    httpClient.defaultContentType = 'application/json';
-
     // Request modifier (Interceptors)
     httpClient.addRequestModifier<dynamic>((request) {
       // Only set application/json if the body is not FormData
@@ -114,6 +128,23 @@ class ApiService extends GetConnect {
       }
       return response;
     });
+  }
+
+  /// Recursively searches for a key in a nested Map or List structure.
+  dynamic recursiveSearch(dynamic data, String key) {
+    if (data is Map) {
+      if (data.containsKey(key)) return data[key];
+      for (var value in data.values) {
+        final result = recursiveSearch(value, key);
+        if (result != null) return result;
+      }
+    } else if (data is List) {
+      for (var item in data) {
+        final result = recursiveSearch(item, key);
+        if (result != null) return result;
+      }
+    }
+    return null;
   }
 
   // --- REGISTRATION API ---
@@ -203,13 +234,16 @@ class ApiService extends GetConnect {
     if (token != null) headers['Authorization'] = 'Bearer $token';
 
     String? csrf = getCsrfToken();
-    if (csrf != null) headers['Cookie'] = 'csrftoken=$csrf';
+    if (csrf != null) {
+      headers['Cookie'] = 'csrftoken=$csrf';
+      headers['X-CSRFToken'] = csrf;
+    }
 
     return headers;
   }
 
   Future<http.Response> createDiagnostic(Map<String, dynamic> payload) async {
-    final url = Uri.parse('${httpClient.baseUrl}/api/diagnostics/');
+    final url = Uri.parse('$apiBaseUrl/api/diagnostics/');
     final headers = await _getHeaders();
     
     _isLoadingSubject.add(true);
@@ -221,17 +255,30 @@ class ApiService extends GetConnect {
       );
       
       if (response.statusCode == 200 || response.statusCode == 201) {
-        print('DIAGNOSTIC CREATED: ${response.body}');
+        final body = json.decode(response.body);
+        final sessionId = recursiveSearch(body, 'session_id') ?? 
+                        recursiveSearch(body, 'id') ?? 
+                        recursiveSearch(body, 'uuid');
+
+        if (sessionId != null) {
+          await saveSessionId(sessionId.toString());
+        }
+      } else {
+        debugPrint('Create Diagnostic Error Status: ${response.statusCode}');
+        debugPrint('Create Diagnostic Error Body: ${response.body}');
       }
       
       return response;
+    } catch (e) {
+      debugPrint('Create Diagnostic Exception: $e');
+      rethrow;
     } finally {
       _isLoadingSubject.add(false);
     }
   }
 
   Future<http.Response> getDiagnosticDetails(String id) async {
-    final url = Uri.parse('\${httpClient.baseUrl}/api/diagnostics/\$id/');
+    final url = Uri.parse('$apiBaseUrl/api/diagnostics/$id/');
     final headers = await _getHeaders();
     
     _isLoadingSubject.add(true);
@@ -240,25 +287,45 @@ class ApiService extends GetConnect {
         url,
         headers: headers,
       );
+      
+      if (response.statusCode != 200) {
+        debugPrint('Get Diagnostic Details Error Status: ${response.statusCode}');
+        debugPrint('Get Diagnostic Details Error Body: ${response.body}');
+      }
+      
       return response;
+    } catch (e) {
+      debugPrint('Get Diagnostic Details Exception: $e');
+      rethrow;
     } finally {
       _isLoadingSubject.add(false);
     }
   }
 
   // Updated to return raw bytes using http package for reliability with binary data
+  // Updated to match working snippet exactly
   Future<http.Response> exportDiagnosticPdf(String sessionId) async {
-    final url = Uri.parse('\${httpClient.baseUrl}/api/diagnostics/export/pdf/');
+    final url = Uri.parse('$apiBaseUrl/api/diagnostics/export/pdf/');
     final headers = await _getHeaders();
     
     _isLoadingSubject.add(true);
     try {
+      // Using http.post directly with encoded body as in user's working snippet
       final response = await http.post(
         url,
         headers: headers,
         body: json.encode({'session_id': sessionId}),
       );
+      
+      if (response.statusCode != 200) {
+        debugPrint('Export PDF Error Status: ${response.statusCode}');
+        debugPrint('Export PDF Error Body: ${response.body}');
+      }
+      
       return response;
+    } catch (e) {
+      debugPrint('Export PDF Exception: $e');
+      rethrow;
     } finally {
       _isLoadingSubject.add(false);
     }
