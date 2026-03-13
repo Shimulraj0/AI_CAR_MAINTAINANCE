@@ -1,4 +1,3 @@
-import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -38,10 +37,13 @@ class CustomGlassToast {
           padding: const EdgeInsets.all(10),
           margin: const EdgeInsets.only(left: 8),
           decoration: BoxDecoration(
-            color: (isError ? Colors.red : const Color(0xFF2B63A8)).withValues(alpha: 0.2),
+            color: (isError ? Colors.red : const Color(0xFF2B63A8)).withValues(
+              alpha: 0.2,
+            ),
             shape: BoxShape.circle,
             border: Border.all(
-              color: (isError ? Colors.red : const Color(0xFF2B63A8)).withValues(alpha: 0.3),
+              color: (isError ? Colors.red : const Color(0xFF2B63A8))
+                  .withValues(alpha: 0.3),
               width: 1,
             ),
           ),
@@ -78,7 +80,8 @@ class CustomGlassToast {
   static void showInactiveUser() {
     show(
       title: 'User Inactive',
-      message: 'Your account is currently inactive. Please contact support for assistance.',
+      message:
+          'Your account is currently inactive. Please contact support for assistance.',
       icon: Icons.person_off_outlined,
       iconColor: const Color(0xFFFFD700), // Gold/Amber for status
       isError: true,
