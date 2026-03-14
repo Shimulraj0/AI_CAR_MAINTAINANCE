@@ -26,15 +26,32 @@ class VerifyEmailController extends GetxController {
       isLoading.value = true;
 
       if (isSignUp) {
-        final payload = {'code': code}; // Assuming signup verify still uses 'code'
+        if (email == null || email.isEmpty) {
+          isLoading.value = false;
+          Get.snackbar('Error', 'Missing email address for verification');
+          return;
+        }
+
+        final payload = {
+          'email': email,
+          'otp': code,
+        };
+
+        debugPrint('--- Registration Verification Payload ---');
+        debugPrint('Email: $email');
+        debugPrint('OTP: $code');
+
         apiService
             .verifyRegistration(payload)
             .listen(
               (response) {
                 isLoading.value = false;
-                if (response.statusCode == 200) {
+                debugPrint('Registration Verify API Status Code: ${response.statusCode}');
+                debugPrint('Registration Verify API Response Body: ${response.body}');
+
+                if (response.statusCode == 200 || response.statusCode == 201) {
                   Get.snackbar('Success', 'Email verified successfully!');
-                  Get.offAllNamed(Routes.vehicleRegistration);
+                  Get.offAllNamed(Routes.login);
                 } else {
                   Get.snackbar(
                     'Verification Failed',

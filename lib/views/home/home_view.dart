@@ -307,12 +307,7 @@ class HomeView extends GetView<HomeController> {
                                             height: 36,
                                             child: OutlinedButton(
                                               onPressed: () {
-                                                Get.snackbar(
-                                                  'Schedule Service',
-                                                  'Redirecting to service scheduling...',
-                                                  snackPosition:
-                                                      SnackPosition.BOTTOM,
-                                                );
+                                                Get.toNamed(Routes.addMaintenance);
                                               },
                                               style: OutlinedButton.styleFrom(
                                                 side: const BorderSide(

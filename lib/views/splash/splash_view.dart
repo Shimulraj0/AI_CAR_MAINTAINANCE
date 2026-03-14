@@ -27,9 +27,9 @@ class SplashView extends GetView<SplashController> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   FadeTransition(
-                    opacity: controller.animation,
+                    opacity: controller.opacityAnimation,
                     child: ScaleTransition(
-                      scale: controller.animation,
+                      scale: controller.scaleAnimation,
                       child: Container(
                         width: 216,
                         height: 180,

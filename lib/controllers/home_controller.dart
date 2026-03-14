@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
 
@@ -21,14 +22,39 @@ class HomeController extends GetxController {
   var activeVehicleId = ''.obs;
   final RxList<Map<String, dynamic>> userVehicles = <Map<String, dynamic>>[].obs;
 
+  // Maintenance Stats
+  var upcomingCount = 0.obs;
+  var overdueCount = 0.obs;
+  var completedCount = 0.obs;
+
+  // Maintenance Tasks
+  final RxList<dynamic> upcomingTasks = <dynamic>[].obs;
+  final RxList<dynamic> overdueTasks = <dynamic>[].obs;
+  final RxList<dynamic> completedTasks = <dynamic>[].obs;
+
+  var upcomingPage = 1;
+  var overduePage = 1;
+  var completedPage = 1;
+
+  var upcomingHasNext = true.obs;
+  var overdueHasNext = true.obs;
+  var completedHasNext = true.obs;
+
+  var upcomingIsLoading = false.obs;
+  var overdueIsLoading = false.obs;
+  var completedIsLoading = false.obs;
+
   @override
   void onInit() {
     super.onInit();
     fetchUserProfile();
     fetchUserVehicles();
+    fetchMaintenanceStats();
+    fetchAllMaintenanceTasks();
   }
 
   void fetchUserProfile() {
+    // ... Implementation unchanged for clarity ...
     _apiService.getProfile().listen(
       (response) {
         if (response.statusCode == 200) {
@@ -57,6 +83,93 @@ class HomeController extends GetxController {
         debugPrint('Failed to load profile in HomeController: $error');
       },
     );
+  }
+
+  void fetchMaintenanceStats() async {
+    try {
+      final response = await _apiService.getMaintenanceStats();
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        
+        // Parse the stats based on assumed standard API output
+        upcomingCount.value = data['upcoming'] ?? 0;
+        overdueCount.value = data['overdue'] ?? 0;
+        completedCount.value = data['completed'] ?? 0;
+      }
+    } catch (e) {
+      debugPrint('Error fetching maintenance stats: $e');
+    }
+  }
+
+  void fetchAllMaintenanceTasks() {
+    upcomingPage = 1;
+    overduePage = 1;
+    completedPage = 1;
+    
+    upcomingHasNext.value = true;
+    overdueHasNext.value = true;
+    completedHasNext.value = true;
+
+    _fetchTasksForStatus('upcoming', upcomingTasks, upcomingPage, upcomingHasNext, upcomingIsLoading);
+    _fetchTasksForStatus('overdue', overdueTasks, overduePage, overdueHasNext, overdueIsLoading);
+    _fetchTasksForStatus('completed', completedTasks, completedPage, completedHasNext, completedIsLoading);
+  }
+
+  void nextMaintenanceTasksPage(String status) {
+    if (status == 'upcoming' && upcomingHasNext.value && !upcomingIsLoading.value) {
+      upcomingPage++;
+      _fetchTasksForStatus('upcoming', upcomingTasks, upcomingPage, upcomingHasNext, upcomingIsLoading);
+    } else if (status == 'overdue' && overdueHasNext.value && !overdueIsLoading.value) {
+      overduePage++;
+      _fetchTasksForStatus('overdue', overdueTasks, overduePage, overdueHasNext, overdueIsLoading);
+    } else if (status == 'completed' && completedHasNext.value && !completedIsLoading.value) {
+      completedPage++;
+      _fetchTasksForStatus('completed', completedTasks, completedPage, completedHasNext, completedIsLoading);
+    }
+  }
+
+  void previousMaintenanceTasksPage(String status) {
+    if (status == 'upcoming' && upcomingPage > 1 && !upcomingIsLoading.value) {
+      upcomingPage--;
+      _fetchTasksForStatus('upcoming', upcomingTasks, upcomingPage, upcomingHasNext, upcomingIsLoading);
+    } else if (status == 'overdue' && overduePage > 1 && !overdueIsLoading.value) {
+      overduePage--;
+      _fetchTasksForStatus('overdue', overdueTasks, overduePage, overdueHasNext, overdueIsLoading);
+    } else if (status == 'completed' && completedPage > 1 && !completedIsLoading.value) {
+      completedPage--;
+      _fetchTasksForStatus('completed', completedTasks, completedPage, completedHasNext, completedIsLoading);
+    }
+  }
+
+  void _fetchTasksForStatus(
+    String status, 
+    RxList<dynamic> targetList, 
+    int page, 
+    RxBool hasNextVal, 
+    RxBool isLoadingVal, 
+  ) async {
+    isLoadingVal.value = true;
+    try {
+      final response = await _apiService.getMaintenanceTasks(status, page: page);
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        
+        List<dynamic> newTasks = [];
+        if (data != null && data['results'] != null) {
+          newTasks = data['results'];
+          hasNextVal.value = data['next'] != null; // DRF standard pagination
+        } else if (data is List) {
+          newTasks = data;
+          hasNextVal.value = false; // No envelope, assume all loaded
+        }
+        
+        targetList.assignAll(newTasks);
+      }
+    } catch (e) {
+      debugPrint('Error fetching $status maintenance tasks on page $page: $e');
+    } finally {
+      isLoadingVal.value = false;
+    }
   }
 
   void fetchUserVehicles() {

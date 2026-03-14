@@ -5,6 +5,7 @@ import 'routes/app_pages.dart';
 import 'services/api_service.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
+
 import 'services/push_notification_service.dart';
 
 void main() async {

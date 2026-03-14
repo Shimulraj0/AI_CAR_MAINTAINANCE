@@ -13,7 +13,7 @@ class LoginController extends GetxController {
   var rememberMe = false.obs;
 
   var isLoading = false.obs;
-  
+
   final ApiService _apiService = Get.find<ApiService>();
 
   @override
@@ -46,6 +46,10 @@ class LoginController extends GetxController {
         'password': passwordController.text,
       };
 
+      debugPrint('--- Login Payload ---');
+      debugPrint('Email: ${payload['email']}');
+      debugPrint('Password: ${payload['password']}');
+
       isLoading.value = true;
 
       apiService
@@ -56,18 +60,20 @@ class LoginController extends GetxController {
               debugPrint('Login API Status Code: ${response.statusCode}');
               debugPrint('Login API Response Body: ${response.body}');
 
-              if (response.statusCode == 200) {
+              if (response.statusCode == 200 || response.statusCode == 201) {
                 final responseData = response.body;
-                
+
                 String? token;
                 String? resetToken;
                 if (responseData is Map<String, dynamic>) {
-                  if (responseData.containsKey('tokens') && responseData['tokens'] is Map<String, dynamic>) {
-                     token = responseData['tokens']['access'];
-                     resetToken = responseData['tokens']['refresh'];
+                  if (responseData.containsKey('tokens') &&
+                      responseData['tokens'] is Map<String, dynamic>) {
+                    token = responseData['tokens']['access'];
+                    resetToken = responseData['tokens']['refresh'];
                   }
                   token ??= responseData['access'] ?? responseData['token'];
-                  resetToken ??= responseData['refresh'] ?? responseData['reset_token'];
+                  resetToken ??=
+                      responseData['refresh'] ?? responseData['reset_token'];
                 }
 
                 debugPrint('Extracted Token: $token');
@@ -78,37 +84,40 @@ class LoginController extends GetxController {
                 if (resetToken != null) {
                   apiService.saveResetToken(resetToken.toString());
                 }
-                
+
                 // Save Remember Me status
                 apiService.saveRememberMe(rememberMe.value);
-                
-                // Fetch vehicles to decide routing
-                apiService.getVehicles().listen((vehResponse) {
-                  if (vehResponse.statusCode == 200) {
-                    final data = vehResponse.body;
-                    bool hasVehicles = false;
-                    
-                    if (data != null && data['results'] != null) {
-                      hasVehicles = (data['results'] as List).isNotEmpty;
-                    } else if (data is List) {
-                      hasVehicles = data.isNotEmpty;
-                    }
 
-                    if (hasVehicles) {
-                      Get.offAllNamed(Routes.home);
+                // Fetch vehicles to decide routing
+                apiService.getVehicles().listen(
+                  (vehResponse) {
+                    if (vehResponse.statusCode == 200 || vehResponse.statusCode == 201) {
+                      final data = vehResponse.body;
+                      bool hasVehicles = false;
+
+                      if (data != null && data['results'] != null) {
+                        hasVehicles = (data['results'] as List).isNotEmpty;
+                      } else if (data is List) {
+                        hasVehicles = data.isNotEmpty;
+                      }
+
+                      if (hasVehicles) {
+                        Get.offAllNamed(Routes.home);
+                      } else {
+                        Get.offAllNamed(Routes.vehicleRegistration);
+                      }
                     } else {
+                      // Default to registration if we can't fetch vehicles
                       Get.offAllNamed(Routes.vehicleRegistration);
                     }
-                  } else {
-                    // Default to registration if we can't fetch vehicles
+                  },
+                  onError: (_) {
                     Get.offAllNamed(Routes.vehicleRegistration);
-                  }
-                }, onError: (_) {
-                    Get.offAllNamed(Routes.vehicleRegistration);
-                });
-                
+                  },
+                );
               } else {
-                var rawMessage = response.body?['message'] ??
+                var rawMessage =
+                    response.body?['message'] ??
                     response.body?['detail'] ??
                     'Invalid credentials';
 
@@ -155,30 +164,33 @@ class LoginController extends GetxController {
         .listen(
           (response) {
             isLoading.value = false;
-            if (response.statusCode == 200) {
+            if (response.statusCode == 200 || response.statusCode == 201) {
               // Fetch vehicles to decide routing
-              apiService.getVehicles().listen((vehResponse) {
-                if (vehResponse.statusCode == 200) {
-                  final data = vehResponse.body;
-                  bool hasVehicles = false;
-                  
-                  if (data != null && data['results'] != null) {
-                    hasVehicles = (data['results'] as List).isNotEmpty;
-                  } else if (data is List) {
-                    hasVehicles = data.isNotEmpty;
-                  }
+              apiService.getVehicles().listen(
+                (vehResponse) {
+                  if (vehResponse.statusCode == 200 || vehResponse.statusCode == 201) {
+                    final data = vehResponse.body;
+                    bool hasVehicles = false;
 
-                  if (hasVehicles) {
-                    Get.offAllNamed(Routes.home);
+                    if (data != null && data['results'] != null) {
+                      hasVehicles = (data['results'] as List).isNotEmpty;
+                    } else if (data is List) {
+                      hasVehicles = data.isNotEmpty;
+                    }
+
+                    if (hasVehicles) {
+                      Get.offAllNamed(Routes.home);
+                    } else {
+                      Get.offAllNamed(Routes.vehicleRegistration);
+                    }
                   } else {
                     Get.offAllNamed(Routes.vehicleRegistration);
                   }
-                } else {
+                },
+                onError: (_) {
                   Get.offAllNamed(Routes.vehicleRegistration);
-                }
-              }, onError: (_) {
-                  Get.offAllNamed(Routes.vehicleRegistration);
-              });
+                },
+              );
             } else {
               CustomGlassToast.show(
                 title: 'Google Login Failed',
@@ -207,30 +219,33 @@ class LoginController extends GetxController {
         .listen(
           (response) {
             isLoading.value = false;
-            if (response.statusCode == 200) {
+            if (response.statusCode == 200 || response.statusCode == 201) {
               // Fetch vehicles to decide routing
-              apiService.getVehicles().listen((vehResponse) {
-                if (vehResponse.statusCode == 200) {
-                  final data = vehResponse.body;
-                  bool hasVehicles = false;
-                  
-                  if (data != null && data['results'] != null) {
-                    hasVehicles = (data['results'] as List).isNotEmpty;
-                  } else if (data is List) {
-                    hasVehicles = data.isNotEmpty;
-                  }
+              apiService.getVehicles().listen(
+                (vehResponse) {
+                  if (vehResponse.statusCode == 200 || vehResponse.statusCode == 201) {
+                    final data = vehResponse.body;
+                    bool hasVehicles = false;
 
-                  if (hasVehicles) {
-                    Get.offAllNamed(Routes.home);
+                    if (data != null && data['results'] != null) {
+                      hasVehicles = (data['results'] as List).isNotEmpty;
+                    } else if (data is List) {
+                      hasVehicles = data.isNotEmpty;
+                    }
+
+                    if (hasVehicles) {
+                      Get.offAllNamed(Routes.home);
+                    } else {
+                      Get.offAllNamed(Routes.vehicleRegistration);
+                    }
                   } else {
                     Get.offAllNamed(Routes.vehicleRegistration);
                   }
-                } else {
+                },
+                onError: (_) {
                   Get.offAllNamed(Routes.vehicleRegistration);
-                }
-              }, onError: (_) {
-                  Get.offAllNamed(Routes.vehicleRegistration);
-              });
+                },
+              );
             } else {
               CustomGlassToast.show(
                 title: 'Apple Login Failed',

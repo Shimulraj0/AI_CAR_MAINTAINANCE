@@ -160,9 +160,39 @@ class ApiService extends GetConnect {
 
   Stream<Response> verifyRegistration(Map<String, dynamic> payload) {
     _isLoadingSubject.add(true);
-    return Stream.fromFuture(
-      post('/api/user/register/verify/', payload),
-    ).doOnDone(() => _isLoadingSubject.add(false));
+    return Stream.fromFuture(_verifyRegistrationHttp(payload))
+        .doOnDone(() => _isLoadingSubject.add(false));
+  }
+
+  Future<Response> _verifyRegistrationHttp(Map<String, dynamic> payload) async {
+    final url = Uri.parse('$apiBaseUrl/api/user/register/verify/');
+    final headers = await _getHeaders();
+    
+    try {
+      final request = http.Request('POST', url);
+      request.body = json.encode(payload);
+      request.headers.addAll(headers);
+
+      final streamedResponse = await request.send();
+      final responseBody = await streamedResponse.stream.bytesToString();
+
+      dynamic decodedBody;
+      try {
+        decodedBody = json.decode(responseBody);
+      } catch (_) {
+        decodedBody = responseBody;
+      }
+
+      return Response(
+        statusCode: streamedResponse.statusCode,
+        body: decodedBody,
+        bodyString: responseBody,
+        headers: streamedResponse.headers,
+      );
+    } catch (e) {
+      debugPrint('Http Error in verifyRegistration: $e');
+      return Response(statusCode: 500, statusText: e.toString());
+    }
   }
 
   // --- PASSWORD RESET API ---
@@ -190,9 +220,39 @@ class ApiService extends GetConnect {
   // --- LOGIN & AUTH API ---
   Stream<Response> loginUser(Map<String, dynamic> payload) {
     _isLoadingSubject.add(true);
-    return Stream.fromFuture(
-      post('/api/user/login/', payload),
-    ).doOnDone(() => _isLoadingSubject.add(false));
+    return Stream.fromFuture(_loginUserHttp(payload))
+        .doOnDone(() => _isLoadingSubject.add(false));
+  }
+
+  Future<Response> _loginUserHttp(Map<String, dynamic> payload) async {
+    final url = Uri.parse('$apiBaseUrl/api/user/login/');
+    final headers = await _getHeaders();
+    
+    try {
+      final request = http.Request('POST', url);
+      request.body = json.encode(payload);
+      request.headers.addAll(headers);
+
+      final streamedResponse = await request.send();
+      final responseBody = await streamedResponse.stream.bytesToString();
+
+      dynamic decodedBody;
+      try {
+        decodedBody = json.decode(responseBody);
+      } catch (_) {
+        decodedBody = responseBody;
+      }
+
+      return Response(
+        statusCode: streamedResponse.statusCode,
+        body: decodedBody,
+        bodyString: responseBody,
+        headers: streamedResponse.headers,
+      );
+    } catch (e) {
+      debugPrint('Http Error in loginUser: $e');
+      return Response(statusCode: 500, statusText: e.toString());
+    }
   }
 
   Stream<Response> googleLogin(Map<String, dynamic> payload) {
@@ -224,6 +284,55 @@ class ApiService extends GetConnect {
     ).doOnDone(() => _isLoadingSubject.add(false));
   }
 
+  Future<http.Response> getMaintenanceStats() async {
+    final url = Uri.parse('$apiBaseUrl/api/maintenance/tasks/stats/');
+    final headers = await _getHeaders();
+    
+    _isLoadingSubject.add(true);
+    try {
+      final response = await http.get(
+        url,
+        headers: headers,
+      );
+      
+      if (response.statusCode != 200) {
+        debugPrint('Get Maintenance Stats Error Status: ${response.statusCode}');
+        debugPrint('Get Maintenance Stats Error Body: ${response.body}');
+      }
+      
+      return response;
+    } catch (e) {
+      debugPrint('Get Maintenance Stats Exception: $e');
+      rethrow;
+    } finally {
+      _isLoadingSubject.add(false);
+    }
+  }
+
+  Future<http.Response> getMaintenanceTasks(String status, {int page = 1}) async {
+    final url = Uri.parse('$apiBaseUrl/api/maintenance/tasks/?status=$status&page=$page');
+    final headers = await _getHeaders();
+    
+    _isLoadingSubject.add(true);
+    try {
+      final response = await http.get(
+        url,
+        headers: headers,
+      );
+      
+      if (response.statusCode != 200) {
+        debugPrint('Get Maintenance Tasks Error Status: ${response.statusCode}');
+        debugPrint('Get Maintenance Tasks Error Body: ${response.body}');
+      }
+      
+      return response;
+    } catch (e) {
+      debugPrint('Get Maintenance Tasks Exception: $e');
+      rethrow;
+    } finally {
+      _isLoadingSubject.add(false);
+    }
+  }
   Future<Map<String, String>> _getHeaders() async {
     final Map<String, String> headers = {
       'Content-Type': 'application/json',
