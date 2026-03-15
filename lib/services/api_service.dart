@@ -351,6 +351,36 @@ class ApiService extends GetConnect {
     return headers;
   }
 
+  // --- DIAGNOSTICS & AI CHAT API ---
+  Future<http.Response> normalChat(Map<String, dynamic> payload) async {
+    final url = Uri.parse('$apiBaseUrl/api/diagnostics/normal-chat/');
+    final headers = await _getHeaders();
+    
+    _isLoadingSubject.add(true);
+    try {
+      debugPrint('ApiService: POST $url');
+      debugPrint('ApiService: Payload: ${json.encode(payload)}');
+      
+      final response = await http.post(
+        url,
+        headers: headers,
+        body: json.encode(payload),
+      );
+      
+      if (response.statusCode != 200 && response.statusCode != 201) {
+        debugPrint('Normal Chat Error Status: ${response.statusCode}');
+        debugPrint('Normal Chat Error Body: ${response.body}');
+      }
+      
+      return response;
+    } catch (e) {
+      debugPrint('Normal Chat Exception: $e');
+      rethrow;
+    } finally {
+      _isLoadingSubject.add(false);
+    }
+  }
+
   Future<http.Response> createDiagnostic(Map<String, dynamic> payload) async {
     final url = Uri.parse('$apiBaseUrl/api/diagnostics/');
     final headers = await _getHeaders();

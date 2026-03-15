@@ -7,7 +7,6 @@ import '../../routes/app_routes.dart';
 import 'package:animations/animations.dart';
 import 'subscription_view.dart'; // Import the view directly for OpenContainer
 
-
 class ProfileTabView extends GetView<HomeController> {
   const ProfileTabView({super.key});
 
@@ -89,45 +88,54 @@ class ProfileTabView extends GetView<HomeController> {
       ),
       child: Row(
         children: [
-          Obx(() => Container(
-            width: 56,
-            height: 56,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              image: DecorationImage(
-                image: controller.userProfileImage.value.isNotEmpty
-                    ? NetworkImage(controller.userProfileImage.value)
-                    : const AssetImage('assets/images/profile.png') as ImageProvider,
-                fit: BoxFit.cover,
+          Obx(
+            () => Container(
+              width: 56,
+              height: 56,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                image: DecorationImage(
+                  image: controller.userProfileImage.value.isNotEmpty
+                      ? NetworkImage(controller.userProfileImage.value)
+                      : const AssetImage('assets/images/profile.png')
+                            as ImageProvider,
+                  fit: BoxFit.cover,
+                ),
               ),
             ),
-          )),
+          ),
           const SizedBox(width: 16),
           Expanded(
-            child: Obx(() => Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  controller.userName.value.isNotEmpty ? controller.userName.value : 'Loading...',
-                  style: const TextStyle(
-                    color: Color(0xFF1A1D23),
-                    fontSize: 18,
-                    fontFamily: 'Archivo',
-                    fontWeight: FontWeight.w600,
+            child: Obx(
+              () => Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    controller.userName.value.isNotEmpty
+                        ? controller.userName.value
+                        : 'Loading...',
+                    style: const TextStyle(
+                      color: Color(0xFF1A1D23),
+                      fontSize: 18,
+                      fontFamily: 'Archivo',
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  controller.userEmail.value.isNotEmpty ? controller.userEmail.value : 'Loading...',
-                  style: const TextStyle(
-                    color: Color(0xFF6B7280),
-                    fontSize: 14,
-                    fontFamily: 'Inter',
-                    fontWeight: FontWeight.w400,
+                  const SizedBox(height: 4),
+                  Text(
+                    controller.userEmail.value.isNotEmpty
+                        ? controller.userEmail.value
+                        : 'Loading...',
+                    style: const TextStyle(
+                      color: Color(0xFF6B7280),
+                      fontSize: 14,
+                      fontFamily: 'Inter',
+                      fontWeight: FontWeight.w400,
+                    ),
                   ),
-                ),
-              ],
-            )),
+                ],
+              ),
+            ),
           ),
         ],
       ),
@@ -182,7 +190,10 @@ class ProfileTabView extends GetView<HomeController> {
                   ],
                 ),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 8,
+                  ),
                   decoration: BoxDecoration(
                     color: const Color(0xFF2F5EA8),
                     borderRadius: BorderRadius.circular(8),
@@ -329,7 +340,11 @@ class ProfileTabView extends GetView<HomeController> {
                 child: const Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Icon(Icons.logout_rounded, size: 20, color: Color(0xFFDC2626)),
+                    Icon(
+                      Icons.logout_rounded,
+                      size: 20,
+                      color: Color(0xFFDC2626),
+                    ),
                     SizedBox(width: 8),
                     Text(
                       'Log Out',

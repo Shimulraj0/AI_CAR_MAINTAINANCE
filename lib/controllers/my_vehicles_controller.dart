@@ -45,6 +45,38 @@ class MyVehiclesController extends GetxController {
            backgroundColor: Colors.red,
            colorText: Colors.white,
         );
+      },
+    );
+  }
+
+  void updateStatus(String vehicleId, String status) {
+    _apiService.updateVehicle(vehicleId, {'status': status}).listen(
+      (response) {
+        if (response.statusCode == 200) {
+          fetchVehicles(); // Refresh list
+          Get.snackbar(
+            'Success', 
+            'Vehicle status updated',
+            snackPosition: SnackPosition.BOTTOM,
+          );
+        } else {
+          Get.snackbar(
+            'Error', 
+            'Failed to update status',
+            snackPosition: SnackPosition.BOTTOM,
+            backgroundColor: Colors.red,
+            colorText: Colors.white,
+          );
+        }
+      },
+      onError: (error) {
+        Get.snackbar(
+          'Error', 
+          'An error occurred: $error',
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: Colors.red,
+          colorText: Colors.white,
+        );
       }
     );
   }

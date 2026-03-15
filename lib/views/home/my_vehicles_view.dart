@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import '../../controllers/home_controller.dart';
 import '../../controllers/my_vehicles_controller.dart';
@@ -63,6 +64,8 @@ class MyVehiclesView extends GetView<MyVehiclesController> {
           );
         }
 
+        final homeController = Get.find<HomeController>();
+
         return SingleChildScrollView(
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 26, vertical: 24),
@@ -79,17 +82,21 @@ class MyVehiclesView extends GetView<MyVehiclesController> {
                         fontFamily: 'Inter',
                       ),
                     ),
-                  )
+                  ),
                 ] else ...[
-                  ...controller.vehicles.asMap().entries.map((entry) {
-                    final index = entry.key;
-                    final vehicle = entry.value;
-                    final isActive = index == 0; // Primary/first is "active"
+                  ...controller.vehicles.map((vehicle) {
+                    final vehicleId = vehicle['id']?.toString() ?? vehicle['uuid']?.toString() ?? '';
+                    final isActive = homeController.activeVehicleId.value == vehicleId;
+                    
                     return Padding(
                       padding: const EdgeInsets.only(bottom: 16),
-                      child: isActive
-                          ? _buildActiveVehicleCard(vehicle)
-                          : _buildSecondaryVehicleCard(vehicle),
+                      child: InkWell(
+                        onTap: () => homeController.selectVehicle(vehicle),
+                        borderRadius: BorderRadius.circular(16),
+                        child: isActive
+                            ? _buildActiveVehicleCard(vehicle)
+                            : _buildSecondaryVehicleCard(vehicle),
+                      ),
                     );
                   }),
                 ],
@@ -118,9 +125,13 @@ class MyVehiclesView extends GetView<MyVehiclesController> {
   }
 
   Widget _buildActiveVehicleCard(dynamic vehicle) {
-    final title = '${vehicle['year']} ${vehicle['manufacturer']} ${vehicle['model']}';
+    final title =
+        '${vehicle['year']} ${vehicle['manufacturer']} ${vehicle['model']}';
     final subtitle = '${vehicle['fuel_type']} · ${vehicle['engine_size']}';
-    
+    final status = vehicle['status']?.toString().replaceAll('_', ' ') ?? 'Due soon';
+    final statusColor = status.toLowerCase() == 'up to date' ? const Color(0xFF059669) : const Color(0xFFD97706);
+    final statusBgColor = status.toLowerCase() == 'up to date' ? const Color(0xFFECFDF5) : const Color(0xFFFFF7ED);
+
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
@@ -185,29 +196,36 @@ class MyVehiclesView extends GetView<MyVehiclesController> {
                 ),
                 Row(
                   children: [
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 8,
-                        vertical: 4,
-                      ),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFFFF7ED),
-                        borderRadius: BorderRadius.circular(100),
-                      ),
-                      child: const Text(
-                        'Due soon',
-                        style: TextStyle(
-                          color: Color(0xFFD97706),
-                          fontSize: 12,
-                          fontFamily: 'Inter',
-                          fontWeight: FontWeight.w500,
+                    InkWell(
+                      onTap: () => _showStatusPicker(Get.context!, vehicle),
+                      borderRadius: BorderRadius.circular(100),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 4,
+                        ),
+                        decoration: BoxDecoration(
+                          color: statusBgColor,
+                          borderRadius: BorderRadius.circular(100),
+                        ),
+                        child: Text(
+                          status,
+                          style: TextStyle(
+                            color: statusColor,
+                            fontSize: 12,
+                            fontFamily: 'Inter',
+                            fontWeight: FontWeight.w500,
+                          ),
                         ),
                       ),
                     ),
                     const SizedBox(width: 8),
                     InkWell(
                       onTap: () async {
-                        final result = await Get.toNamed(Routes.addVehicles, arguments: {'vehicle': vehicle});
+                        final result = await Get.toNamed(
+                          Routes.addVehicles,
+                          arguments: {'vehicle': vehicle},
+                        );
                         if (result == true) {
                           controller.fetchVehicles();
                         }
@@ -250,9 +268,13 @@ class MyVehiclesView extends GetView<MyVehiclesController> {
   }
 
   Widget _buildSecondaryVehicleCard(dynamic vehicle) {
-    final title = '${vehicle['year']} ${vehicle['manufacturer']} ${vehicle['model']}';
+    final title =
+        '${vehicle['year']} ${vehicle['manufacturer']} ${vehicle['model']}';
     final subtitle = '${vehicle['fuel_type']} · ${vehicle['engine_size']}';
-    
+    final status = vehicle['status']?.toString().replaceAll('_', ' ') ?? 'Up to date';
+    final statusColor = status.toLowerCase() == 'up to date' ? const Color(0xFF059669) : const Color(0xFFD97706);
+    final statusBgColor = status.toLowerCase() == 'up to date' ? const Color(0xFFECFDF5) : const Color(0xFFFFF7ED);
+
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
@@ -310,29 +332,36 @@ class MyVehiclesView extends GetView<MyVehiclesController> {
             ),
             Row(
               children: [
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 8,
-                    vertical: 4,
-                  ),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFECFDF5),
-                    borderRadius: BorderRadius.circular(100),
-                  ),
-                  child: const Text(
-                    'Up to date',
-                    style: TextStyle(
-                      color: Color(0xFF059669),
-                      fontSize: 12,
-                      fontFamily: 'Inter',
-                      fontWeight: FontWeight.w500,
+                InkWell(
+                  onTap: () => _showStatusPicker(Get.context!, vehicle),
+                  borderRadius: BorderRadius.circular(100),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 4,
+                    ),
+                    decoration: BoxDecoration(
+                      color: statusBgColor,
+                      borderRadius: BorderRadius.circular(100),
+                    ),
+                    child: Text(
+                      status,
+                      style: TextStyle(
+                        color: statusColor,
+                        fontSize: 12,
+                        fontFamily: 'Inter',
+                        fontWeight: FontWeight.w500,
+                      ),
                     ),
                   ),
                 ),
                 const SizedBox(width: 8),
                 InkWell(
                   onTap: () async {
-                    final result = await Get.toNamed(Routes.addVehicles, arguments: {'vehicle': vehicle});
+                    final result = await Get.toNamed(
+                      Routes.addVehicles,
+                      arguments: {'vehicle': vehicle},
+                    );
                     if (result == true) {
                       controller.fetchVehicles();
                     }
@@ -356,6 +385,65 @@ class MyVehiclesView extends GetView<MyVehiclesController> {
           ],
         ),
       ),
+    );
+  }
+
+  void _showStatusPicker(BuildContext context, dynamic vehicle) {
+    final vehicleId = vehicle['id']?.toString() ?? vehicle['uuid']?.toString() ?? '';
+    Get.bottomSheet(
+      Container(
+        padding: const EdgeInsets.all(24),
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.only(
+            topLeft: Radius.circular(24),
+            topRight: Radius.circular(24),
+          ),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'Update Vehicle Status',
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+                fontFamily: 'Archivo',
+              ),
+            ),
+            const SizedBox(height: 16),
+            _buildStatusOption('Up to date', Icons.check_circle_outline, Colors.green, () {
+              controller.updateStatus(vehicleId, 'up_to_date');
+              Get.back();
+            }),
+            _buildStatusOption('Due soon', Icons.access_time, Colors.orange, () {
+              controller.updateStatus(vehicleId, 'due_soon');
+              Get.back();
+            }),
+            _buildStatusOption('Overdue', Icons.warning_amber_outlined, Colors.red, () {
+              controller.updateStatus(vehicleId, 'overdue');
+              Get.back();
+            }),
+            const SizedBox(height: 24),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildStatusOption(String label, IconData icon, Color color, VoidCallback onTap) {
+    return ListTile(
+      contentPadding: EdgeInsets.zero,
+      leading: Icon(icon, color: color),
+      title: Text(
+        label,
+        style: const TextStyle(
+          fontSize: 16,
+          fontFamily: 'Inter',
+        ),
+      ),
+      onTap: onTap,
     );
   }
 

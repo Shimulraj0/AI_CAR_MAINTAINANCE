@@ -2,15 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import '../../controllers/ai_chat_controller.dart';
+import '../../controllers/home_controller.dart';
 
 class AiChatView extends GetView<AiChatController> {
   const AiChatView({super.key});
 
   @override
   Widget build(BuildContext context) {
-    // Ensure controller is initialized
-    Get.put(AiChatController());
-
     return Scaffold(
       backgroundColor: const Color(0xFFF8FAFC),
       appBar: AppBar(
@@ -36,9 +34,36 @@ class AiChatView extends GetView<AiChatController> {
           onPressed: () => Get.back(),
         ),
         actions: [
-          IconButton(
+          PopupMenuButton<String>(
+            onSelected: (value) {
+              if (value == 'clear') {
+                controller.clearChat();
+              }
+            },
             icon: const Icon(Icons.more_horiz, color: Colors.white),
-            onPressed: () {},
+            itemBuilder: (BuildContext context) => [
+              const PopupMenuItem<String>(
+                value: 'clear',
+                child: Row(
+                  children: [
+                    Icon(
+                      Icons.delete_outline,
+                      color: Color(0xFFEF4444),
+                      size: 18,
+                    ),
+                    SizedBox(width: 8),
+                    Text(
+                      'Clear Chat',
+                      style: TextStyle(
+                        color: Color(0xFFEF4444),
+                        fontSize: 14,
+                        fontFamily: 'Inter',
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
           ),
         ],
       ),
@@ -52,10 +77,15 @@ class AiChatView extends GetView<AiChatController> {
                   horizontal: 24,
                   vertical: 16,
                 ),
-                itemCount: controller.messages.length,
+                itemCount:
+                    controller.messages.length +
+                    (controller.isLoading.value ? 1 : 0),
                 separatorBuilder: (context, index) =>
                     const SizedBox(height: 16),
                 itemBuilder: (context, index) {
+                  if (index == controller.messages.length) {
+                    return _buildTypingIndicator();
+                  }
                   final message = controller.messages[index];
                   if (message.isUser) {
                     return _buildUserMessage(text: message.text);
@@ -72,6 +102,41 @@ class AiChatView extends GetView<AiChatController> {
           _buildMessageInput(),
         ],
       ),
+    );
+  }
+
+  Widget _buildTypingIndicator() {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Container(
+          width: 40,
+          height: 40,
+          decoration: const BoxDecoration(shape: BoxShape.circle),
+          clipBehavior: Clip.antiAlias,
+          child: Image.asset('assets/images/TM 2.png', fit: BoxFit.cover),
+        ),
+        const SizedBox(width: 12),
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          decoration: const BoxDecoration(
+            color: Color(0x33BBDCFF),
+            borderRadius: BorderRadius.only(
+              topRight: Radius.circular(12),
+              bottomLeft: Radius.circular(12),
+              bottomRight: Radius.circular(12),
+            ),
+          ),
+          child: const Text(
+            "typing...",
+            style: TextStyle(
+              color: Color(0xFF383838),
+              fontSize: 12,
+              fontStyle: FontStyle.italic,
+            ),
+          ),
+        ),
+      ],
     );
   }
 
@@ -196,7 +261,29 @@ class AiChatView extends GetView<AiChatController> {
           height: 40,
           clipBehavior: Clip.antiAlias,
           decoration: const BoxDecoration(shape: BoxShape.circle),
-          child: Image.asset('assets/images/chatuser.png', fit: BoxFit.cover),
+          child: GetX<HomeController>(
+            builder: (homeController) {
+              final imageUrl = homeController.userProfileImage.value;
+              if (imageUrl.isNotEmpty) {
+                if (imageUrl.startsWith('http')) {
+                  return Image.network(
+                    imageUrl,
+                    fit: BoxFit.cover,
+                    errorBuilder: (context, error, stackTrace) => Image.asset(
+                      'assets/images/chatuser.png',
+                      fit: BoxFit.cover,
+                    ),
+                  );
+                } else if (imageUrl.startsWith('assets/')) {
+                  return Image.asset(imageUrl, fit: BoxFit.cover);
+                }
+              }
+              return Image.asset(
+                'assets/images/chatuser.png',
+                fit: BoxFit.cover,
+              );
+            },
+          ),
         ),
       ],
     );
@@ -241,17 +328,18 @@ class AiChatView extends GetView<AiChatController> {
               onTap: () =>
                   controller.sendMessage(controller.textController.text),
               child: Container(
-                width: 48,
-                height: 48,
-                decoration: const BoxDecoration(
-                  color: Color(0xFF2B63A8),
-                  shape: BoxShape.circle,
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                decoration: BoxDecoration(
+                  color: const Color(0xFF2B63A8),
+                  borderRadius: BorderRadius.circular(12),
                 ),
                 child: const Center(
+                  widthFactor: 1,
+                  heightFactor: 1,
                   child: Icon(
                     Icons.send_rounded,
                     color: Colors.white,
-                    size: 20,
+                    size: 18,
                   ),
                 ),
               ),

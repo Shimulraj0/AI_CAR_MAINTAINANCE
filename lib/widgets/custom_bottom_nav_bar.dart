@@ -31,7 +31,7 @@ class _CustomBottomNavBarState extends State<CustomBottomNavBar> {
   Widget build(BuildContext context) {
     // Screen dimensions
     final screenWidth = MediaQuery.of(context).size.width;
-    final width = screenWidth > 360 ? 360.0 : screenWidth;
+    final width = screenWidth * 0.92; // 92% of screen width for floating effect
 
     return Hero(
       tag: 'custom_bottom_nav_bar',
@@ -69,55 +69,58 @@ class _CustomBottomNavBarState extends State<CustomBottomNavBar> {
       child: Material(
         type: MaterialType.transparency,
         child: SafeArea(
-          child: Center(
-            heightFactor: 1.0,
-            child: Container(
-              width: width,
-              height: 64, // Exact hugging height
-              // Adjusted padding to keep elements inside 360px balanced
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(
-                  20,
-                ), // Adding curved corners
-                boxShadow: const [
-                  BoxShadow(
-                    color: Color(0x3FACACAC),
-                    blurRadius: 10, // Softer shadow
-                    offset: Offset(0, -2), // Slight upward offset for the bar
-                    spreadRadius: 0,
-                  ),
-                ],
-              ),
-              child: Stack(
-                clipBehavior: Clip.none,
-                children: [
-                  SizedBox(
-                    height: 64,
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.end,
-                      children: [
-                        Expanded(child: _buildNavItem(0, _navItems[0])),
-                        Expanded(child: _buildNavItem(1, _navItems[1])),
-                        const SizedBox(
-                          width: 80,
-                        ), // Dedicated space for the 72px AI button without invasion
-                        Expanded(child: _buildNavItem(2, _navItems[3])),
-                        Expanded(child: _buildNavItem(3, _navItems[4])),
-                      ],
+          child: Padding(
+            padding: const EdgeInsets.only(bottom: 16),
+            child: Center(
+              heightFactor: 1.0,
+              child: Container(
+                width: width,
+                height: 64, // Exact hugging height
+                // Adjusted padding to keep elements inside 360px balanced
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(
+                    20,
+                  ), // Adding curved corners
+                  boxShadow: const [
+                    BoxShadow(
+                      color: Color(0x3FACACAC),
+                      blurRadius: 10, // Softer shadow
+                      offset: Offset(0, -2), // Slight upward offset for the bar
+                      spreadRadius: 0,
                     ),
-                  ),
-                  Positioned(
-                    bottom: 24, // Sits above the 64px bar natively
-                    left: 0,
-                    right: 0,
-                    child: Align(
-                      alignment: Alignment.bottomCenter,
-                      child: _buildFab(),
+                  ],
+                ),
+                child: Stack(
+                  clipBehavior: Clip.none,
+                  children: [
+                    SizedBox(
+                      height: 64,
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: [
+                          Expanded(child: _buildNavItem(0, _navItems[0])),
+                          Expanded(child: _buildNavItem(1, _navItems[1])),
+                          const SizedBox(
+                            width: 80,
+                          ), // Dedicated space for the 72px AI button without invasion
+                          Expanded(child: _buildNavItem(2, _navItems[3])),
+                          Expanded(child: _buildNavItem(3, _navItems[4])),
+                        ],
+                      ),
                     ),
-                  ),
-                ],
+                    Positioned(
+                      bottom: 24, // Sits above the 64px bar natively
+                      left: 0,
+                      right: 0,
+                      child: Align(
+                        alignment: Alignment.bottomCenter,
+                        child: _buildFab(),
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
           ),

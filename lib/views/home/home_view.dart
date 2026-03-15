@@ -108,7 +108,7 @@ class HomeView extends GetView<HomeController> {
                                   children: [
                                     const Icon(Icons.directions_car, size: 20),
                                     const SizedBox(width: 8),
-                                  Text(
+                                    Text(
                                       controller.vehicleName.value,
                                       style: const TextStyle(
                                         color: Color(0xFF0F0F0F),
@@ -213,11 +213,17 @@ class HomeView extends GetView<HomeController> {
                           const SizedBox(height: 16),
                           InkWell(
                             onTap: () {
-                              Get.snackbar(
-                                'Active Issues',
-                                'Viewing active issues report...',
-                                snackPosition: SnackPosition.BOTTOM,
-                              );
+                              if (controller.lastSessionId.value.isNotEmpty) {
+                                Get.toNamed(
+                                  Routes.diagnosticResult,
+                                  arguments: {
+                                    'diagnostic_id':
+                                        controller.lastSessionId.value,
+                                  },
+                                );
+                              } else {
+                                controller.changeTabIndex(1);
+                              }
                             },
                             child: Container(
                               decoration: BoxDecoration(
@@ -307,7 +313,9 @@ class HomeView extends GetView<HomeController> {
                                             height: 36,
                                             child: OutlinedButton(
                                               onPressed: () {
-                                                Get.toNamed(Routes.addMaintenance);
+                                                Get.toNamed(
+                                                  Routes.addMaintenance,
+                                                );
                                               },
                                               style: OutlinedButton.styleFrom(
                                                 side: const BorderSide(

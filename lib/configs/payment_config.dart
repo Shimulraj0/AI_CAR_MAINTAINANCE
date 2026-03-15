@@ -5,8 +5,8 @@ const String defaultApplePay = '''{
     "displayName": "AutoIntel Premium",
     "merchantCapabilities": ["3DS", "debit", "credit"],
     "supportedNetworks": ["amex", "visa", "discover", "masterCard"],
-    "countryCode": "US",
-    "currencyCode": "USD",
+    "countryCode": "GB",
+    "currencyCode": "GBP",
     "requiredBillingContactFields": ["emailAddress", "name", "phoneNumber", "postalAddress"],
     "requiredShippingContactFields": [],
     "shippingMethods": []
@@ -45,8 +45,8 @@ const String defaultGooglePay = '''{
       "merchantName": "AutoIntel"
     },
     "transactionInfo": {
-      "countryCode": "US",
-      "currencyCode": "USD",
+      "countryCode": "GB",
+      "currencyCode": "GBP",
       "checkoutOption": "COMPLETE_IMMEDIATE_PURCHASE"
     }
   }

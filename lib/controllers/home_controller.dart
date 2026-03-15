@@ -20,6 +20,7 @@ class HomeController extends GetxController {
   var userProfileImage = ''.obs;
   var vehicleName = 'Toyota Corolla 2020'.obs; // Default fallback
   var activeVehicleId = ''.obs;
+  var lastSessionId = ''.obs;
   final RxList<Map<String, dynamic>> userVehicles = <Map<String, dynamic>>[].obs;
 
   // Maintenance Stats
@@ -51,6 +52,7 @@ class HomeController extends GetxController {
     fetchUserVehicles();
     fetchMaintenanceStats();
     fetchAllMaintenanceTasks();
+    lastSessionId.value = _apiService.getSessionId() ?? '';
   }
 
   void fetchUserProfile() {
@@ -210,6 +212,12 @@ class HomeController extends GetxController {
     if (manufacturer.isNotEmpty || model.isNotEmpty) {
       vehicleName.value = '$year $manufacturer $model'.trim();
     }
+  }
+
+  void selectVehicle(dynamic vehicle) {
+    final vehicleMap = vehicle is Map ? vehicle : Map<String, dynamic>.from(vehicle);
+    activeVehicleId.value = vehicleMap['id']?.toString() ?? vehicleMap['uuid']?.toString() ?? "";
+    updateVehicleDisplayName(Map<String, dynamic>.from(vehicleMap));
   }
 
   void changeTabIndex(int index, {bool autoStart = false}) {

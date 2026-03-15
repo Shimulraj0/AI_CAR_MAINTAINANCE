@@ -1,5 +1,6 @@
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 class AnalyzingView extends StatefulWidget {
   const AnalyzingView({super.key});
@@ -19,9 +20,23 @@ class _AnalyzingViewState extends State<AnalyzingView> {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: const Color(0xFF2B63A8),
         elevation: 0,
-        leading: const SizedBox(), // Hidden back button if any
+        centerTitle: true,
+        title: const Text(
+          'Analyzing',
+          style: TextStyle(
+            color: Colors.white,
+            fontSize: 18,
+            fontFamily: 'Archivo',
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        systemOverlayStyle: const SystemUiOverlayStyle(
+          statusBarColor: Colors.transparent,
+          statusBarIconBrightness: Brightness.light,
+        ),
+        leading: const SizedBox(), // Hidden back button during analysis
       ),
       body: Center(
         child: Padding(

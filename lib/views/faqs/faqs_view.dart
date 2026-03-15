@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import '../../controllers/faqs_controller.dart';
 
@@ -12,6 +13,10 @@ class FaqsView extends GetView<FaqsController> {
       appBar: AppBar(
         backgroundColor: const Color(0xFF2B63A8),
         elevation: 0,
+        systemOverlayStyle: const SystemUiOverlayStyle(
+          statusBarColor: Colors.transparent,
+          statusBarIconBrightness: Brightness.light,
+        ),
         centerTitle: true,
         leading: IconButton(
           icon: Container(
