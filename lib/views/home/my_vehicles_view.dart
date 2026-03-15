@@ -79,15 +79,17 @@ class MyVehiclesView extends GetView<MyVehiclesController> {
                         fontFamily: 'Inter',
                       ),
                     ),
-                  ),
+                  )
                 ] else ...[
-                  ...controller.vehicles.map((vehicle) {
-                    final vehicleId = vehicle['id']?.toString() ?? '';
-                    final isSelected =
-                        controller.selectedVehicleId.value == vehicleId;
+                  ...controller.vehicles.asMap().entries.map((entry) {
+                    final index = entry.key;
+                    final vehicle = entry.value;
+                    final isActive = index == 0; // Primary/first is "active"
                     return Padding(
                       padding: const EdgeInsets.only(bottom: 16),
-                      child: _buildAnimatedVehicleCard(vehicle, isSelected),
+                      child: isActive
+                          ? _buildActiveVehicleCard(vehicle)
+                          : _buildSecondaryVehicleCard(vehicle),
                     );
                   }),
                 ],
@@ -115,173 +117,243 @@ class MyVehiclesView extends GetView<MyVehiclesController> {
     );
   }
 
-  Widget _buildAnimatedVehicleCard(dynamic vehicle, bool isSelected) {
-    final title =
-        '${vehicle['year']} ${vehicle['manufacturer']} ${vehicle['model']}';
+  Widget _buildActiveVehicleCard(dynamic vehicle) {
+    final title = '${vehicle['year']} ${vehicle['manufacturer']} ${vehicle['model']}';
     final subtitle = '${vehicle['fuel_type']} · ${vehicle['engine_size']}';
-    final vehicleId = vehicle['id']?.toString() ?? '';
-
-    return MouseRegion(
-      cursor: SystemMouseCursors.click,
-      child: GestureDetector(
-        onTap: () => controller.selectVehicle(vehicleId),
-        child: AnimatedScale(
-          scale: isSelected ? 1.02 : 1.0,
-          duration: const Duration(milliseconds: 200),
-          curve: Curves.easeInOut,
-          child: AnimatedContainer(
-            duration: const Duration(milliseconds: 200),
-            width: double.infinity,
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(
-                color: isSelected
-                    ? const Color(0xFF2F5EA8)
-                    : Colors.black.withValues(alpha: 0.06),
-                width: isSelected ? 1.5 : 0.8,
-              ),
-              boxShadow: isSelected
-                  ? [
-                      const BoxShadow(
-                        color: Color(0x192F5EA8),
-                        blurRadius: 10,
-                        offset: Offset(0, 4),
-                      ),
-                    ]
-                  : [
-                      BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.03),
-                        blurRadius: 4,
-                        offset: const Offset(0, 2),
-                      ),
-                    ],
-            ),
-            child: Column(
+    
+    return Container(
+      width: double.infinity,
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: const Color(0xFF2F5EA8), width: 0.8),
+        boxShadow: const [
+          BoxShadow(
+            color: Color(0x192F5EA8),
+            blurRadius: 4,
+            offset: Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(16),
+            child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: Row(
+                Container(
+                  width: 44,
+                  height: 44,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFEDF2F9),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  alignment: Alignment.center,
+                  child: const Icon(
+                    Icons.directions_car_outlined,
+                    color: Color(0xFF2F5EA8),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Container(
-                        width: 44,
-                        height: 44,
-                        decoration: BoxDecoration(
-                          color: isSelected
-                              ? const Color(0xFFEDF2F9)
-                              : const Color(0xFFF3F4F6),
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        alignment: Alignment.center,
-                        child: Icon(
-                          Icons.directions_car_outlined,
-                          color: isSelected
-                              ? const Color(0xFF2F5EA8)
-                              : const Color(0xFF9CA3AF),
+                      Text(
+                        title,
+                        style: const TextStyle(
+                          color: Color(0xFF1A1D23),
+                          fontSize: 16,
+                          fontFamily: 'Archivo',
+                          fontWeight: FontWeight.w600,
                         ),
                       ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              title,
-                              style: TextStyle(
-                                color: const Color(0xFF1A1D23),
-                                fontSize: 16,
-                                fontFamily: 'Archivo',
-                                fontWeight: isSelected
-                                    ? FontWeight.w700
-                                    : FontWeight.w600,
-                              ),
-                            ),
-                            const SizedBox(height: 2),
-                            Text(
-                              subtitle,
-                              style: const TextStyle(
-                                color: Color(0xFF6B7280),
-                                fontSize: 13,
-                                fontFamily: 'Inter',
-                                fontWeight: FontWeight.w400,
-                              ),
-                            ),
-                          ],
+                      const SizedBox(height: 2),
+                      Text(
+                        subtitle,
+                        style: const TextStyle(
+                          color: Color(0xFF6B7280),
+                          fontSize: 13,
+                          fontFamily: 'Inter',
+                          fontWeight: FontWeight.w400,
                         ),
-                      ),
-                      Row(
-                        children: [
-                          if (isSelected)
-                            const Padding(
-                              padding: EdgeInsets.only(right: 8),
-                              child: Icon(
-                                Icons.check_circle,
-                                color: Color(0xFF2F5EA8),
-                                size: 20,
-                              ),
-                            ),
-                          InkWell(
-                            onTap: () async {
-                              final result = await Get.toNamed(
-                                Routes.addVehicles,
-                                arguments: {'vehicle': vehicle},
-                              );
-                              if (result == true) {
-                                controller.fetchVehicles();
-                              }
-                            },
-                            borderRadius: BorderRadius.circular(8),
-                            child: Container(
-                              padding: const EdgeInsets.all(6),
-                              decoration: BoxDecoration(
-                                color: const Color(0xFFF3F4F6),
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                              child: const Icon(
-                                Icons.edit_outlined,
-                                size: 16,
-                                color: Color(0xFF6B7280),
-                              ),
-                            ),
-                          ),
-                        ],
                       ),
                     ],
                   ),
                 ),
-                if (isSelected) ...[
-                  const Divider(height: 1, color: Color(0xFFE5E7EB)),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 12,
-                    ),
-                    child: Row(
-                      children: [
-                        const Icon(
-                          Icons.stars_rounded,
-                          size: 14,
-                          color: Color(0xFF2F5EA8),
+                Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 4,
+                      ),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFFFF7ED),
+                        borderRadius: BorderRadius.circular(100),
+                      ),
+                      child: const Text(
+                        'Due soon',
+                        style: TextStyle(
+                          color: Color(0xFFD97706),
+                          fontSize: 12,
+                          fontFamily: 'Inter',
+                          fontWeight: FontWeight.w500,
                         ),
-                        const SizedBox(width: 6),
-                        const Text(
-                          'Primary vehicle',
-                          style: TextStyle(
-                            color: Color(0xFF2F5EA8),
-                            fontSize: 13,
-                            fontFamily: 'Inter',
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ],
+                      ),
                     ),
-                  ),
-                ],
+                    const SizedBox(width: 8),
+                    InkWell(
+                      onTap: () async {
+                        final result = await Get.toNamed(Routes.addVehicles, arguments: {'vehicle': vehicle});
+                        if (result == true) {
+                          controller.fetchVehicles();
+                        }
+                      },
+                      borderRadius: BorderRadius.circular(8),
+                      child: Container(
+                        padding: const EdgeInsets.all(6),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFF3F4F6),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: const Icon(
+                          Icons.edit_outlined,
+                          size: 16,
+                          color: Color(0xFF6B7280),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
               ],
             ),
           ),
+          const Divider(height: 1, color: Color(0xFFE5E7EB)),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            child: const Text(
+              'Active vehicle',
+              style: TextStyle(
+                color: Color(0xFF2F5EA8),
+                fontSize: 13,
+                fontFamily: 'Inter',
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSecondaryVehicleCard(dynamic vehicle) {
+    final title = '${vehicle['year']} ${vehicle['manufacturer']} ${vehicle['model']}';
+    final subtitle = '${vehicle['fuel_type']} · ${vehicle['engine_size']}';
+    
+    return Container(
+      width: double.infinity,
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: Colors.black.withValues(alpha: 0.06),
+          width: 0.8,
+        ),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Container(
+              width: 44,
+              height: 44,
+              decoration: BoxDecoration(
+                color: const Color(0xFFEDF2F9),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              alignment: Alignment.center,
+              child: const Icon(
+                Icons.directions_car_outlined,
+                color: Color(0xFF2F5EA8),
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: const TextStyle(
+                      color: Color(0xFF1A1D23),
+                      fontSize: 16,
+                      fontFamily: 'Archivo',
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    subtitle,
+                    style: const TextStyle(
+                      color: Color(0xFF6B7280),
+                      fontSize: 13,
+                      fontFamily: 'Inter',
+                      fontWeight: FontWeight.w400,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 4,
+                  ),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFECFDF5),
+                    borderRadius: BorderRadius.circular(100),
+                  ),
+                  child: const Text(
+                    'Up to date',
+                    style: TextStyle(
+                      color: Color(0xFF059669),
+                      fontSize: 12,
+                      fontFamily: 'Inter',
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                InkWell(
+                  onTap: () async {
+                    final result = await Get.toNamed(Routes.addVehicles, arguments: {'vehicle': vehicle});
+                    if (result == true) {
+                      controller.fetchVehicles();
+                    }
+                  },
+                  borderRadius: BorderRadius.circular(8),
+                  child: Container(
+                    padding: const EdgeInsets.all(6),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFF3F4F6),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: const Icon(
+                      Icons.edit_outlined,
+                      size: 16,
+                      color: Color(0xFF6B7280),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ],
         ),
       ),
     );

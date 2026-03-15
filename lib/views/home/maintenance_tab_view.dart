@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import '../../controllers/home_controller.dart';
-import '../../utils/responsive_helper.dart';
 
 class MaintenanceTabView extends StatefulWidget {
   const MaintenanceTabView({super.key});
@@ -93,22 +93,86 @@ class _MaintenanceTabViewState extends State<MaintenanceTabView> {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        _buildTabs(),
-        Expanded(
-          child: Obx(() {
-            final homeController = Get.find<HomeController>();
-            return ListView(
-              padding: EdgeInsets.symmetric(
-                horizontal: ResponsiveHelper.paddingMedium,
-                vertical: 16,
-              ),
-              children: _buildTabContent(homeController),
-            );
-          }),
+    return Scaffold(
+      backgroundColor: Colors.white,
+      appBar: AppBar(
+        title: const Text(
+          'Maintenance',
+          style: TextStyle(
+            color: Colors.white,
+            fontSize: 18,
+            fontFamily: 'Archivo',
+            fontWeight: FontWeight.w600,
+          ),
         ),
-      ],
+        centerTitle: true,
+        backgroundColor: const Color(0xFF2B63A8),
+        elevation: 0,
+        systemOverlayStyle: const SystemUiOverlayStyle(
+          statusBarColor: Colors.transparent,
+          statusBarIconBrightness: Brightness.light,
+        ),
+        toolbarHeight: kToolbarHeight,
+        leading: Center(
+          child: Container(
+            margin: const EdgeInsets.only(left: 16),
+            width: 32,
+            height: 32,
+            decoration: BoxDecoration(
+              color: Colors.white.withValues(alpha: 0.2),
+              shape: BoxShape.circle,
+            ),
+            child: IconButton(
+              padding: EdgeInsets.zero,
+              icon: const Icon(Icons.arrow_back, color: Colors.white, size: 18),
+              onPressed: () {
+                if (Get.isRegistered<HomeController>()) {
+                  Get.find<HomeController>().changeTabIndex(0);
+                } else {
+                  Get.back();
+                }
+              },
+            ),
+          ),
+        ),
+        actions: [
+          Center(
+            child: Container(
+              margin: const EdgeInsets.only(right: 16),
+              width: 36,
+              height: 36,
+              decoration: const BoxDecoration(
+                color: Color(0xFFEDF2F9),
+                shape: BoxShape.circle,
+              ),
+              child: IconButton(
+                padding: EdgeInsets.zero,
+                icon: const Icon(Icons.add, color: Color(0xFF2B63A8), size: 20),
+                onPressed: () {
+                  Get.toNamed('/add-maintenance');
+                },
+              ),
+            ),
+          ),
+        ],
+      ),
+      body: Column(
+        children: [
+          _buildTabs(),
+          Expanded(
+            child: Obx(() {
+              final homeController = Get.find<HomeController>();
+              return ListView(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 24,
+                  vertical: 16,
+                ),
+                children: _buildTabContent(homeController),
+              );
+            }),
+          ),
+        ],
+      ),
     );
   }
 
@@ -122,20 +186,10 @@ class _MaintenanceTabViewState extends State<MaintenanceTabView> {
         final widgets = controller.upcomingTasks
             .map(
               (task) => _buildMaintenanceCard(
-                taskId: task['id']?.toString() ?? '',
                 status: 'UPCOMING',
-                title:
-                    task['service_type'] ??
-                    task['task_type'] ??
-                    task['title'] ??
-                    'Maintenance Task',
-                date:
-                    task['next_due_date']?.toString() ??
-                    task['due_date']?.toString() ??
-                    'N/A',
-                mileage: task['mileage'] != null
-                    ? '${task['mileage']} mi'
-                    : task['due_mileage'] != null
+                title: task['task_type'] ?? task['title'] ?? 'Maintenance Task',
+                date: task['due_date']?.toString() ?? 'N/A',
+                mileage: task['due_mileage'] != null
                     ? '${task['due_mileage']} mi'
                     : 'N/A',
                 notes: task['notes'] ?? 'No notes provided.',
@@ -154,20 +208,10 @@ class _MaintenanceTabViewState extends State<MaintenanceTabView> {
         final widgets = controller.overdueTasks
             .map(
               (task) => _buildMaintenanceCard(
-                taskId: task['id']?.toString() ?? '',
                 status: 'OVERDUE',
-                title:
-                    task['service_type'] ??
-                    task['task_type'] ??
-                    task['title'] ??
-                    'Maintenance Task',
-                date:
-                    task['next_due_date']?.toString() ??
-                    task['due_date']?.toString() ??
-                    'N/A',
-                mileage: task['mileage'] != null
-                    ? '${task['mileage']} mi'
-                    : task['due_mileage'] != null
+                title: task['task_type'] ?? task['title'] ?? 'Maintenance Task',
+                date: task['due_date']?.toString() ?? 'N/A',
+                mileage: task['due_mileage'] != null
                     ? '${task['due_mileage']} mi'
                     : 'N/A',
                 notes: task['notes'] ?? 'No notes provided.',
@@ -234,24 +278,14 @@ class _MaintenanceTabViewState extends State<MaintenanceTabView> {
         final widgets = controller.completedTasks
             .map(
               (task) => _buildMaintenanceCard(
-                taskId: task['id']?.toString() ?? '',
                 status: 'COMPLETED',
-                title:
-                    task['service_type'] ??
-                    task['task_type'] ??
-                    task['title'] ??
-                    'Maintenance Task',
+                title: task['task_type'] ?? task['title'] ?? 'Maintenance Task',
                 date:
                     task['completion_date']?.toString() ??
-                    task['next_due_date']?.toString() ??
                     task['due_date']?.toString() ??
                     'N/A',
                 mileage: task['completion_mileage'] != null
                     ? '${task['completion_mileage']} mi'
-                    : task['mileage'] != null
-                    ? '${task['mileage']} mi'
-                    : task['due_mileage'] != null
-                    ? '${task['due_mileage']} mi'
                     : 'N/A',
                 notes: task['notes'] ?? 'No notes provided.',
               ),
@@ -389,19 +423,20 @@ class _MaintenanceTabViewState extends State<MaintenanceTabView> {
   }
 
   Widget _buildMaintenanceCard({
-    required String taskId,
     required String status,
     required String title,
     required String date,
     required String mileage,
     required String notes,
   }) {
+    final subtitle = status == 'OVERDUE'
+        ? 'Overdue • $mileage'
+        : 'Due at $mileage';
     return InkWell(
       onTap: () {
         Get.toNamed(
           '/task-details',
           arguments: {
-            'id': taskId,
             'status': status,
             'title': title,
             'date': date,
@@ -413,7 +448,6 @@ class _MaintenanceTabViewState extends State<MaintenanceTabView> {
       borderRadius: BorderRadius.circular(12),
       child: Container(
         padding: const EdgeInsets.all(16),
-        margin: const EdgeInsets.only(bottom: 12),
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(12),
@@ -432,20 +466,13 @@ class _MaintenanceTabViewState extends State<MaintenanceTabView> {
               width: 48,
               height: 48,
               decoration: BoxDecoration(
-                color: status == 'OVERDUE'
-                    ? Colors.transparent
-                    : const Color(0xFFEFF6FF),
+                color: const Color(0xFFEFF6FF),
                 borderRadius: BorderRadius.circular(14),
               ),
-              child: status == 'OVERDUE'
-                  ? Image.asset(
-                      'assets/images/cautions.png',
-                      fit: BoxFit.contain,
-                    )
-                  : const Icon(
-                      Icons.calendar_today_outlined,
-                      color: Color(0xFF2B63A8),
-                    ),
+              child: const Icon(
+                Icons.calendar_today_outlined,
+                color: Color(0xFF2B63A8),
+              ),
             ),
             const SizedBox(width: 16),
             Expanded(
@@ -465,13 +492,13 @@ class _MaintenanceTabViewState extends State<MaintenanceTabView> {
                   Row(
                     children: [
                       const Icon(
-                        Icons.calendar_today_outlined,
+                        Icons.access_time_outlined,
                         size: 14,
                         color: Color(0xFF62748E),
                       ),
                       const SizedBox(width: 4),
                       Text(
-                        'Due: $date',
+                        date,
                         style: const TextStyle(
                           color: Color(0xFF62748E),
                           fontSize: 12,
@@ -481,25 +508,13 @@ class _MaintenanceTabViewState extends State<MaintenanceTabView> {
                     ],
                   ),
                   const SizedBox(height: 4),
-                  Row(
-                    children: [
-                      const Icon(
-                        Icons.speed_outlined,
-                        size: 14,
-                        color: Color(0xFF62748E),
-                      ),
-                      const SizedBox(width: 4),
-                      Text(
-                        status == 'OVERDUE'
-                            ? 'Overdue at $mileage'
-                            : 'Interval: $mileage',
-                        style: const TextStyle(
-                          color: Color(0xFF62748E),
-                          fontSize: 12,
-                          fontFamily: 'Inter',
-                        ),
-                      ),
-                    ],
+                  Text(
+                    subtitle,
+                    style: const TextStyle(
+                      color: Color(0xFF90A1B9),
+                      fontSize: 12,
+                      fontFamily: 'Inter',
+                    ),
                   ),
                 ],
               ),

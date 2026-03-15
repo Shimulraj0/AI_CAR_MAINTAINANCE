@@ -112,11 +112,6 @@ class SubscriptionView extends GetView<HomeController> {
                 ),
                 const SizedBox(height: 24),
                 _FadeInSlide(
-                  delay: 200,
-                  child: _buildOneTimeUnlockPlan(),
-                ),
-                const SizedBox(height: 24),
-                _FadeInSlide(
                   delay: 300,
                   child: _buildProPlan(),
                 ),
@@ -267,7 +262,7 @@ class SubscriptionView extends GetView<HomeController> {
             ),
             const SizedBox(height: 6),
             const Text(
-              'Essential vehicle tools for free',
+              'Ideal for small projects',
               style: TextStyle(
                 color: Color(0xFF787878),
                 fontSize: 14,
@@ -277,7 +272,7 @@ class SubscriptionView extends GetView<HomeController> {
             ),
             const SizedBox(height: 20),
             const Text(
-              '\$0.00',
+              'Free',
               style: TextStyle(
                 color: Color(0xFF1A1A1A),
                 fontSize: 32,
@@ -287,106 +282,21 @@ class SubscriptionView extends GetView<HomeController> {
             ),
             const SizedBox(height: 24),
             _buildFeatureRow('Basic AI Diagnosis', true),
-            _buildFeatureRow('Limited AI Chat (5/day)', true),
-            _buildFeatureRow('Single Vehicle Profile', true),
-            _buildFeatureRow('Standard Notifications', true),
+            _buildFeatureRow('Limited Chat AI', false),
+            _buildFeatureRow('Maintenance Reminder (Basic)', false),
+            _buildFeatureRow('Save Limited Reports', false),
+            _buildFeatureRow('Single Vehicle Only', false),
             const SizedBox(height: 32),
             Container(
               width: double.infinity,
               padding: const EdgeInsets.symmetric(vertical: 14),
               decoration: BoxDecoration(
-                color: const Color(0xFFE5E7EB),
+                color: const Color(0xFFE0E0E0),
                 borderRadius: BorderRadius.circular(30),
               ),
               alignment: Alignment.center,
               child: const Text(
-                'Current Plan',
-                style: TextStyle(
-                  color: Color(0xFF6B7280),
-                  fontSize: 16,
-                  fontFamily: 'Poppins',
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    ));
-  }
-
-  Widget _buildOneTimeUnlockPlan() {
-    return Obx(() => GestureDetector(
-      onTap: () => controller.selectedPlanIndex.value = 1,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 300),
-        margin: const EdgeInsets.symmetric(horizontal: 26),
-        padding: const EdgeInsets.all(24),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(24),
-          border: Border.all(
-            color: controller.selectedPlanIndex.value == 1
-                ? const Color(0xFF1363DF)
-                : const Color(0xFFE1E1E1),
-            width: controller.selectedPlanIndex.value == 1 ? 2 : 1,
-          ),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.04),
-              blurRadius: 8,
-              offset: const Offset(0, 4),
-            ),
-          ],
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text(
-              'One-Time Unlock',
-              style: TextStyle(
-                color: Color(0xFF1A1A1A),
-                fontSize: 24,
-                fontFamily: 'Archivo',
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-            const SizedBox(height: 6),
-            const Text(
-              'Full access for a single scan',
-              style: TextStyle(
-                color: Color(0xFF787878),
-                fontSize: 14,
-                fontFamily: 'Inter',
-                fontWeight: FontWeight.w400,
-              ),
-            ),
-            const SizedBox(height: 20),
-            const Text(
-              '\$1.99',
-              style: TextStyle(
-                color: Color(0xFF1A1A1A),
-                fontSize: 32,
-                fontFamily: 'Inter',
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-            const SizedBox(height: 24),
-            _buildFeatureRow('One-Time Full Report', true),
-            _buildFeatureRow('Unlimited AI Chat (24h)', true),
-            _buildFeatureRow('Deep OBD-II Analysis', true),
-            _buildFeatureRow('PDF Export Capability', true),
-            const SizedBox(height: 32),
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.symmetric(vertical: 14),
-              decoration: BoxDecoration(
-                color: const Color(0xFF111827),
-                borderRadius: BorderRadius.circular(30),
-              ),
-              alignment: Alignment.center,
-              child: const Text(
-                'Unlock Now',
+                'Starter',
                 style: TextStyle(
                   color: Colors.white,
                   fontSize: 16,
@@ -403,7 +313,7 @@ class SubscriptionView extends GetView<HomeController> {
 
   Widget _buildProPlan() {
     return Obx(() => GestureDetector(
-      onTap: () => controller.selectedPlanIndex.value = 2,
+      onTap: () => controller.selectedPlanIndex.value = 1,
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 300),
         margin: const EdgeInsets.symmetric(horizontal: 26),
@@ -415,10 +325,10 @@ class SubscriptionView extends GetView<HomeController> {
           ),
           borderRadius: BorderRadius.circular(28),
           border: Border.all(
-            color: controller.selectedPlanIndex.value == 2
+            color: controller.selectedPlanIndex.value == 1
                 ? const Color(0xFFFFFFFF)
                 : Colors.transparent,
-            width: controller.selectedPlanIndex.value == 2 ? 2 : 0,
+            width: controller.selectedPlanIndex.value == 1 ? 2 : 0,
           ),
         ),
         child: Column(
@@ -447,7 +357,7 @@ class SubscriptionView extends GetView<HomeController> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const Text(
-                    'Autointel Pro',
+                    'Professional',
                     style: TextStyle(
                       color: Color(0xFF1A1A1A),
                       fontSize: 24,
@@ -457,7 +367,7 @@ class SubscriptionView extends GetView<HomeController> {
                   ),
                   const SizedBox(height: 6),
                   const Text(
-                    'The ultimate vehicle companion',
+                    'For freelancers and startups',
                     style: TextStyle(
                       color: Color(0xFF787878),
                       fontSize: 14,
@@ -470,7 +380,7 @@ class SubscriptionView extends GetView<HomeController> {
                     crossAxisAlignment: CrossAxisAlignment.end,
                     children: [
                       const Text(
-                        '\$3.99',
+                        '\$99.99',
                         style: TextStyle(
                           color: Color(0xFF1A1A1A),
                           fontSize: 32,
@@ -494,16 +404,16 @@ class SubscriptionView extends GetView<HomeController> {
                     ],
                   ),
                   const SizedBox(height: 24),
-                  _buildFeatureRow('Unlimited AI Diagnostics', true),
-                  _buildFeatureRow('Priority 24/7 AI Chat', true),
-                  _buildFeatureRow('Advanced Maintenance AI', true),
-                  _buildFeatureRow('Manage Unlimited Vehicles', true),
-                  _buildFeatureRow('Early Access to New Features', true),
-                  _buildFeatureRow('Concierge Support', true),
+                  _buildFeatureRow('Advanced AI Diagnosis', true),
+                  _buildFeatureRow('Unlimited AI Chat', false),
+                  _buildFeatureRow('Full Vehicle History Tracking', false),
+                  _buildFeatureRow('Multiple Vehicles', false),
+                  _buildFeatureRow('Smart Maintenance System', false),
+                  _buildFeatureRow('Priority Support', false),
                   const SizedBox(height: 32),
                   if (Platform.isIOS)
                     ClipRRect(
-                      borderRadius: BorderRadius.circular(30),
+                      borderRadius: BorderRadius.circular(20),
                       child: SizedBox(
                         key: _applePayKey,
                         width: double.infinity,
@@ -515,8 +425,8 @@ class SubscriptionView extends GetView<HomeController> {
                               ),
                           paymentItems: const [
                             PaymentItem(
-                              label: 'AutoIntel Pro',
-                              amount: '3.99',
+                              label: 'AutoIntel Premium',
+                              amount: '99.99',
                               status: PaymentItemStatus.final_price,
                             ),
                           ],
@@ -529,7 +439,7 @@ class SubscriptionView extends GetView<HomeController> {
                     ),
                   if (Platform.isAndroid)
                     ClipRRect(
-                      borderRadius: BorderRadius.circular(30),
+                      borderRadius: BorderRadius.circular(12),
                       child: SizedBox(
                         key: _googlePayKey,
                         width: double.infinity,
@@ -541,8 +451,8 @@ class SubscriptionView extends GetView<HomeController> {
                               ),
                           paymentItems: const [
                             PaymentItem(
-                              label: 'AutoIntel Pro',
-                              amount: '3.99',
+                              label: 'AutoIntel Premium',
+                              amount: '99.99',
                               status: PaymentItemStatus.final_price,
                             ),
                           ],
@@ -568,23 +478,23 @@ class SubscriptionView extends GetView<HomeController> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Icon(
-            isIncluded ? Icons.check_circle_rounded : Icons.check_circle_outline_rounded,
+            isIncluded ? Icons.verified : Icons.verified_outlined,
             color: isIncluded
-                ? const Color(0xFF2B63A8)
-                : const Color(0xFF94A3B8),
-            size: 20,
+                ? const Color(0xFF1363DF)
+                : const Color(0xFF475569),
+            size: 18,
           ),
-          const SizedBox(width: 10),
+          const SizedBox(width: 8),
           Expanded(
             child: Text(
               text,
               style: TextStyle(
                 color: isIncluded
-                    ? const Color(0xFF0F172A)
-                    : const Color(0xFF64748B),
+                    ? const Color(0xFF1A1A1A)
+                    : const Color(0xFF475569),
                 fontSize: 14,
                 fontFamily: 'Inter',
-                fontWeight: isIncluded ? FontWeight.w500 : FontWeight.w400,
+                fontWeight: isIncluded ? FontWeight.w600 : FontWeight.w400,
               ),
             ),
           ),

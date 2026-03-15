@@ -1,35 +1,76 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 import '../../controllers/home_controller.dart';
 import '../../routes/app_routes.dart';
 import 'package:animations/animations.dart';
-import '../../utils/responsive_helper.dart';
 import 'subscription_view.dart'; // Import the view directly for OpenContainer
+
 
 class ProfileTabView extends GetView<HomeController> {
   const ProfileTabView({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      padding: EdgeInsets.only(
-        left: ResponsiveHelper.paddingLarge,
-        right: ResponsiveHelper.paddingLarge,
-        top: 24,
-        bottom: 24,
+    return Scaffold(
+      backgroundColor: Colors.white,
+      appBar: AppBar(
+        title: const Text(
+          'Profile',
+          style: TextStyle(
+            color: Colors.white,
+            fontSize: 18,
+            fontFamily: 'Archivo',
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        centerTitle: true,
+        backgroundColor: const Color(0xFF2B63A8),
+        elevation: 0,
+        systemOverlayStyle: const SystemUiOverlayStyle(
+          statusBarColor: Colors.transparent,
+          statusBarIconBrightness: Brightness.light,
+        ),
+        toolbarHeight: kToolbarHeight,
+        leading: Center(
+          child: Container(
+            margin: const EdgeInsets.only(left: 16),
+            width: 32,
+            height: 32,
+            decoration: BoxDecoration(
+              color: Colors.white.withValues(alpha: 0.2),
+              shape: BoxShape.circle,
+            ),
+            child: IconButton(
+              padding: EdgeInsets.zero,
+              icon: const Icon(Icons.arrow_back, color: Colors.white, size: 18),
+              onPressed: () {
+                controller.changeTabIndex(0);
+              },
+            ),
+          ),
+        ),
       ),
-      child: Column(
-        children: [
-          _buildProfileCard(),
-          const SizedBox(height: 24),
-          _buildSubscriptionCard(),
-          const SizedBox(height: 24),
-          _buildMenuSection(),
-          const SizedBox(height: 24),
-          _buildLogoutButton(),
-          const SizedBox(height: 120), // Space for bottom nav
-        ],
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.only(
+          left: 26,
+          right: 26,
+          top: 24,
+          bottom: 24,
+        ),
+        child: Column(
+          children: [
+            _buildProfileCard(),
+            const SizedBox(height: 24),
+            _buildSubscriptionCard(),
+            const SizedBox(height: 24),
+            _buildMenuSection(),
+            const SizedBox(height: 24),
+            _buildLogoutButton(),
+            const SizedBox(height: 100), // Space for bottom nav
+          ],
+        ),
       ),
     );
   }

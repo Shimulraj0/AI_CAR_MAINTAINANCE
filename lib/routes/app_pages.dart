@@ -6,7 +6,6 @@ import '../views/home/save_reports_view.dart';
 import '../controllers/save_reports_controller.dart';
 import '../views/home/ai_chat_view.dart';
 import '../views/home/task_details_view.dart';
-import '../controllers/task_details_controller.dart';
 import '../views/home/add_maintenance_view.dart';
 import '../controllers/add_maintenance_controller.dart';
 import '../views/splash/splash_view.dart';
@@ -146,13 +145,7 @@ class AppPages {
       }),
     ),
     GetPage(name: Routes.aiChat, page: () => const AiChatView()),
-    GetPage(
-      name: Routes.taskDetails,
-      page: () => const TaskDetailsView(),
-      binding: BindingsBuilder(() {
-        Get.lazyPut<TaskDetailsController>(() => TaskDetailsController());
-      }),
-    ),
+    GetPage(name: Routes.taskDetails, page: () => const TaskDetailsView()),
     GetPage(
       name: Routes.addMaintenance,
       page: () => const AddMaintenanceView(),
@@ -163,7 +156,7 @@ class AppPages {
     GetPage(name: Routes.subscription, page: () => SubscriptionView()),
     GetPage(name: Routes.editProfile, page: () => const EditProfileView()),
     GetPage(
-      name: Routes.myVehicles,
+      name: Routes.myVehicles, 
       page: () => const MyVehiclesView(),
       binding: BindingsBuilder(() {
         Get.lazyPut<MyVehiclesController>(() => MyVehiclesController());
@@ -217,9 +210,7 @@ class AppPages {
     GetPage(
       name: Routes.paymentSuccess,
       page: () => PaymentSuccessView(
-        revealOffset: Get.arguments is Map
-            ? (Get.arguments as Map)['revealOffset']
-            : null,
+        revealOffset: Get.arguments is Map ? (Get.arguments as Map)['revealOffset'] : null,
       ),
       transition: Transition.circularReveal,
       transitionDuration: const Duration(milliseconds: 800),

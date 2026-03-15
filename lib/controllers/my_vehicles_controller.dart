@@ -7,11 +7,6 @@ class MyVehiclesController extends GetxController {
   
   final isLoading = true.obs;
   final vehicles = [].obs;
-  final selectedVehicleId = ''.obs;
-
-  void selectVehicle(String id) {
-    selectedVehicleId.value = id;
-  }
 
   @override
   void onInit() {
@@ -30,9 +25,6 @@ class MyVehiclesController extends GetxController {
             vehicles.assignAll(data['results']);
           } else if (data is List) {
              vehicles.assignAll(data);
-          }
-          if (vehicles.isNotEmpty && selectedVehicleId.isEmpty) {
-            selectedVehicleId.value = vehicles[0]['id']?.toString() ?? '';
           }
         } else {
           Get.snackbar(
