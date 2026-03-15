@@ -328,7 +328,7 @@ class AiChatView extends GetView<AiChatController> {
               onTap: () =>
                   controller.sendMessage(controller.textController.text),
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                 decoration: BoxDecoration(
                   color: const Color(0xFF2B63A8),
                   borderRadius: BorderRadius.circular(12),
