@@ -31,7 +31,7 @@ class _CustomBottomNavBarState extends State<CustomBottomNavBar> {
   Widget build(BuildContext context) {
     // Screen dimensions
     final screenWidth = MediaQuery.of(context).size.width;
-    final width = screenWidth > 360 ? 360.0 : screenWidth;
+    final width = screenWidth;
 
     return Hero(
       tag: 'custom_bottom_nav_bar',
@@ -78,9 +78,10 @@ class _CustomBottomNavBarState extends State<CustomBottomNavBar> {
               padding: const EdgeInsets.symmetric(horizontal: 16),
               decoration: BoxDecoration(
                 color: Colors.white,
-                borderRadius: BorderRadius.circular(
-                  20,
-                ), // Adding curved corners
+                borderRadius: const BorderRadius.only(
+                  topLeft: Radius.circular(32),
+                  topRight: Radius.circular(32),
+                ), // Premium curved top
                 boxShadow: const [
                   BoxShadow(
                     color: Color(0x3FACACAC),

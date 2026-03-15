@@ -24,7 +24,7 @@ class ApiService extends GetConnect {
     final prefs = await SharedPreferences.getInstance();
     _token = prefs.getString('auth_token');
     _resetToken = prefs.getString('reset_token');
-    _csrfToken = prefs.getString('csrf_token') ?? 'JzRi4cSVcW79ODedGqUV7PoqbctoDGR3';
+    _csrfToken = prefs.getString('csrf_token');
     _sessionId = prefs.getString('last_session_id');
     _rememberMe = prefs.getBool('remember_me') ?? false;
 
@@ -111,6 +111,10 @@ class ApiService extends GetConnect {
       String? csrf = getCsrfToken();
       if (csrf != null) {
         request.headers['Cookie'] = 'csrftoken=$csrf';
+        // Inject CSRF token for state-changing requests
+        if (request.method.toUpperCase() != 'GET' && request.method.toUpperCase() != 'HEAD') {
+          request.headers['X-CSRFToken'] = csrf;
+        }
       }
 
       // Attach token if available
@@ -123,6 +127,20 @@ class ApiService extends GetConnect {
 
     // Response modifier
     httpClient.addResponseModifier((request, response) {
+      // Dynamic CSRF Token Capture from Set-Cookie
+      final setCookie = response.headers?['set-cookie'];
+      if (setCookie != null && setCookie.contains('csrftoken=')) {
+        final regExp = RegExp(r'csrftoken=([^;]+)');
+        final match = regExp.firstMatch(setCookie);
+        if (match != null) {
+          final newToken = match.group(1);
+          if (newToken != null) {
+            debugPrint('Captured new CSRF Token: $newToken');
+            saveCsrfToken(newToken);
+          }
+        }
+      }
+
       if (response.statusCode == 401) {
         // Handle unauthorized (e.g., logout)
       }
@@ -328,6 +346,82 @@ class ApiService extends GetConnect {
       return response;
     } catch (e) {
       debugPrint('Get Maintenance Tasks Exception: $e');
+      rethrow;
+    } finally {
+      _isLoadingSubject.add(false);
+    }
+  }
+
+  Future<http.Response> getMaintenanceTask(String id) async {
+    final url = Uri.parse('$apiBaseUrl/api/maintenance/tasks/$id/');
+    final headers = await _getHeaders();
+    
+    _isLoadingSubject.add(true);
+    try {
+      final response = await http.get(
+        url,
+        headers: headers,
+      );
+      
+      if (response.statusCode != 200) {
+        debugPrint('Get Maintenance Task Error Status: ${response.statusCode}');
+        debugPrint('Get Maintenance Task Error Body: ${response.body}');
+      }
+      
+      return response;
+    } catch (e) {
+      debugPrint('Get Maintenance Task Exception: $e');
+      rethrow;
+    } finally {
+      _isLoadingSubject.add(false);
+    }
+  }
+
+  Future<http.Response> markTaskAsCompleted(String id, bool isCompleted) async {
+    final url = Uri.parse('$apiBaseUrl/api/maintenance/tasks/$id/mark-completed/');
+    final headers = await _getHeaders();
+    
+    _isLoadingSubject.add(true);
+    try {
+      final response = await http.patch(
+        url,
+        headers: headers,
+        body: json.encode({"is_completed": isCompleted}),
+      );
+      
+      if (response.statusCode != 200) {
+        debugPrint('Mark Task Completed Error Status: ${response.statusCode}');
+        debugPrint('Mark Task Completed Error Body: ${response.body}');
+      }
+      
+      return response;
+    } catch (e) {
+      debugPrint('Mark Task Completed Exception: $e');
+      rethrow;
+    } finally {
+      _isLoadingSubject.add(false);
+    }
+  }
+
+  Future<http.Response> deleteMaintenanceTask(String id) async {
+    final url = Uri.parse('$apiBaseUrl/api/maintenance/tasks/$id/');
+    final headers = await _getHeaders();
+    
+    _isLoadingSubject.add(true);
+    try {
+      final response = await http.delete(
+        url,
+        headers: headers,
+      );
+      
+      if (response.statusCode != 200 && response.statusCode != 204) {
+        debugPrint('Delete Maintenance Task Error Status: ${response.statusCode}');
+        debugPrint('Delete Maintenance Task Error Body: ${response.body}');
+      }
+      
+      return response;
+    } catch (e) {
+      debugPrint('Delete Maintenance Task Exception: $e');
       rethrow;
     } finally {
       _isLoadingSubject.add(false);
