@@ -1,6 +1,7 @@
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import '../../utils/responsive_helper.dart';
 
 class AnalyzingView extends StatefulWidget {
   const AnalyzingView({super.key});
@@ -40,46 +41,46 @@ class _AnalyzingViewState extends State<AnalyzingView> {
       ),
       body: Center(
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 24.0),
+          padding: EdgeInsets.symmetric(horizontal: context.w(24)),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               // Logo / Loading concentric circles
-              const AnimatedConcentricCircles(),
-              const SizedBox(height: 32),
-              const Text(
+              AnimatedConcentricCircles(context),
+              SizedBox(height: context.h(32)),
+              Text(
                 'Analyzing...',
                 textAlign: TextAlign.center,
                 style: TextStyle(
-                  color: Color(0xFF1A1D23),
-                  fontSize: 24,
+                  color: const Color(0xFF1A1D23),
+                  fontSize: context.sp(24),
                   fontFamily: 'Archivo',
                   fontWeight: FontWeight.w600,
                   height: 1.42,
                 ),
               ),
-              const SizedBox(height: 8),
-              const Text(
+              SizedBox(height: context.h(8)),
+              Text(
                 'Reviewing your vehicle information and\nidentifying potential causes',
                 textAlign: TextAlign.center,
                 style: TextStyle(
-                  color: Color(0xFF45556C),
-                  fontSize: 16,
+                  color: const Color(0xFF45556C),
+                  fontSize: context.sp(16),
                   fontFamily: 'Inter',
                   fontWeight: FontWeight.w400,
                   height: 1.5,
                 ),
               ),
-              const SizedBox(height: 48),
+              SizedBox(height: context.h(48)),
 
               // Checklist Items
-              _buildChecklistItem('Reading diagnostic codes'),
-              const SizedBox(height: 16),
-              _buildChecklistItem('Analyzing symptoms'),
-              const SizedBox(height: 16),
-              _buildChecklistItem('Matching patterns'),
-              const SizedBox(height: 16),
-              _buildChecklistItem('Generating report'),
+              _buildChecklistItem(context, 'Reading diagnostic codes'),
+              SizedBox(height: context.h(16)),
+              _buildChecklistItem(context, 'Analyzing symptoms'),
+              SizedBox(height: context.h(16)),
+              _buildChecklistItem(context, 'Matching patterns'),
+              SizedBox(height: context.h(16)),
+              _buildChecklistItem(context, 'Generating report'),
             ],
           ),
         ),
@@ -87,26 +88,26 @@ class _AnalyzingViewState extends State<AnalyzingView> {
     );
   }
 
-  Widget _buildChecklistItem(String text) {
+  Widget _buildChecklistItem(BuildContext context, String text) {
     return Padding(
-      padding: const EdgeInsets.only(left: 32.0),
+      padding: EdgeInsets.only(left: context.w(32)),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           Container(
-            width: 8,
-            height: 8,
+            width: context.w(8),
+            height: context.w(8),
             decoration: const BoxDecoration(
               color: Color(0xFF2B63A8),
               shape: BoxShape.circle,
             ),
           ),
-          const SizedBox(width: 12),
+          SizedBox(width: context.w(12)),
           Text(
             text,
-            style: const TextStyle(
-              color: Color(0xFF45556C),
-              fontSize: 14,
+            style: TextStyle(
+              color: const Color(0xFF45556C),
+              fontSize: context.sp(14),
               fontFamily: 'Inter',
               fontWeight: FontWeight.w400,
               height: 1.43,
@@ -119,7 +120,8 @@ class _AnalyzingViewState extends State<AnalyzingView> {
 }
 
 class AnimatedConcentricCircles extends StatefulWidget {
-  const AnimatedConcentricCircles({super.key});
+  final BuildContext context;
+  const AnimatedConcentricCircles(this.context, {super.key});
 
   @override
   State<AnimatedConcentricCircles> createState() =>
@@ -148,8 +150,8 @@ class _AnimatedConcentricCirclesState extends State<AnimatedConcentricCircles>
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      width: 80,
-      height: 80,
+      width: widget.context.w(80),
+      height: widget.context.w(80),
       child: Stack(
         alignment: Alignment.center,
         children: [
@@ -163,8 +165,8 @@ class _AnimatedConcentricCirclesState extends State<AnimatedConcentricCircles>
               );
             },
             child: SizedBox(
-              width: 80,
-              height: 80,
+              width: widget.context.w(80),
+              height: widget.context.w(80),
               child: CircularProgressIndicator(
                 value: 0.35, // 35% colored, 65% background
                 strokeWidth: 3,
@@ -183,8 +185,8 @@ class _AnimatedConcentricCirclesState extends State<AnimatedConcentricCircles>
               );
             },
             child: SizedBox(
-              width: 56,
-              height: 56,
+              width: widget.context.w(56),
+              height: widget.context.w(56),
               child: CircularProgressIndicator(
                 value: 0.25,
                 strokeWidth: 3,
@@ -203,8 +205,8 @@ class _AnimatedConcentricCirclesState extends State<AnimatedConcentricCircles>
               );
             },
             child: SizedBox(
-              width: 24,
-              height: 24,
+              width: widget.context.w(24),
+              height: widget.context.w(24),
               child: CustomPaint(painter: InnerArcsPainter()),
             ),
           ),

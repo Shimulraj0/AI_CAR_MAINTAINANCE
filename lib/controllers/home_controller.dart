@@ -1,12 +1,14 @@
 import 'dart:convert';
-import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../services/api_service.dart';
+import '../services/iap_service.dart';
 import '../routes/app_routes.dart';
 
 class HomeController extends GetxController {
   final ApiService _apiService = Get.find<ApiService>();
+  final IAPService _iapService = Get.find<IAPService>();
 
   final currentIndex = 0.obs;
   final autoStartDiagnose = false.obs;
@@ -21,7 +23,8 @@ class HomeController extends GetxController {
   var vehicleName = 'Toyota Corolla 2020'.obs; // Default fallback
   var activeVehicleId = ''.obs;
   var lastSessionId = ''.obs;
-  final RxList<Map<String, dynamic>> userVehicles = <Map<String, dynamic>>[].obs;
+  final RxList<Map<String, dynamic>> userVehicles =
+      <Map<String, dynamic>>[].obs;
 
   // Maintenance Stats
   var upcomingCount = 0.obs;
@@ -53,7 +56,17 @@ class HomeController extends GetxController {
     fetchMaintenanceStats();
     fetchAllMaintenanceTasks();
     lastSessionId.value = _apiService.getSessionId() ?? '';
+    // Wire up IAP success callback
+    _iapService.onPurchaseSuccess = () {
+      isProcessingPayment.value = false;
+      Get.toNamed(
+        Routes.paymentSuccess,
+        arguments: {'revealOffset': _lastRevealOffset},
+      );
+    };
   }
+
+  Offset? _lastRevealOffset;
 
   void fetchUserProfile() {
     // ... Implementation unchanged for clarity ...
@@ -65,18 +78,27 @@ class HomeController extends GetxController {
             userName.value = data['full_name'] ?? data['name'] ?? 'User';
             userEmail.value = data['email'] ?? '';
             userPhone.value = data['phone'] ?? '';
-            userProfileImage.value = data['profile_picture'] ?? data['image'] ?? data['avatar'] ?? '';
-            
+            userProfileImage.value =
+                data['profile_picture'] ??
+                data['image'] ??
+                data['avatar'] ??
+                '';
+
             // Try to set vehicle name if available in profile
             if (data['vehicles'] != null) {
-               final vehiclesList = data['vehicles'] as List;
-               userVehicles.value = vehiclesList.map((e) => Map<String, dynamic>.from(e)).toList();
-               
-               if (userVehicles.isNotEmpty) {
-                 final vehicle = userVehicles[0];
-                 activeVehicleId.value = vehicle['id']?.toString() ?? vehicle['uuid']?.toString() ?? '';
-                 updateVehicleDisplayName(vehicle);
-               }
+              final vehiclesList = data['vehicles'] as List;
+              userVehicles.value = vehiclesList
+                  .map((e) => Map<String, dynamic>.from(e))
+                  .toList();
+
+              if (userVehicles.isNotEmpty) {
+                final vehicle = userVehicles[0];
+                activeVehicleId.value =
+                    vehicle['id']?.toString() ??
+                    vehicle['uuid']?.toString() ??
+                    '';
+                updateVehicleDisplayName(vehicle);
+              }
             }
           }
         }
@@ -92,7 +114,7 @@ class HomeController extends GetxController {
       final response = await _apiService.getMaintenanceStats();
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
-        
+
         // Parse the stats based on assumed standard API output
         upcomingCount.value = data['upcoming'] ?? 0;
         overdueCount.value = data['overdue'] ?? 0;
@@ -107,55 +129,122 @@ class HomeController extends GetxController {
     upcomingPage = 1;
     overduePage = 1;
     completedPage = 1;
-    
+
     upcomingHasNext.value = true;
     overdueHasNext.value = true;
     completedHasNext.value = true;
 
-    _fetchTasksForStatus('upcoming', upcomingTasks, upcomingPage, upcomingHasNext, upcomingIsLoading);
-    _fetchTasksForStatus('overdue', overdueTasks, overduePage, overdueHasNext, overdueIsLoading);
-    _fetchTasksForStatus('completed', completedTasks, completedPage, completedHasNext, completedIsLoading);
+    _fetchTasksForStatus(
+      'upcoming',
+      upcomingTasks,
+      upcomingPage,
+      upcomingHasNext,
+      upcomingIsLoading,
+    );
+    _fetchTasksForStatus(
+      'overdue',
+      overdueTasks,
+      overduePage,
+      overdueHasNext,
+      overdueIsLoading,
+    );
+    _fetchTasksForStatus(
+      'completed',
+      completedTasks,
+      completedPage,
+      completedHasNext,
+      completedIsLoading,
+    );
   }
 
   void nextMaintenanceTasksPage(String status) {
-    if (status == 'upcoming' && upcomingHasNext.value && !upcomingIsLoading.value) {
+    if (status == 'upcoming' &&
+        upcomingHasNext.value &&
+        !upcomingIsLoading.value) {
       upcomingPage++;
-      _fetchTasksForStatus('upcoming', upcomingTasks, upcomingPage, upcomingHasNext, upcomingIsLoading);
-    } else if (status == 'overdue' && overdueHasNext.value && !overdueIsLoading.value) {
+      _fetchTasksForStatus(
+        'upcoming',
+        upcomingTasks,
+        upcomingPage,
+        upcomingHasNext,
+        upcomingIsLoading,
+      );
+    } else if (status == 'overdue' &&
+        overdueHasNext.value &&
+        !overdueIsLoading.value) {
       overduePage++;
-      _fetchTasksForStatus('overdue', overdueTasks, overduePage, overdueHasNext, overdueIsLoading);
-    } else if (status == 'completed' && completedHasNext.value && !completedIsLoading.value) {
+      _fetchTasksForStatus(
+        'overdue',
+        overdueTasks,
+        overduePage,
+        overdueHasNext,
+        overdueIsLoading,
+      );
+    } else if (status == 'completed' &&
+        completedHasNext.value &&
+        !completedIsLoading.value) {
       completedPage++;
-      _fetchTasksForStatus('completed', completedTasks, completedPage, completedHasNext, completedIsLoading);
+      _fetchTasksForStatus(
+        'completed',
+        completedTasks,
+        completedPage,
+        completedHasNext,
+        completedIsLoading,
+      );
     }
   }
 
   void previousMaintenanceTasksPage(String status) {
     if (status == 'upcoming' && upcomingPage > 1 && !upcomingIsLoading.value) {
       upcomingPage--;
-      _fetchTasksForStatus('upcoming', upcomingTasks, upcomingPage, upcomingHasNext, upcomingIsLoading);
-    } else if (status == 'overdue' && overduePage > 1 && !overdueIsLoading.value) {
+      _fetchTasksForStatus(
+        'upcoming',
+        upcomingTasks,
+        upcomingPage,
+        upcomingHasNext,
+        upcomingIsLoading,
+      );
+    } else if (status == 'overdue' &&
+        overduePage > 1 &&
+        !overdueIsLoading.value) {
       overduePage--;
-      _fetchTasksForStatus('overdue', overdueTasks, overduePage, overdueHasNext, overdueIsLoading);
-    } else if (status == 'completed' && completedPage > 1 && !completedIsLoading.value) {
+      _fetchTasksForStatus(
+        'overdue',
+        overdueTasks,
+        overduePage,
+        overdueHasNext,
+        overdueIsLoading,
+      );
+    } else if (status == 'completed' &&
+        completedPage > 1 &&
+        !completedIsLoading.value) {
       completedPage--;
-      _fetchTasksForStatus('completed', completedTasks, completedPage, completedHasNext, completedIsLoading);
+      _fetchTasksForStatus(
+        'completed',
+        completedTasks,
+        completedPage,
+        completedHasNext,
+        completedIsLoading,
+      );
     }
   }
 
   void _fetchTasksForStatus(
-    String status, 
-    RxList<dynamic> targetList, 
-    int page, 
-    RxBool hasNextVal, 
-    RxBool isLoadingVal, 
+    String status,
+    RxList<dynamic> targetList,
+    int page,
+    RxBool hasNextVal,
+    RxBool isLoadingVal,
   ) async {
     isLoadingVal.value = true;
     try {
-      final response = await _apiService.getMaintenanceTasks(status, page: page);
+      final response = await _apiService.getMaintenanceTasks(
+        status,
+        page: page,
+      );
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
-        
+
         List<dynamic> newTasks = [];
         if (data != null && data['results'] != null) {
           newTasks = data['results'];
@@ -164,7 +253,7 @@ class HomeController extends GetxController {
           newTasks = data;
           hasNextVal.value = false; // No envelope, assume all loaded
         }
-        
+
         targetList.assignAll(newTasks);
       }
     } catch (e) {
@@ -177,30 +266,44 @@ class HomeController extends GetxController {
   void fetchUserVehicles() {
     _apiService.getVehicles().listen(
       (response) {
-        if (response.statusCode == 200) {
-          final data = response.body;
-          List<Map<String, dynamic>> fetchedVehicles = [];
-          
-          if (data != null && data['results'] != null) {
-            fetchedVehicles = List<Map<String, dynamic>>.from(data['results']);
-          } else if (data is List) {
-            fetchedVehicles = List<Map<String, dynamic>>.from(data);
-          }
-          
+        if (response.statusCode == 200 || response.statusCode == 201) {
+          final fetchedVehicles = _apiService.parseVehicleList(response.body);
+
           if (fetchedVehicles.isNotEmpty) {
             userVehicles.assignAll(fetchedVehicles);
-            
+
             // Set active vehicle if not already set
             if (activeVehicleId.value.isEmpty) {
               final vehicle = userVehicles[0];
-              activeVehicleId.value = vehicle['id']?.toString() ?? vehicle['uuid']?.toString() ?? "";
+              activeVehicleId.value =
+                  vehicle['id']?.toString() ??
+                  vehicle['uuid']?.toString() ??
+                  "";
               updateVehicleDisplayName(vehicle);
             }
+          } else {
+            userVehicles.clear();
           }
+        } else {
+          debugPrint('Failed to fetch vehicles in HomeController: ${response.statusCode}');
+          Get.snackbar(
+            'Error',
+            'Failed to load vehicles (${response.statusCode})',
+            snackPosition: SnackPosition.BOTTOM,
+            backgroundColor: Colors.red.withValues(alpha: 0.1),
+            colorText: Colors.red,
+          );
         }
       },
       onError: (error) {
-        debugPrint('Failed to fetch vehicles in HomeController: $error');
+        debugPrint('Error in fetchUserVehicles in HomeController: $error');
+        Get.snackbar(
+          'Error',
+          'A connection error occurred while loading vehicles',
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: Colors.red.withValues(alpha: 0.1),
+          colorText: Colors.red,
+        );
       },
     );
   }
@@ -215,8 +318,11 @@ class HomeController extends GetxController {
   }
 
   void selectVehicle(dynamic vehicle) {
-    final vehicleMap = vehicle is Map ? vehicle : Map<String, dynamic>.from(vehicle);
-    activeVehicleId.value = vehicleMap['id']?.toString() ?? vehicleMap['uuid']?.toString() ?? "";
+    final vehicleMap = vehicle is Map
+        ? vehicle
+        : Map<String, dynamic>.from(vehicle);
+    activeVehicleId.value =
+        vehicleMap['id']?.toString() ?? vehicleMap['uuid']?.toString() ?? "";
     updateVehicleDisplayName(Map<String, dynamic>.from(vehicleMap));
   }
 
@@ -224,9 +330,10 @@ class HomeController extends GetxController {
     autoStartDiagnose.value = autoStart;
     currentIndex.value = index;
     if (index == 0) {
-       fetchUserVehicles();
+      fetchUserVehicles();
     }
-    if (index == 3) { // 3 is usually the Profile tab index, refresh when navigated here
+    if (index == 3) {
+      // 3 is usually the Profile tab index, refresh when navigated here
       fetchUserProfile();
       fetchUserVehicles();
     }
@@ -245,6 +352,61 @@ class HomeController extends GetxController {
       isLoadingLogout.value = false;
       // Always clear out and go to login
       Get.offAllNamed(Routes.login);
+    }
+  }
+
+  Future<void> markTaskCompleted(String taskId) async {
+    try {
+      final response = await _apiService.markTaskCompleted(taskId);
+      if (response.statusCode == 200) {
+        Get.snackbar(
+          'Success',
+          'Task marked as completed successfully',
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: const Color(0xFF10B981),
+          colorText: Colors.white,
+        );
+        // Refresh data
+        fetchMaintenanceStats();
+        fetchAllMaintenanceTasks();
+        // Go back if we are in details
+        if (Get.currentRoute == Routes.taskDetails ||
+            Get.currentRoute == '/task-details') {
+          Get.back();
+        }
+      } else {
+        Get.snackbar(
+          'Error',
+          'Failed to mark task as completed',
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: const Color(0xFFEF4444),
+          colorText: Colors.white,
+        );
+      }
+    } catch (e) {
+      debugPrint('Error marking task as completed: $e');
+      Get.snackbar(
+        'Error',
+        'An unexpected error occurred',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: const Color(0xFFEF4444),
+        colorText: Colors.white,
+      );
+    }
+  }
+
+  Future<void> startSubscription(String productId, {Offset? revealOffset}) async {
+    isProcessingPayment.value = true;
+    _lastRevealOffset = revealOffset;
+    try {
+      final launched = await _iapService.buyProduct(productId);
+      if (!launched) {
+        isProcessingPayment.value = false;
+      }
+    } catch (e) {
+      debugPrint('Subscription Error: $e');
+      Get.snackbar('Error', 'An unexpected error occurred during payment');
+      isProcessingPayment.value = false;
     }
   }
 }

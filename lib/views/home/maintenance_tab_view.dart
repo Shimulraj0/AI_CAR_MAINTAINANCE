@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import '../../controllers/home_controller.dart';
+import '../../utils/responsive_helper.dart';
 
 class MaintenanceTabView extends StatefulWidget {
   const MaintenanceTabView({super.key});
@@ -13,7 +13,7 @@ class MaintenanceTabView extends StatefulWidget {
 class _MaintenanceTabViewState extends State<MaintenanceTabView> {
   int _selectedTabIndex = 0; // 0: Upcoming, 1: Overdue, 2: Completed
 
-  Widget _buildPaginationControls(HomeController controller, String status) {
+  Widget _buildPaginationControls(BuildContext context, HomeController controller, String status) {
     int page = 1;
     bool hasNext = false;
     bool isLoading = false;
@@ -33,7 +33,7 @@ class _MaintenanceTabViewState extends State<MaintenanceTabView> {
     }
 
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 16),
+      padding: EdgeInsets.symmetric(vertical: context.h(16)),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
@@ -93,90 +93,26 @@ class _MaintenanceTabViewState extends State<MaintenanceTabView> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.white,
-      appBar: AppBar(
-        title: const Text(
-          'Maintenance',
-          style: TextStyle(
-            color: Colors.white,
-            fontSize: 18,
-            fontFamily: 'Archivo',
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-        centerTitle: true,
-        backgroundColor: const Color(0xFF2B63A8),
-        elevation: 0,
-        systemOverlayStyle: const SystemUiOverlayStyle(
-          statusBarColor: Colors.transparent,
-          statusBarIconBrightness: Brightness.light,
-        ),
-        toolbarHeight: kToolbarHeight,
-        leading: Center(
-          child: Container(
-            margin: const EdgeInsets.only(left: 16),
-            width: 32,
-            height: 32,
-            decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.2),
-              shape: BoxShape.circle,
-            ),
-            child: IconButton(
-              padding: EdgeInsets.zero,
-              icon: const Icon(Icons.arrow_back, color: Colors.white, size: 18),
-              onPressed: () {
-                if (Get.isRegistered<HomeController>()) {
-                  Get.find<HomeController>().changeTabIndex(0);
-                } else {
-                  Get.back();
-                }
-              },
-            ),
-          ),
-        ),
-        actions: [
-          Center(
-            child: Container(
-              margin: const EdgeInsets.only(right: 16),
-              width: 36,
-              height: 36,
-              decoration: const BoxDecoration(
-                color: Color(0xFFEDF2F9),
-                shape: BoxShape.circle,
+    return Column(
+      children: [
+        _buildTabs(),
+        Expanded(
+          child: Obx(() {
+            final homeController = Get.find<HomeController>();
+            return ListView(
+              padding: EdgeInsets.symmetric(
+                horizontal: context.w(24),
+                vertical: context.h(16),
               ),
-              child: IconButton(
-                padding: EdgeInsets.zero,
-                icon: const Icon(Icons.add, color: Color(0xFF2B63A8), size: 20),
-                onPressed: () {
-                  Get.toNamed('/add-maintenance');
-                },
-              ),
-            ),
-          ),
-        ],
-      ),
-      body: Column(
-        children: [
-          _buildTabs(),
-          Expanded(
-            child: Obx(() {
-              final homeController = Get.find<HomeController>();
-              return ListView(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 24,
-                  vertical: 16,
-                ),
-                children: _buildTabContent(homeController),
-              );
-            }),
-          ),
-        ],
-      ),
+              children: _buildTabContent(context, homeController),
+            );
+          }),
+        ),
+      ],
     );
   }
 
-  List<Widget> _buildTabContent(HomeController controller) {
+  List<Widget> _buildTabContent(BuildContext context, HomeController controller) {
     switch (_selectedTabIndex) {
       case 0:
         if (controller.upcomingTasks.isEmpty &&
@@ -187,10 +123,19 @@ class _MaintenanceTabViewState extends State<MaintenanceTabView> {
             .map(
               (task) => _buildMaintenanceCard(
                 status: 'UPCOMING',
-                title: task['task_type'] ?? task['title'] ?? 'Maintenance Task',
-                date: task['due_date']?.toString() ?? 'N/A',
-                mileage: task['due_mileage'] != null
-                    ? '${task['due_mileage']} mi'
+                title:
+                    task['service_type'] ??
+                    task['service type'] ??
+                    task['task_type'] ??
+                    task['title'] ??
+                    'Maintenance Task',
+                id: task['id']?.toString() ?? task['uuid']?.toString() ?? '',
+                date:
+                    task['next_due_date']?.toString() ??
+                    task['due_date']?.toString() ??
+                    'N/A',
+                mileage: (task['mileage'] ?? task['Mileage']) != null
+                    ? '${task['mileage'] ?? task['Mileage']} mi'
                     : 'N/A',
                 notes: task['notes'] ?? 'No notes provided.',
               ),
@@ -198,7 +143,8 @@ class _MaintenanceTabViewState extends State<MaintenanceTabView> {
             .cast<Widget>()
             .toList();
 
-        widgets.add(_buildPaginationControls(controller, 'upcoming'));
+        widgets.add(_buildPaginationControls(context, controller, 'upcoming'));
+        widgets.add(const SizedBox(height: 100));
         return widgets;
       case 1:
         if (controller.overdueTasks.isEmpty &&
@@ -209,10 +155,19 @@ class _MaintenanceTabViewState extends State<MaintenanceTabView> {
             .map(
               (task) => _buildMaintenanceCard(
                 status: 'OVERDUE',
-                title: task['task_type'] ?? task['title'] ?? 'Maintenance Task',
-                date: task['due_date']?.toString() ?? 'N/A',
-                mileage: task['due_mileage'] != null
-                    ? '${task['due_mileage']} mi'
+                title:
+                    task['service_type'] ??
+                    task['service type'] ??
+                    task['task_type'] ??
+                    task['title'] ??
+                    'Maintenance Task',
+                id: task['id']?.toString() ?? task['uuid']?.toString() ?? '',
+                date:
+                    task['next_due_date']?.toString() ??
+                    task['due_date']?.toString() ??
+                    'N/A',
+                mileage: (task['mileage'] ?? task['Mileage']) != null
+                    ? '${task['mileage'] ?? task['Mileage']} mi'
                     : 'N/A',
                 notes: task['notes'] ?? 'No notes provided.',
               ),
@@ -220,7 +175,8 @@ class _MaintenanceTabViewState extends State<MaintenanceTabView> {
             .cast<Widget>()
             .toList();
 
-        widgets.add(_buildPaginationControls(controller, 'overdue'));
+        widgets.add(_buildPaginationControls(context, controller, 'overdue'));
+        widgets.add(const SizedBox(height: 100));
         return widgets;
       case 2:
         if (controller.completedTasks.isEmpty &&
@@ -279,13 +235,24 @@ class _MaintenanceTabViewState extends State<MaintenanceTabView> {
             .map(
               (task) => _buildMaintenanceCard(
                 status: 'COMPLETED',
-                title: task['task_type'] ?? task['title'] ?? 'Maintenance Task',
+                title:
+                    task['service_type'] ??
+                    task['service type'] ??
+                    task['task_type'] ??
+                    task['title'] ??
+                    'Maintenance Task',
+                id: task['id']?.toString() ?? task['uuid']?.toString() ?? '',
                 date:
                     task['completion_date']?.toString() ??
+                    task['next_due_date']?.toString() ??
                     task['due_date']?.toString() ??
                     'N/A',
-                mileage: task['completion_mileage'] != null
-                    ? '${task['completion_mileage']} mi'
+                mileage:
+                    (task['completion_mileage'] ??
+                            task['mileage'] ??
+                            task['Mileage']) !=
+                        null
+                    ? '${task['completion_mileage'] ?? task['mileage'] ?? task['Mileage']} mi'
                     : 'N/A',
                 notes: task['notes'] ?? 'No notes provided.',
               ),
@@ -293,7 +260,8 @@ class _MaintenanceTabViewState extends State<MaintenanceTabView> {
             .cast<Widget>()
             .toList();
 
-        widgets.add(_buildPaginationControls(controller, 'completed'));
+        widgets.add(_buildPaginationControls(context, controller, 'completed'));
+        widgets.add(const SizedBox(height: 100));
         return widgets;
       default:
         return [];
@@ -321,7 +289,7 @@ class _MaintenanceTabViewState extends State<MaintenanceTabView> {
     final homeController = Get.find<HomeController>();
     return Container(
       color: Colors.white,
-      padding: const EdgeInsets.only(top: 16),
+      padding: EdgeInsets.only(top: context.h(16)),
       child: Obx(
         () => Row(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -425,6 +393,7 @@ class _MaintenanceTabViewState extends State<MaintenanceTabView> {
   Widget _buildMaintenanceCard({
     required String status,
     required String title,
+    required String id,
     required String date,
     required String mileage,
     required String notes,
@@ -437,6 +406,7 @@ class _MaintenanceTabViewState extends State<MaintenanceTabView> {
         Get.toNamed(
           '/task-details',
           arguments: {
+            'id': id,
             'status': status,
             'title': title,
             'date': date,
@@ -465,14 +435,22 @@ class _MaintenanceTabViewState extends State<MaintenanceTabView> {
             Container(
               width: 48,
               height: 48,
+              padding: const EdgeInsets.all(10),
               decoration: BoxDecoration(
-                color: const Color(0xFFEFF6FF),
+                color: status == 'OVERDUE'
+                    ? const Color(0xFFFFF7ED)
+                    : const Color(0xFFEFF6FF),
                 borderRadius: BorderRadius.circular(14),
               ),
-              child: const Icon(
-                Icons.calendar_today_outlined,
-                color: Color(0xFF2B63A8),
-              ),
+              child: status == 'OVERDUE'
+                  ? Image.asset(
+                      'assets/images/cautions.png',
+                      fit: BoxFit.contain,
+                    )
+                  : const Icon(
+                      Icons.calendar_today_outlined,
+                      color: Color(0xFF2B63A8),
+                    ),
             ),
             const SizedBox(width: 16),
             Expanded(

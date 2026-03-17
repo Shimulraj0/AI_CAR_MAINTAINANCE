@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import '../../controllers/home_controller.dart';
 import '../../widgets/custom_bottom_nav_bar.dart';
 import '../../routes/app_routes.dart';
+import '../../utils/responsive_helper.dart';
 
 class TaskDetailsView extends GetView<HomeController> {
   const TaskDetailsView({super.key});
@@ -19,7 +20,9 @@ class TaskDetailsView extends GetView<HomeController> {
         args['notes'] as String? ??
         'No additional notes provided for this task.';
 
+    final taskId = args['id'] as String? ?? '';
     final bool isOverdue = status == 'OVERDUE';
+    final bool isCompleted = status == 'COMPLETED';
 
     return Scaffold(
       backgroundColor: const Color(0xFFF8FAFC),
@@ -57,14 +60,14 @@ class TaskDetailsView extends GetView<HomeController> {
         children: [
           Expanded(
             child: SingleChildScrollView(
-              padding: const EdgeInsets.only(
-                left: 26,
-                right: 26,
-                top: 16,
-                bottom: 24,
+              padding: EdgeInsets.only(
+                left: context.w(26),
+                right: context.w(26),
+                top: context.h(16),
+                bottom: context.h(24),
               ),
               child: Container(
-                padding: const EdgeInsets.all(16),
+                padding: EdgeInsets.all(context.w(16)),
                 decoration: ShapeDecoration(
                   color: Colors.white,
                   shape: RoundedRectangleBorder(
@@ -94,16 +97,29 @@ class TaskDetailsView extends GetView<HomeController> {
                           borderRadius: BorderRadius.circular(100),
                         ),
                       ),
-                      child: Text(
-                        status,
-                        style: TextStyle(
-                          color: isOverdue
-                              ? const Color(0xFFE7000B)
-                              : const Color(0xFF155DFC),
-                          fontSize: 12,
-                          fontFamily: 'Inter',
-                          fontWeight: FontWeight.w500,
-                        ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          if (isOverdue) ...[
+                            Image.asset(
+                              'assets/images/cautions.png',
+                              width: context.w(14),
+                              height: context.w(14),
+                            ),
+                            SizedBox(width: context.w(6)),
+                          ],
+                          Text(
+                            status,
+                            style: TextStyle(
+                              color: isOverdue
+                                  ? const Color(0xFFE7000B)
+                                  : const Color(0xFF155DFC),
+                              fontSize: 12,
+                              fontFamily: 'Inter',
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                     const SizedBox(height: 12),
@@ -146,21 +162,32 @@ class TaskDetailsView extends GetView<HomeController> {
             ),
           ),
           Container(
-            padding: const EdgeInsets.only(left: 26, right: 26, bottom: 24),
+            padding: EdgeInsets.only(
+              left: context.w(26),
+              right: context.w(26),
+              bottom: context.h(24),
+            ),
             decoration: const BoxDecoration(color: Color(0xFFF8FAFC)),
             child: Column(
               children: [
-                _buildActionButton(
-                  icon: Icons.check_circle_outline,
-                  label: 'Mark as Completed',
-                  backgroundColor: const Color(0xFF2F5EA8),
-                  textColor: Colors.white,
-                  onTap: () {
-                    // Handle complete action
-                  },
-                ),
+                if (!isCompleted)
+                  _buildActionButton(
+                    context,
+                    icon: Icons.check_circle_outline,
+                    label: 'Mark as Completed',
+                    backgroundColor: const Color(0xFF2B63A8),
+                    textColor: Colors.white,
+                    onTap: () {
+                      if (taskId.isNotEmpty) {
+                        controller.markTaskCompleted(taskId);
+                      } else {
+                        Get.snackbar('Error', 'Task ID not found');
+                      }
+                    },
+                  ),
                 const SizedBox(height: 12),
                 _buildActionButton(
+                  context,
                   icon: Icons.delete_outline,
                   label: 'Delete Task',
                   backgroundColor: Colors.white,
@@ -223,7 +250,8 @@ class TaskDetailsView extends GetView<HomeController> {
     );
   }
 
-  Widget _buildActionButton({
+  Widget _buildActionButton(
+    BuildContext context, {
     required IconData icon,
     required String label,
     required Color backgroundColor,
@@ -236,7 +264,7 @@ class TaskDetailsView extends GetView<HomeController> {
       borderRadius: BorderRadius.circular(14),
       child: Container(
         width: double.infinity,
-        padding: const EdgeInsets.symmetric(vertical: 16),
+        padding: EdgeInsets.symmetric(vertical: context.h(16)),
         decoration: ShapeDecoration(
           color: backgroundColor,
           shape: RoundedRectangleBorder(

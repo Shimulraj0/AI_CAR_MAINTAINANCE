@@ -7,6 +7,8 @@ import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
 
 import 'services/push_notification_service.dart';
+import 'services/iap_service.dart';
+import 'utils/responsive_helper.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -74,6 +76,7 @@ void main() async {
   // Initialize Services (e.g., ApiService) before running the app
   // This is where you would also initialize Firebase, LocalStorage, etc.
   await Get.putAsync(() => ApiService().init());
+  await Get.putAsync<IAPService>(() async => Get.put(IAPService()));
 
   // Initialize Push Notifications in the background so it doesn't block UI load
   final pushNotificationService = PushNotificationService();
@@ -89,20 +92,36 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GetMaterialApp(
-      title: 'Auto Intel',
-      debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-        useMaterial3: true,
-      ),
-      // INITIAL ROUTE DEFINITION
-      initialRoute: AppPages.initial,
-      // DEFAULT TRANSITION
-      defaultTransition: Transition.rightToLeftWithFade,
-      transitionDuration: const Duration(milliseconds: 300),
-      // GETPAGES DEFINITION (Centralized Routing)
-      getPages: AppPages.routes,
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        return GetMaterialApp(
+          title: 'Auto Intel',
+          debugShowCheckedModeBanner: false,
+          theme: ThemeData(
+            colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+            useMaterial3: true,
+          ),
+          builder: (context, child) {
+            // Initialize ResponsiveHelper here or in a wrapper
+            ResponsiveHelper.init(context);
+            return MediaQuery(
+              data: MediaQuery.of(context).copyWith(
+                textScaler: TextScaler.linear(
+                  MediaQuery.of(context).textScaler.scale(1.0).clamp(0.8, 1.2),
+                ),
+              ),
+              child: child!,
+            );
+          },
+          // INITIAL ROUTE DEFINITION
+          initialRoute: AppPages.initial,
+          // DEFAULT TRANSITION
+          defaultTransition: Transition.rightToLeftWithFade,
+          transitionDuration: const Duration(milliseconds: 300),
+          // GETPAGES DEFINITION (Centralized Routing)
+          getPages: AppPages.routes,
+        );
+      },
     );
   }
 }

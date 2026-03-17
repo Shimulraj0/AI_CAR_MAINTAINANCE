@@ -8,10 +8,21 @@ class DiagnosticResultController extends GetxController {
   final DiagnoseController _diagnoseController = Get.find<DiagnoseController>();
   
   final Rx<dynamic> _localResult = Rx<dynamic>(null);
+  final RxString sessionId = "".obs;
   
   List<Map<String, dynamic>> get resultsList {
     final dynamic rawData = _localResult.value ?? _diagnoseController.diagnosticResult.value;
     if (rawData == null) return [];
+
+    // Extract session ID if not already set
+    if (sessionId.value.isEmpty) {
+      final id = _apiService.recursiveSearch(rawData, 'session_id') ?? 
+               _apiService.recursiveSearch(rawData, 'id') ?? 
+               _apiService.recursiveSearch(rawData, 'uuid');
+      if (id != null) {
+        sessionId.value = id.toString();
+      }
+    }
     
     List<Map<String, dynamic>> aggregatedResults = [];
     

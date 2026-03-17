@@ -284,6 +284,32 @@ class ApiService extends GetConnect {
     ).doOnDone(() => _isLoadingSubject.add(false));
   }
 
+  Future<http.Response> markTaskCompleted(String taskId) async {
+    final url = Uri.parse('$apiBaseUrl/api/maintenance/tasks/$taskId/mark-completed/');
+    final headers = await _getHeaders();
+    
+    _isLoadingSubject.add(true);
+    try {
+      final response = await http.patch(
+        url,
+        headers: headers,
+        body: json.encode({'is_completed': true}),
+      );
+      
+      if (response.statusCode != 200) {
+        debugPrint('Mark Task Completed Error Status: ${response.statusCode}');
+        debugPrint('Mark Task Completed Error Body: ${response.body}');
+      }
+      
+      return response;
+    } catch (e) {
+      debugPrint('Mark Task Completed Exception: $e');
+      rethrow;
+    } finally {
+      _isLoadingSubject.add(false);
+    }
+  }
+
   Future<http.Response> getMaintenanceStats() async {
     final url = Uri.parse('$apiBaseUrl/api/maintenance/tasks/stats/');
     final headers = await _getHeaders();
@@ -352,33 +378,59 @@ class ApiService extends GetConnect {
   }
 
   // --- DIAGNOSTICS & AI CHAT API ---
-  Future<http.Response> normalChat(Map<String, dynamic> payload) async {
+  Stream<Response> normalChat(Map<String, dynamic> payload) {
+    _isLoadingSubject.add(true);
+    return Stream.fromFuture(_normalChatHttp(payload))
+        .doOnDone(() => _isLoadingSubject.add(false));
+  }
+
+  Future<Response> _normalChatHttp(Map<String, dynamic> payload) async {
     final url = Uri.parse('$apiBaseUrl/api/diagnostics/normal-chat/');
     final headers = await _getHeaders();
-    
-    _isLoadingSubject.add(true);
+
     try {
       debugPrint('ApiService: POST $url');
-      debugPrint('ApiService: Payload: ${json.encode(payload)}');
-      
       final response = await http.post(
         url,
         headers: headers,
         body: json.encode(payload),
       );
-      
-      if (response.statusCode != 200 && response.statusCode != 201) {
-        debugPrint('Normal Chat Error Status: ${response.statusCode}');
-        debugPrint('Normal Chat Error Body: ${response.body}');
+      final responseBody = response.body;
+
+      dynamic decodedBody;
+      try {
+        decodedBody = json.decode(responseBody);
+      } catch (_) {
+        decodedBody = responseBody;
       }
-      
-      return response;
+
+      return Response(
+        statusCode: response.statusCode,
+        body: decodedBody,
+        bodyString: responseBody,
+        headers: response.headers,
+      );
     } catch (e) {
-      debugPrint('Normal Chat Exception: $e');
-      rethrow;
-    } finally {
-      _isLoadingSubject.add(false);
+      debugPrint('Http Error in normalChat: $e');
+      return Response(statusCode: 500, statusText: e.toString());
     }
+  }
+
+  /// Robustly extracts AI response text from various possible formats
+  String parseAiResponse(dynamic data) {
+    if (data == null) return "";
+
+    if (data is Map) {
+      return data['ai_response']?.toString() ??
+             data['response']?.toString() ??
+             data['reply']?.toString() ??
+             data['message']?.toString() ??
+             "";
+    } else if (data is String) {
+      return data;
+    }
+
+    return "";
   }
 
   Future<http.Response> createDiagnostic(Map<String, dynamic> payload) async {
@@ -473,9 +525,56 @@ class ApiService extends GetConnect {
   // --- VEHICLES API ---
   Stream<Response> getVehicles() {
     _isLoadingSubject.add(true);
-    return Stream.fromFuture(
-      get('/api/vehicles/'),
-    ).doOnDone(() => _isLoadingSubject.add(false));
+    return Stream.fromFuture(_getVehiclesHttp())
+        .doOnDone(() => _isLoadingSubject.add(false));
+  }
+
+  Future<Response> _getVehiclesHttp() async {
+    final url = Uri.parse('$apiBaseUrl/api/vehicles/');
+    final headers = await _getHeaders();
+
+    try {
+      final response = await http.get(url, headers: headers);
+      final responseBody = response.body;
+
+      dynamic decodedBody;
+      try {
+        decodedBody = json.decode(responseBody);
+      } catch (_) {
+        decodedBody = responseBody;
+      }
+
+      return Response(
+        statusCode: response.statusCode,
+        body: decodedBody,
+        bodyString: responseBody,
+        headers: response.headers,
+      );
+    } catch (e) {
+      debugPrint('Http Error in getVehicles: $e');
+      return Response(statusCode: 500, statusText: e.toString());
+    }
+  }
+
+  /// Robustly parses a vehicle list from various possible backend formats
+  List<Map<String, dynamic>> parseVehicleList(dynamic data) {
+    if (data == null) return [];
+
+    if (data is Map) {
+      // Check common keys like 'results', 'vehicles', 'data'
+      final list = data['results'] ?? data['vehicles'] ?? data['data'];
+      if (list is List) {
+        return List<Map<String, dynamic>>.from(
+          list.whereType<Map<String, dynamic>>(),
+        );
+      }
+    } else if (data is List) {
+      return List<Map<String, dynamic>>.from(
+        data.whereType<Map<String, dynamic>>(),
+      );
+    }
+
+    return [];
   }
 
   Stream<Response> addVehicle(Map<String, dynamic> payload) {
@@ -499,6 +598,30 @@ class ApiService extends GetConnect {
     return Stream.fromFuture(
       get('/api/user/me/'),
     ).doOnDone(() => _isLoadingSubject.add(false));
+  }
+
+  // --- STRIPE PAYMENT API ---
+  Future<http.Response> createPaymentIntent(double amount) async {
+    final url = Uri.parse('$apiBaseUrl/api/payments/create-intent/');
+    final headers = await _getHeaders();
+    
+    _isLoadingSubject.add(true);
+    try {
+      final response = await http.post(
+        url,
+        headers: headers,
+        body: json.encode({
+          'amount': (amount * 100).toInt(), // Stripe expects amounts in cents
+          'currency': 'gbp',
+        }),
+      );
+      return response;
+    } catch (e) {
+      debugPrint('Stripe Payment Intent Error: $e');
+      rethrow;
+    } finally {
+      _isLoadingSubject.add(false);
+    }
   }
 
   Stream<Response> updateProfile(Map<String, dynamic> payload) {

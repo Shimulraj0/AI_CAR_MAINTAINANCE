@@ -1,6 +1,5 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import '../../controllers/home_controller.dart';
 import '../../controllers/edit_profile_controller.dart';
@@ -70,29 +69,29 @@ class EditProfileView extends GetView<EditProfileController> {
             : SingleChildScrollView(
                 child: Column(
                   children: [
-            const SizedBox(height: 32),
-            _buildProfileImage(),
-            const SizedBox(height: 32),
-            _buildInputField(
-              'Full Name',
-              controller.nameController,
-              TextInputType.name,
-            ),
-            const SizedBox(height: 20),
-            _buildInputField(
-              'Email',
-              controller.emailController,
-              TextInputType.emailAddress,
-            ),
-            const SizedBox(height: 20),
-            _buildInputField(
-              'Phone',
-              controller.phoneController,
-              TextInputType.phone,
-            ),
-            const SizedBox(height: 48),
-            _buildSaveButton(),
-            const SizedBox(height: 40),
+                    const SizedBox(height: 32),
+                    _buildProfileImage(),
+                    const SizedBox(height: 32),
+                    _buildInputField(
+                      'Full Name',
+                      controller.nameController,
+                      TextInputType.name,
+                    ),
+                    const SizedBox(height: 20),
+                    _buildInputField(
+                      'Email',
+                      controller.emailController,
+                      TextInputType.emailAddress,
+                    ),
+                    const SizedBox(height: 20),
+                    _buildInputField(
+                      'Phone',
+                      controller.phoneController,
+                      TextInputType.phone,
+                    ),
+                    const SizedBox(height: 48),
+                    _buildSaveButton(),
+                    const SizedBox(height: 40),
                   ],
                 ),
               ),
@@ -129,8 +128,10 @@ class EditProfileView extends GetView<EditProfileController> {
                         ? FileImage(File(controller.pickedImagePath.value))
                               as ImageProvider
                         : controller.currentImageUrl.value.isNotEmpty
-                            ? NetworkImage(controller.currentImageUrl.value) as ImageProvider
-                            : const AssetImage('assets/images/profile.png') as ImageProvider,
+                        ? NetworkImage(controller.currentImageUrl.value)
+                              as ImageProvider
+                        : const AssetImage('assets/images/profile.png')
+                              as ImageProvider,
                     fit: BoxFit.cover,
                   ),
                 ),

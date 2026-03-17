@@ -19,17 +19,15 @@ class MyVehiclesController extends GetxController {
     _apiService.getVehicles().listen(
       (response) {
         isLoading.value = false;
-        if (response.statusCode == 200) {
-          final data = response.body;
-          if (data != null && data['results'] != null) {
-            vehicles.assignAll(data['results']);
-          } else if (data is List) {
-             vehicles.assignAll(data);
-          }
+        if (response.statusCode == 200 || response.statusCode == 201) {
+          final fetchedVehicles = _apiService.parseVehicleList(response.body);
+          vehicles.assignAll(fetchedVehicles);
         } else {
+          debugPrint('MyVehiclesController: Fetch Error ${response.statusCode}');
+          debugPrint('MyVehiclesController: Body ${response.body}');
           Get.snackbar(
              'Error', 
-             'Failed to fetch vehicles',
+             'Failed to fetch vehicles (${response.statusCode})',
              snackPosition: SnackPosition.BOTTOM,
              backgroundColor: Colors.red,
              colorText: Colors.white,

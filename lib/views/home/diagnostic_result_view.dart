@@ -4,7 +4,7 @@ import 'package:get/get.dart';
 import '../../routes/app_routes.dart';
 import '../../controllers/diagnostic_result_controller.dart';
 import '../../controllers/save_reports_controller.dart';
-import '../../services/api_service.dart';
+import '../../utils/responsive_helper.dart';
 
 class DiagnosticResultView extends GetView<DiagnosticResultController> {
   const DiagnosticResultView({super.key});
@@ -19,11 +19,11 @@ class DiagnosticResultView extends GetView<DiagnosticResultController> {
     return Scaffold(
       backgroundColor: const Color(0xFFF8FAFC),
       appBar: AppBar(
-        title: const Text(
+        title: Text(
           'Diagnostic Result',
           style: TextStyle(
             color: Colors.white,
-            fontSize: 18,
+            fontSize: context.sp(18),
             fontFamily: 'Archivo',
             fontWeight: FontWeight.w600,
           ),
@@ -42,16 +42,17 @@ class DiagnosticResultView extends GetView<DiagnosticResultController> {
       ),
       body: Obx(() {
         if (controller.isLoading.value && controller.result.isEmpty) {
-          return const Center(
+          return Center(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                CircularProgressIndicator(color: Color(0xFF2B63A8)),
-                SizedBox(height: 16),
+                CircularProgressIndicator(color: const Color(0xFF2B63A8)),
+                SizedBox(height: context.h(16)),
                 Text(
                   'Collecting diagnostic data...',
                   style: TextStyle(
-                    color: Color(0xFF64748B),
+                    color: const Color(0xFF64748B),
+                    fontSize: context.sp(14),
                     fontFamily: 'Inter',
                   ),
                 ),
@@ -66,7 +67,7 @@ class DiagnosticResultView extends GetView<DiagnosticResultController> {
 
         return SingleChildScrollView(
           child: Padding(
-            padding: const EdgeInsets.all(24.0),
+            padding: EdgeInsets.all(context.w(24)),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -80,10 +81,10 @@ class DiagnosticResultView extends GetView<DiagnosticResultController> {
                     children: [
                       if (isMultiPart) ...[
                         Container(
-                          margin: const EdgeInsets.only(top: 8, bottom: 16),
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 12,
-                            vertical: 6,
+                          margin: EdgeInsets.only(top: context.h(8), bottom: context.h(16)),
+                          padding: EdgeInsets.symmetric(
+                            horizontal: context.w(12),
+                            vertical: context.h(6),
                           ),
                           decoration: BoxDecoration(
                             color: const Color(0xFF2B63A8).withValues(alpha: 0.1),
@@ -94,9 +95,9 @@ class DiagnosticResultView extends GetView<DiagnosticResultController> {
                           ),
                           child: Text(
                             'PART ${resultIndex + 1} OF ${controller.resultsList.length}',
-                            style: const TextStyle(
-                              color: Color(0xFF2B63A8),
-                              fontSize: 12,
+                            style: TextStyle(
+                              color: const Color(0xFF2B63A8),
+                              fontSize: context.sp(12),
                               fontWeight: FontWeight.w700,
                               letterSpacing: 0.5,
                             ),
@@ -107,9 +108,9 @@ class DiagnosticResultView extends GetView<DiagnosticResultController> {
                       Row(
                         children: [
                           Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 12,
-                              vertical: 6,
+                            padding: EdgeInsets.symmetric(
+                              horizontal: context.w(12),
+                              vertical: context.h(6),
                             ),
                             decoration: BoxDecoration(
                               color: const Color(0xFFFF6900),
@@ -120,21 +121,21 @@ class DiagnosticResultView extends GetView<DiagnosticResultController> {
                               result['severity_label'] ??
                               result['severity']?.toString().toUpperCase() ??
                               'MODERATE SEVERITY',
-                              style: const TextStyle(
+                              style: TextStyle(
                                 color: Colors.white,
-                                fontSize: 12,
+                                fontSize: context.sp(12),
                                 fontFamily: 'Inter',
                                 fontWeight: FontWeight.w700,
                               ),
                             ),
                           ),
-                          const SizedBox(width: 12),
+                          SizedBox(width: context.w(12)),
                           Expanded(
                             child: Text(
                               'Confidence: ${result['confidence_level'] ?? result['confidence'] ?? '94'}%',
-                              style: const TextStyle(
-                                color: Color(0xFF62748E),
-                                fontSize: 14,
+                              style: TextStyle(
+                                color: const Color(0xFF62748E),
+                                fontSize: context.sp(14),
                                 fontFamily: 'Inter',
                                 fontWeight: FontWeight.w400,
                               ),
@@ -143,34 +144,35 @@ class DiagnosticResultView extends GetView<DiagnosticResultController> {
                           ),
                         ],
                       ),
-                      const SizedBox(height: 12),
+                      SizedBox(height: context.h(12)),
                       Text(
                         result['title'] ?? 'Diagnostic Result',
-                        style: const TextStyle(
-                          color: Color(
+                        style: TextStyle(
+                          color: const Color(
                             0xFF1E293B,
                           ), // Matches design's dark blue/slate
-                          fontSize: 24,
+                          fontSize: context.sp(24),
                           fontFamily: 'Archivo',
                           fontWeight: FontWeight.w700,
                           height: 1.2,
                         ),
                       ),
-                      const SizedBox(height: 4),
+                      SizedBox(height: context.h(4)),
                       Text(
                         '${result['diagnostic_codes'] is List && (result['diagnostic_codes'] as List).isNotEmpty ? (result['diagnostic_codes'] as List).join(', ') : (result['primary_code'] ?? result['code'] ?? result['diagnostic_code'] ?? 'P0133')} • ${result['system'] ?? result['vehicle_system'] ?? 'Vehicle System'}',
-                        style: const TextStyle(
-                          color: Color(0xFF62748E),
-                          fontSize: 14,
+                        style: TextStyle(
+                          color: const Color(0xFF62748E),
+                          fontSize: context.sp(14),
                           fontFamily: 'Inter',
                           fontWeight: FontWeight.w400,
                         ),
                       ),
 
-                      const SizedBox(height: 24),
+                      SizedBox(height: context.h(24)),
 
                       // Vehicle Assessment Card
                       _buildAssessmentCard(
+                        context,
                         assessment: result['summary'] ??
                             result['ai_assessment'] ??
                             result['assessment'] ??
@@ -180,19 +182,19 @@ class DiagnosticResultView extends GetView<DiagnosticResultController> {
                             result['symptoms'] ?? result['reported_symptoms']),
                       ),
 
-                      const SizedBox(height: 28),
+                      SizedBox(height: context.h(28)),
 
                       // Possible Causes Header
-                      const Text(
+                      Text(
                         'Possible Causes',
                         style: TextStyle(
-                          color: Color(0xFF1E293B),
-                          fontSize: 16,
+                          color: const Color(0xFF1E293B),
+                          fontSize: context.sp(16),
                           fontFamily: 'Archivo',
                           fontWeight: FontWeight.w700,
                         ),
                       ),
-                      const SizedBox(height: 16),
+                      SizedBox(height: context.h(16)),
 
                       // Dynamic Possible Causes
                       ...(_ensureList(result['likely_causes'] ??
@@ -208,8 +210,9 @@ class DiagnosticResultView extends GetView<DiagnosticResultController> {
                                 (resultIndex * 100 + causeIndex).toInt();
 
                             return Padding(
-                              padding: const EdgeInsets.only(bottom: 16),
+                              padding: EdgeInsets.only(bottom: context.h(16)),
                               child: _buildCauseCard(
+                                context,
                                 index: globalIndex,
                                 title:
                                     cause['title'] ??
@@ -244,12 +247,12 @@ class DiagnosticResultView extends GetView<DiagnosticResultController> {
                             );
                           }),
 
-                      const SizedBox(height: 12),
+                      SizedBox(height: context.h(12)),
 
                       // Recommended Next Steps
                       Container(
                         width: double.infinity,
-                        padding: const EdgeInsets.all(20),
+                        padding: EdgeInsets.all(context.w(20)),
                         decoration: BoxDecoration(
                           color: const Color(
                             0xFFEFF6FF,
@@ -259,16 +262,16 @@ class DiagnosticResultView extends GetView<DiagnosticResultController> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const Text(
+                            Text(
                               'Recommended Next Steps',
                               style: TextStyle(
-                                color: Color(0xFF2B63A8),
-                                fontSize: 16,
+                                color: const Color(0xFF2B63A8),
+                                fontSize: context.sp(16),
                                 fontFamily: 'Archivo',
                                 fontWeight: FontWeight.w700,
                               ),
                             ),
-                            const SizedBox(height: 16),
+                            SizedBox(height: context.h(16)),
                             ...(_ensureList(result['recommended_next_steps'] ??
                                         result['next_steps'] ??
                                         result['recommendations']))
@@ -276,8 +279,9 @@ class DiagnosticResultView extends GetView<DiagnosticResultController> {
                                 .entries
                                 .map((entry) {
                                   return Padding(
-                                    padding: const EdgeInsets.only(bottom: 12),
+                                    padding: EdgeInsets.only(bottom: context.h(12)),
                                     child: _buildStepRow(
+                                      context,
                                       (entry.key + 1).toString(),
                                       entry.value.toString(),
                                     ),
@@ -299,7 +303,7 @@ class DiagnosticResultView extends GetView<DiagnosticResultController> {
                   );
                 }),
 
-                const SizedBox(height: 32),
+                SizedBox(height: context.h(32)),
 
                 // Bottom Buttons
                 Row(
@@ -316,18 +320,14 @@ class DiagnosticResultView extends GetView<DiagnosticResultController> {
                               ? null
                               : () {
                                   final result = controller.result;
-                                  final apiService = Get.find<ApiService>();
-                                  final sessionId =
-                                      apiService.recursiveSearch(result, 'session_id') ??
-                                      apiService.recursiveSearch(result, 'id') ??
-                                      apiService.recursiveSearch(result, 'uuid');
+                                  final sId = controller.sessionId.value;
 
-                                  debugPrint('Extracted Session ID for Export: $sessionId');
+                                  debugPrint('Extracted Session ID for Export: $sId');
 
-                                  if (sessionId != null) {
+                                  if (sId.isNotEmpty) {
                                     saveReportsController
                                         .exportAndSaveDiagnosticPdf(
-                                          sessionId: sessionId.toString(),
+                                          sessionId: sId,
                                           diagnosticTitle:
                                               result['title'] ??
                                               'Diagnostic Result',
@@ -356,28 +356,31 @@ class DiagnosticResultView extends GetView<DiagnosticResultController> {
                                   }
                                 },
                           icon: saveReportsController.isLoading.value
-                              ? const SizedBox(
-                                  width: 20,
-                                  height: 20,
-                                  child: CircularProgressIndicator(
+                              ? SizedBox(
+                                  width: context.w(20),
+                                  height: context.w(20),
+                                  child: const CircularProgressIndicator(
                                     strokeWidth: 2,
                                   ),
                                 )
-                              : const Icon(
+                              : Icon(
                                   Icons.file_download_outlined,
-                                  size: 20,
+                                  size: context.w(20),
                                 ),
                           label: Flexible(
                             child: Text(
                               saveReportsController.isLoading.value
                                   ? 'Saving...'
                                   : 'Save Report',
-                              style: const TextStyle(fontWeight: FontWeight.w600),
+                              style: TextStyle(
+                                fontSize: context.sp(14),
+                                fontWeight: FontWeight.w600,
+                              ),
                               overflow: TextOverflow.ellipsis,
                             ),
                           ),
                           style: OutlinedButton.styleFrom(
-                            padding: const EdgeInsets.symmetric(vertical: 14),
+                            padding: EdgeInsets.symmetric(vertical: context.h(14)),
                             foregroundColor: const Color(0xFF314158),
                             side: const BorderSide(
                               color: Color(0xFFE2E8F0),
@@ -390,22 +393,25 @@ class DiagnosticResultView extends GetView<DiagnosticResultController> {
                         );
                       }),
                     ),
-                    const SizedBox(width: 12),
+                    SizedBox(width: context.w(12)),
                     Expanded(
                       child: ElevatedButton.icon(
                         onPressed: () {
                           Get.toNamed(Routes.aiChat);
                         },
-                        icon: const Icon(Icons.chat_bubble_outline, size: 20),
-                        label: const Flexible(
+                        icon: Icon(Icons.chat_bubble_outline, size: context.w(20)),
+                        label: Flexible(
                           child: Text(
                             'Live Chat Support',
-                            style: TextStyle(fontWeight: FontWeight.w600),
+                            style: TextStyle(
+                              fontSize: context.sp(14),
+                              fontWeight: FontWeight.w600,
+                            ),
                             overflow: TextOverflow.ellipsis,
                           ),
                         ),
                         style: ElevatedButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(vertical: 14),
+                          padding: EdgeInsets.symmetric(vertical: context.h(14)),
                           backgroundColor: const Color(0xFF2B63A8),
                           foregroundColor: Colors.white,
                           elevation: 0,
@@ -417,20 +423,23 @@ class DiagnosticResultView extends GetView<DiagnosticResultController> {
                     ),
                   ],
                 ),
-                const SizedBox(height: 12),
+                SizedBox(height: context.h(12)),
                 SizedBox(
                   width: double.infinity,
                   child: ElevatedButton.icon(
                     onPressed: () {
                       Get.toNamed(Routes.addMaintenance);
                     },
-                    icon: const Icon(Icons.calendar_today_outlined, size: 20),
-                    label: const Text(
+                    icon: Icon(Icons.calendar_today_outlined, size: context.w(20)),
+                    label: Text(
                       'Schedule Service',
-                      style: TextStyle(fontWeight: FontWeight.w600),
+                      style: TextStyle(
+                        fontSize: context.sp(14),
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
                     style: ElevatedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      padding: EdgeInsets.symmetric(vertical: context.h(14)),
                       backgroundColor: const Color(0xFF1D293D),
                       foregroundColor: Colors.white,
                       elevation: 0,
@@ -441,7 +450,7 @@ class DiagnosticResultView extends GetView<DiagnosticResultController> {
                   ),
                 ),
 
-                const SizedBox(height: 48),
+                SizedBox(height: context.h(48)),
               ],
             ),
           ),
@@ -450,13 +459,14 @@ class DiagnosticResultView extends GetView<DiagnosticResultController> {
     );
   }
 
-  Widget _buildAssessmentCard({
+  Widget _buildAssessmentCard(
+    BuildContext context, {
     required String assessment,
     required List symptoms,
   }) {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(20),
+      padding: EdgeInsets.all(context.w(20)),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),
@@ -475,57 +485,57 @@ class DiagnosticResultView extends GetView<DiagnosticResultController> {
           Row(
             children: [
               Container(
-                padding: const EdgeInsets.all(4),
+                padding: EdgeInsets.all(context.w(4)),
                 decoration: BoxDecoration(
                   color: const Color(0xFFEFF6FF),
                   borderRadius: BorderRadius.circular(6),
                 ),
-                child: const Icon(
+                child: Icon(
                   Icons.info_outline,
-                  color: Color(0xFF2B63A8),
-                  size: 18,
+                  color: const Color(0xFF2B63A8),
+                  size: context.w(18),
                 ),
               ),
-              const SizedBox(width: 8),
-              const Text(
+              SizedBox(width: context.w(8)),
+              Text(
                 'Vehicle Assessment',
                 style: TextStyle(
-                  color: Color(0xFF1E293B),
-                  fontSize: 16,
+                  color: const Color(0xFF1E293B),
+                  fontSize: context.sp(16),
                   fontFamily: 'Archivo',
                   fontWeight: FontWeight.w700,
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 16),
+          SizedBox(height: context.h(16)),
           Text(
             assessment,
-            style: const TextStyle(
-              color: Color(0xFF64748B),
-              fontSize: 14,
+            style: TextStyle(
+              color: const Color(0xFF64748B),
+              fontSize: context.sp(14),
               fontFamily: 'Inter',
               height: 1.6,
             ),
           ),
           if (symptoms.isNotEmpty) ...[
-            const SizedBox(height: 20),
-            const Text(
+            SizedBox(height: context.h(20)),
+            Text(
               'REPORTED SYMPTOMS',
               style: TextStyle(
-                color: Color(0xFF1E293B),
-                fontSize: 10,
+                color: const Color(0xFF1E293B),
+                fontSize: context.sp(10),
                 fontFamily: 'Inter',
                 fontWeight: FontWeight.w800,
                 letterSpacing: 0.5,
               ),
             ),
-            const SizedBox(height: 12),
+            SizedBox(height: context.h(12)),
             Wrap(
-              spacing: 8,
-              runSpacing: 8,
+              spacing: context.w(8),
+              runSpacing: context.h(8),
               children: symptoms
-                  .map((s) => _buildSymptomChip(s.toString()))
+                  .map((s) => _buildSymptomChip(context, s.toString()))
                   .toList(),
             ),
           ],
@@ -534,18 +544,18 @@ class DiagnosticResultView extends GetView<DiagnosticResultController> {
     );
   }
 
-  Widget _buildSymptomChip(String label) {
+  Widget _buildSymptomChip(BuildContext context, String label) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      padding: EdgeInsets.symmetric(horizontal: context.w(12), vertical: context.h(6)),
       decoration: BoxDecoration(
         color: const Color(0xFFF1F5F9),
         borderRadius: BorderRadius.circular(8),
       ),
       child: Text(
         label,
-        style: const TextStyle(
-          color: Color(0xFF475569),
-          fontSize: 12,
+        style: TextStyle(
+          color: const Color(0xFF475569),
+          fontSize: context.sp(12),
           fontFamily: 'Inter',
           fontWeight: FontWeight.w500,
         ),
@@ -553,7 +563,8 @@ class DiagnosticResultView extends GetView<DiagnosticResultController> {
     );
   }
 
-  Widget _buildCauseCard({
+  Widget _buildCauseCard(
+    BuildContext context, {
     required int index,
     required String title,
     required String probLabel,
@@ -578,16 +589,16 @@ class DiagnosticResultView extends GetView<DiagnosticResultController> {
             InkWell(
               onTap: () => controller.toggleExpansion(index),
               child: Padding(
-                padding: const EdgeInsets.all(16),
+                padding: EdgeInsets.all(context.w(16)),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Expanded(
                       child: Text(
                         title,
-                        style: const TextStyle(
-                          color: Color(0xFF1E293B),
-                          fontSize: 16,
+                        style: TextStyle(
+                          color: const Color(0xFF1E293B),
+                          fontSize: context.sp(16),
                           fontFamily: 'Inter',
                           fontWeight: FontWeight.w600,
                         ),
@@ -598,9 +609,9 @@ class DiagnosticResultView extends GetView<DiagnosticResultController> {
                     Row(
                       children: [
                         Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 8,
-                            vertical: 4,
+                          padding: EdgeInsets.symmetric(
+                            horizontal: context.w(8),
+                            vertical: context.h(4),
                           ),
                           decoration: BoxDecoration(
                             color: probBgColor,
@@ -610,19 +621,19 @@ class DiagnosticResultView extends GetView<DiagnosticResultController> {
                             probLabel,
                             style: TextStyle(
                               color: probColor,
-                              fontSize: 11,
+                              fontSize: context.sp(11),
                               fontFamily: 'Inter',
                               fontWeight: FontWeight.w700,
                             ),
                           ),
                         ),
-                        const SizedBox(width: 8),
+                        SizedBox(width: context.w(8)),
                         Icon(
                           isExpanded
                               ? Icons.keyboard_arrow_up
                               : Icons.keyboard_arrow_down,
                           color: const Color(0xFF64748B),
-                          size: 20,
+                          size: context.w(20),
                         ),
                       ],
                     ),
@@ -632,24 +643,27 @@ class DiagnosticResultView extends GetView<DiagnosticResultController> {
             ),
             if (isExpanded)
               Padding(
-                padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+                padding: EdgeInsets.fromLTRB(context.w(16), 0, context.w(16), context.h(16)),
                 child: Column(
                   children: [
                     _buildCauseSection(
+                      context,
                       Icons.info_outline,
                       'What This Means',
                       meaning,
                       const Color(0xFF2B63A8),
                     ),
-                    const SizedBox(height: 16),
+                    SizedBox(height: context.h(16)),
                     _buildCauseSection(
+                      context,
                       Icons.check_circle_outline,
                       'Why This Matches Your Issue',
                       whyMatch,
                       const Color(0xFF10B981),
                     ),
-                    const SizedBox(height: 16),
+                    SizedBox(height: context.h(16)),
                     _buildCauseSection(
+                      context,
                       Icons.build_circle_outlined,
                       'Recommended Action',
                       action,
@@ -665,6 +679,7 @@ class DiagnosticResultView extends GetView<DiagnosticResultController> {
   }
 
   Widget _buildCauseSection(
+    BuildContext context,
     IconData icon,
     String title,
     String text,
@@ -675,14 +690,14 @@ class DiagnosticResultView extends GetView<DiagnosticResultController> {
       children: [
         Row(
           children: [
-            Icon(icon, size: 18, color: iconColor),
-            const SizedBox(width: 8),
+            Icon(icon, size: context.w(18), color: iconColor),
+            SizedBox(width: context.w(8)),
             Expanded(
               child: Text(
                 title,
-                style: const TextStyle(
-                  color: Color(0xFF1E293B),
-                  fontSize: 14,
+                style: TextStyle(
+                  color: const Color(0xFF1E293B),
+                  fontSize: context.sp(14),
                   fontFamily: 'Inter',
                   fontWeight: FontWeight.w600,
                 ),
@@ -690,14 +705,14 @@ class DiagnosticResultView extends GetView<DiagnosticResultController> {
             ),
           ],
         ),
-        const SizedBox(height: 6),
+        SizedBox(height: context.h(6)),
         Padding(
-          padding: const EdgeInsets.only(left: 26),
+          padding: EdgeInsets.only(left: context.w(26)),
           child: Text(
             text,
-            style: const TextStyle(
-              color: Color(0xFF64748B),
-              fontSize: 13,
+            style: TextStyle(
+              color: const Color(0xFF64748B),
+              fontSize: context.sp(13),
               fontFamily: 'Inter',
               height: 1.5,
             ),
@@ -707,13 +722,13 @@ class DiagnosticResultView extends GetView<DiagnosticResultController> {
     );
   }
 
-  Widget _buildStepRow(String number, String text) {
+  Widget _buildStepRow(BuildContext context, String number, String text) {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Container(
-          width: 22,
-          height: 22,
+          width: context.w(22),
+          height: context.w(22),
           alignment: Alignment.center,
           decoration: const BoxDecoration(
             color: Colors.white,
@@ -721,20 +736,20 @@ class DiagnosticResultView extends GetView<DiagnosticResultController> {
           ),
           child: Text(
             number,
-            style: const TextStyle(
-              color: Color(0xFF2B63A8),
-              fontSize: 11,
+            style: TextStyle(
+              color: const Color(0xFF2B63A8),
+              fontSize: context.sp(11),
               fontWeight: FontWeight.w800,
             ),
           ),
         ),
-        const SizedBox(width: 12),
+        SizedBox(width: context.w(12)),
         Expanded(
           child: Text(
             text,
-            style: const TextStyle(
-              color: Color(0xFF1E293B),
-              fontSize: 14,
+            style: TextStyle(
+              color: const Color(0xFF1E293B),
+              fontSize: context.sp(14),
               fontFamily: 'Inter',
               fontWeight: FontWeight.w500,
               height: 1.4,

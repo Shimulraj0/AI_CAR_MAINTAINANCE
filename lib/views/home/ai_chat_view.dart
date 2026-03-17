@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import '../../controllers/ai_chat_controller.dart';
 import '../../controllers/home_controller.dart';
+import '../../utils/responsive_helper.dart';
 
 class AiChatView extends GetView<AiChatController> {
   const AiChatView({super.key});
@@ -73,9 +74,9 @@ class AiChatView extends GetView<AiChatController> {
             child: Obx(
               () => ListView.separated(
                 controller: controller.scrollController,
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 24,
-                  vertical: 16,
+                padding: EdgeInsets.symmetric(
+                  horizontal: context.w(24),
+                  vertical: context.h(16),
                 ),
                 itemCount:
                     controller.messages.length +
@@ -84,13 +85,14 @@ class AiChatView extends GetView<AiChatController> {
                     const SizedBox(height: 16),
                 itemBuilder: (context, index) {
                   if (index == controller.messages.length) {
-                    return _buildTypingIndicator();
+                    return _buildTypingIndicator(context);
                   }
                   final message = controller.messages[index];
                   if (message.isUser) {
-                    return _buildUserMessage(text: message.text);
+                    return _buildUserMessage(context, text: message.text);
                   } else {
                     return _buildAiMessage(
+                      context,
                       text: message.text,
                       options: message.options,
                     );
@@ -99,13 +101,13 @@ class AiChatView extends GetView<AiChatController> {
               ),
             ),
           ),
-          _buildMessageInput(),
+          _buildMessageInput(context),
         ],
       ),
     );
   }
 
-  Widget _buildTypingIndicator() {
+  Widget _buildTypingIndicator(BuildContext context) {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -140,18 +142,18 @@ class AiChatView extends GetView<AiChatController> {
     );
   }
 
-  Widget _buildAiMessage({required String text, List<String>? options}) {
+  Widget _buildAiMessage(BuildContext context, {required String text, List<String>? options}) {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Container(
-          width: 40,
-          height: 40,
+          width: context.w(40),
+          height: context.w(40),
           decoration: const BoxDecoration(shape: BoxShape.circle),
           clipBehavior: Clip.antiAlias,
           child: Image.asset('assets/images/TM 2.png', fit: BoxFit.cover),
         ),
-        const SizedBox(width: 12),
+        SizedBox(width: context.w(12)),
         Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -227,14 +229,14 @@ class AiChatView extends GetView<AiChatController> {
     );
   }
 
-  Widget _buildUserMessage({required String text}) {
+  Widget _buildUserMessage(BuildContext context, {required String text}) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.end,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Expanded(
           child: Container(
-            padding: const EdgeInsets.all(12),
+            padding: EdgeInsets.all(context.w(12)),
             decoration: const BoxDecoration(
               color: Color(0xFF366FB5),
               borderRadius: BorderRadius.only(
@@ -257,8 +259,8 @@ class AiChatView extends GetView<AiChatController> {
         ),
         const SizedBox(width: 12),
         Container(
-          width: 40,
-          height: 40,
+          width: context.w(40),
+          height: context.w(40),
           clipBehavior: Clip.antiAlias,
           decoration: const BoxDecoration(shape: BoxShape.circle),
           child: GetX<HomeController>(
@@ -289,10 +291,10 @@ class AiChatView extends GetView<AiChatController> {
     );
   }
 
-  Widget _buildMessageInput() {
+  Widget _buildMessageInput(BuildContext context) {
     return SafeArea(
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+        padding: EdgeInsets.symmetric(horizontal: context.w(24), vertical: context.h(16)),
         color: const Color(0xFFF8FAFC),
         child: Row(
           children: [

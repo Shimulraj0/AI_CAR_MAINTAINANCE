@@ -5,6 +5,7 @@ import '../../controllers/home_controller.dart';
 import '../../controllers/add_maintenance_controller.dart';
 import '../../widgets/custom_bottom_nav_bar.dart';
 import '../../routes/app_routes.dart';
+import '../../utils/responsive_helper.dart';
 
 class AddMaintenanceView extends GetView<AddMaintenanceController> {
   const AddMaintenanceView({super.key});
@@ -48,32 +49,33 @@ class AddMaintenanceView extends GetView<AddMaintenanceController> {
         ),
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.only(
-          left: 26,
-          right: 26,
-          top: 16,
-          bottom: 24,
+        padding: EdgeInsets.only(
+          left: context.w(26),
+          right: context.w(26),
+          top: context.h(16),
+          bottom: context.h(24),
         ),
         child: Form(
           key: controller.formKey,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _buildInputField('Service Type', hintText: '', txtController: controller.serviceTypeController),
-              const SizedBox(height: 16),
-              _buildInputField('Date', hintText: 'YYYY-MM-DD', txtController: controller.dateController),
-              const SizedBox(height: 16),
-              _buildInputField('Mileage', hintText: 'Current mileage', txtController: controller.mileageController, keyboardType: TextInputType.number),
-              const SizedBox(height: 16),
+              _buildInputField(context, 'Service Type', hintText: '', txtController: controller.serviceTypeController),
+              SizedBox(height: context.h(16)),
+              _buildInputField(context, 'Date', hintText: 'YYYY-MM-DD', txtController: controller.dateController),
+              SizedBox(height: context.h(16)),
+              _buildInputField(context, 'Mileage', hintText: 'Current mileage', txtController: controller.mileageController, keyboardType: TextInputType.number),
+              SizedBox(height: context.h(16)),
               _buildInputField(
+                context,
                 'Notes(optional)',
                 hintText: 'Additional notes...',
                 maxLines: 4,
                 txtController: controller.notesController
               ),
-              const SizedBox(height: 16),
-              _buildInputField('Next Due Date', hintText: 'YYYY-MM-DD', txtController: controller.nextDueDateController),
-              const SizedBox(height: 32),
+              SizedBox(height: context.h(16)),
+              _buildInputField(context, 'Next Due Date', hintText: 'YYYY-MM-DD', txtController: controller.nextDueDateController),
+              SizedBox(height: context.h(32)),
               SizedBox(
                 width: double.infinity,
                 child: Obx(() => ElevatedButton(
@@ -128,6 +130,7 @@ class AddMaintenanceView extends GetView<AddMaintenanceController> {
   }
 
   Widget _buildInputField(
+    BuildContext context,
     String label, {
     required String hintText,
     int maxLines = 1,

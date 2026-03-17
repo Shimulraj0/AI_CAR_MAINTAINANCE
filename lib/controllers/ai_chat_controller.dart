@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'dart:async';
-import 'dart:convert';
 import '../services/api_service.dart';
+import 'home_controller.dart';
 
 class ChatMessage {
   final String text;
@@ -54,42 +54,68 @@ class AiChatController extends GetxController {
     isLoading.value = true;
 
     try {
-      debugPrint('AiChatController: Sending message to API: $userText');
-      final response = await _apiService.normalChat({'message': userText});
-      
-      debugPrint('AiChatController: API Response Status: ${response.statusCode}');
-      debugPrint('AiChatController: API Response Body: ${response.body}');
-
-      if (response.statusCode == 200 || response.statusCode == 201) {
-        final data = json.decode(response.body);
-        final aiText = data['ai_response'] ?? data['response'] ?? data['reply'] ?? data['message'] ?? "I'm sorry, I couldn't process that.";
-        
-        debugPrint('AiChatController: Extracted AI Text: $aiText');
-
-        // Handle options if present in the response
-        List<String>? options;
-        if (data['options'] != null && data['options'] is List) {
-          options = List<String>.from(data['options']);
-          debugPrint('AiChatController: Suggestions found: ${options.length}');
+      // Include active vehicle context if available
+      final Map<String, dynamic> payload = {'message': userText};
+      if (Get.isRegistered<HomeController>()) {
+        final activeVehicle = Get.find<HomeController>().activeVehicleId.value;
+        if (activeVehicle.isNotEmpty) {
+          payload['vehicle'] = activeVehicle;
         }
-
-        final newMessage = ChatMessage(text: aiText, isUser: false, options: options);
-        messages.add(newMessage);
-        debugPrint('AiChatController: Added AI message to list. New list length: ${messages.length}');
-      } else {
-        debugPrint('AiChatController: API Error ${response.statusCode}');
-        messages.add(ChatMessage(
-          text: "Sorry, I'm having trouble connecting to the service. Please try again later.",
-          isUser: false,
-        ));
       }
+
+      debugPrint('AiChatController: Sending payload: $payload');
+
+      _apiService.normalChat(payload).listen(
+        (response) {
+          if (response.statusCode == 200 || response.statusCode == 201) {
+            final data = response.body;
+            final aiText = _apiService.parseAiResponse(data);
+
+            if (aiText.isEmpty) {
+              messages.add(ChatMessage(
+                text: "I'm sorry, I couldn't process that response.",
+                isUser: false,
+              ));
+            } else {
+              // Handle options if present in the response
+              List<String>? options;
+              if (data is Map &&
+                  data['options'] != null &&
+                  data['options'] is List) {
+                options = List<String>.from(data['options']);
+              }
+
+              messages.add(
+                ChatMessage(text: aiText, isUser: false, options: options),
+              );
+            }
+          } else {
+            debugPrint('AiChatController: API Error ${response.statusCode}');
+            messages.add(
+              ChatMessage(
+                text:
+                    "Sorry, I'm having trouble connecting to the service. Please try again later.",
+                isUser: false,
+              ),
+            );
+          }
+          isLoading.value = false;
+          _scrollToBottom();
+        },
+        onError: (error) {
+          debugPrint('Chat error: $error');
+          messages.add(
+            ChatMessage(
+              text: "An error occurred. Please check your connection.",
+              isUser: false,
+            ),
+          );
+          isLoading.value = false;
+          _scrollToBottom();
+        },
+      );
     } catch (e) {
-      debugPrint('Chat error: $e');
-      messages.add(ChatMessage(
-        text: "An error occurred. Please check your connection.",
-        isUser: false,
-      ));
-    } finally {
+      debugPrint('Chat exception: $e');
       isLoading.value = false;
       _scrollToBottom();
     }

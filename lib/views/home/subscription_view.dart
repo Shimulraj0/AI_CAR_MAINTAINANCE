@@ -3,16 +3,15 @@ import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import '../../controllers/home_controller.dart';
 import '../../routes/app_routes.dart';
+import '../../services/iap_service.dart';
 import '../../widgets/custom_bottom_nav_bar.dart';
-import 'dart:io' show Platform;
-import 'package:pay/pay.dart';
-import '../../configs/payment_config.dart';
 
 class SubscriptionView extends GetView<HomeController> {
   SubscriptionView({super.key});
 
-  final GlobalKey _applePayKey = GlobalKey();
-  final GlobalKey _googlePayKey = GlobalKey();
+  // 0 = Starter (free), 1 = One-Time, 2 = Pro
+  final RxInt _selectedIndex = 2.obs;
+  final GlobalKey _proButtonKey = GlobalKey();
 
   Offset? _getCenterOfKey(GlobalKey key) {
     try {
@@ -56,6 +55,15 @@ class SubscriptionView extends GetView<HomeController> {
           icon: const Icon(Icons.arrow_back, color: Colors.white),
           onPressed: () => Get.back(),
         ),
+        actions: [
+          TextButton(
+            onPressed: () => Get.find<IAPService>().restorePurchases(),
+            child: const Text(
+              'Restore',
+              style: TextStyle(color: Colors.white70, fontSize: 13),
+            ),
+          ),
+        ],
       ),
       body: Stack(
         children: [
@@ -91,15 +99,34 @@ class SubscriptionView extends GetView<HomeController> {
                 const SizedBox(height: 24),
 
                 // --- Starter / Free Card ---
-                _FadeInSlide(delay: 100, child: _buildStarterCard()),
+                _FadeInSlide(
+                  delay: 100,
+                  child: Obx(
+                    () => _buildStarterCard(
+                      isSelected: _selectedIndex.value == 0,
+                    ),
+                  ),
+                ),
                 const SizedBox(height: 24),
 
                 // --- One-Time Full Report Unlock Card ---
-                _FadeInSlide(delay: 200, child: _buildOneTimeCard()),
+                _FadeInSlide(
+                  delay: 200,
+                  child: Obx(
+                    () => _buildOneTimeCard(
+                      isSelected: _selectedIndex.value == 1,
+                    ),
+                  ),
+                ),
                 const SizedBox(height: 24),
 
                 // --- Most Popular Pro Card ---
-                _FadeInSlide(delay: 300, child: _buildProCard()),
+                _FadeInSlide(
+                  delay: 300,
+                  child: Obx(
+                    () => _buildProCard(isSelected: _selectedIndex.value == 2),
+                  ),
+                ),
                 const SizedBox(height: 40),
               ],
             ),
@@ -124,10 +151,10 @@ class SubscriptionView extends GetView<HomeController> {
                         ),
                       ],
                     ),
-                    child: Column(
+                    child: const Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        const SizedBox(
+                        SizedBox(
                           width: 40,
                           height: 40,
                           child: CircularProgressIndicator(
@@ -137,8 +164,8 @@ class SubscriptionView extends GetView<HomeController> {
                             ),
                           ),
                         ),
-                        const SizedBox(height: 20),
-                        const Text(
+                        SizedBox(height: 20),
+                        Text(
                           'Processing Payment...',
                           style: TextStyle(
                             color: Color(0xFF1A1A1A),
@@ -147,8 +174,8 @@ class SubscriptionView extends GetView<HomeController> {
                             fontWeight: FontWeight.w600,
                           ),
                         ),
-                        const SizedBox(height: 8),
-                        const Text(
+                        SizedBox(height: 8),
+                        Text(
                           'Setting up your premium experience',
                           style: TextStyle(
                             color: Color(0xFF787878),
@@ -182,369 +209,395 @@ class SubscriptionView extends GetView<HomeController> {
 
   // ─── Starter / Free Card ────────────────────────────────────────────────────
 
-  Widget _buildStarterCard() {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
-      decoration: ShapeDecoration(
-        color: Colors.white,
-        shape: RoundedRectangleBorder(
-          side: const BorderSide(width: 1, color: Color(0xFFE1E1E1)),
-          borderRadius: BorderRadius.circular(24),
-        ),
-        shadows: const [
-          BoxShadow(
-            color: Color(0x19000000),
-            blurRadius: 8,
-            offset: Offset(0, 4),
-            spreadRadius: -2,
+  Widget _buildStarterCard({required bool isSelected}) {
+    return GestureDetector(
+      onTap: () => _selectedIndex.value = 0,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
+        decoration: ShapeDecoration(
+          color: Colors.white,
+          shape: RoundedRectangleBorder(
+            side: BorderSide(
+              width: isSelected ? 2 : 1,
+              color: isSelected
+                  ? const Color(0xFF2B63A8)
+                  : const Color(0xFFE1E1E1),
+            ),
+            borderRadius: BorderRadius.circular(24),
           ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text.rich(
-            TextSpan(
+          shadows: const [
+            BoxShadow(
+              color: Color(0x19000000),
+              blurRadius: 8,
+              offset: Offset(0, 4),
+              spreadRadius: -2,
+            ),
+          ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                TextSpan(
-                  text: 'Starter / ',
-                  style: TextStyle(
-                    color: const Color(0xFF1A1A1A),
-                    fontSize: 24,
-                    fontFamily: 'Archivo',
-                    fontWeight: FontWeight.w600,
-                    height: 1.25,
+                Text.rich(
+                  TextSpan(
+                    children: [
+                      TextSpan(
+                        text: 'Starter / ',
+                        style: const TextStyle(
+                          color: Color(0xFF1A1A1A),
+                          fontSize: 24,
+                          fontFamily: 'Archivo',
+                          fontWeight: FontWeight.w600,
+                          height: 1.25,
+                        ),
+                      ),
+                      const TextSpan(
+                        text: 'Free',
+                        style: TextStyle(
+                          color: Color(0xFF1A1A1A),
+                          fontSize: 28,
+                          fontFamily: 'Archivo',
+                          fontWeight: FontWeight.w600,
+                          height: 1.21,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-                TextSpan(
-                  text: 'Free',
-                  style: TextStyle(
-                    color: const Color(0xFF1A1A1A),
-                    fontSize: 28,
-                    fontFamily: 'Archivo',
-                    fontWeight: FontWeight.w600,
-                    height: 1.21,
-                  ),
+                Icon(
+                  isSelected ? Icons.verified : Icons.verified_outlined,
+                  color: isSelected
+                      ? const Color(0xFF2B63A8)
+                      : const Color(0xFFBBBBBB),
+                  size: 24,
                 ),
               ],
             ),
-          ),
-          const SizedBox(height: 12),
-          _buildFeatureRow('Enter vehicle details', isIncluded: true),
-          _buildFeatureRow('Enter diagnostic codes', isIncluded: false),
-          _buildFeatureRow('Enter symptoms', isIncluded: false),
-          _buildFeatureRow(
-            'Receive a basic explanation summary',
-            isIncluded: false,
-          ),
-          _buildFeatureRow(
-            'View 1–2 likely causes (no deep breakdown)',
-            isIncluded: false,
-          ),
-          _buildFeatureRow(
-            'View basic safety-to-drive rating',
-            isIncluded: false,
-          ),
-          _buildFeatureRow(
-            'Perform limited basic DIY checks (1–2)',
-            isIncluded: false,
-          ),
-          _buildFeatureRow('Add vehicle profile', isIncluded: false),
-          _buildFeatureRow(
-            'Use maintenance tracker (basic logging only)',
-            isIncluded: false,
-          ),
-          const SizedBox(height: 32),
-          _buildGreyButton('Starter'),
-        ],
+            const SizedBox(height: 12),
+            _buildFeatureRow('Enter vehicle details', isIncluded: true),
+            _buildFeatureRow('Enter diagnostic codes', isIncluded: false),
+            _buildFeatureRow('Enter symptoms', isIncluded: false),
+            _buildFeatureRow(
+              'Receive a basic explanation summary',
+              isIncluded: false,
+            ),
+            _buildFeatureRow(
+              'View 1–2 likely causes (no deep breakdown)',
+              isIncluded: false,
+            ),
+            _buildFeatureRow(
+              'View basic safety-to-drive rating',
+              isIncluded: false,
+            ),
+            _buildFeatureRow(
+              'Perform limited basic DIY checks (1–2)',
+              isIncluded: false,
+            ),
+            _buildFeatureRow('Add vehicle profile', isIncluded: false),
+            _buildFeatureRow(
+              'Use maintenance tracker (basic logging only)',
+              isIncluded: false,
+            ),
+            const SizedBox(height: 32),
+            _buildGreyButton('Starter', onTap: () => Get.back()),
+          ],
+        ),
       ),
     );
   }
 
   // ─── One-Time Full Report Unlock Card ────────────────────────────────────────
 
-  Widget _buildOneTimeCard() {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
-      decoration: ShapeDecoration(
-        color: Colors.white,
-        shape: RoundedRectangleBorder(
-          side: const BorderSide(width: 1, color: Color(0xFFE1E1E1)),
-          borderRadius: BorderRadius.circular(24),
-        ),
-        shadows: const [
-          BoxShadow(
-            color: Color(0x19000000),
-            blurRadius: 8,
-            offset: Offset(0, 4),
-            spreadRadius: -2,
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Text(
-            'One-Time Full Report Unlock',
-            style: TextStyle(
-              color: Color(0xFF1A1A1A),
-              fontSize: 24,
-              fontFamily: 'Archivo',
-              fontWeight: FontWeight.w600,
-              height: 1.25,
+  Widget _buildOneTimeCard({required bool isSelected}) {
+    return GestureDetector(
+      onTap: () => _selectedIndex.value = 1,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
+        decoration: ShapeDecoration(
+          color: Colors.white,
+          shape: RoundedRectangleBorder(
+            side: BorderSide(
+              width: isSelected ? 2 : 1,
+              color: isSelected
+                  ? const Color(0xFF2B63A8)
+                  : const Color(0xFFE1E1E1),
             ),
+            borderRadius: BorderRadius.circular(24),
           ),
-          const SizedBox(height: 12),
-          _buildFeatureRow('Full ranked 1–5 causes', isIncluded: true),
-          _buildFeatureRow('Detailed explanation per cause', isIncluded: false),
-          _buildFeatureRow('Enter symptoms', isIncluded: false),
-          _buildFeatureRow(
-            'Receive a basic explanation summary',
-            isIncluded: false,
-          ),
-          _buildFeatureRow(
-            'View 1–2 likely causes (no deep breakdown)',
-            isIncluded: false,
-          ),
-          _buildFeatureRow(
-            'View basic safety-to-drive rating',
-            isIncluded: false,
-          ),
-          _buildFeatureRow(
-            'Perform limited basic DIY checks (1–2)',
-            isIncluded: false,
-          ),
-          _buildFeatureRow('Add vehicle profile', isIncluded: false),
-          _buildFeatureRow(
-            'Use maintenance tracker (basic logging only)',
-            isIncluded: false,
-          ),
-          const SizedBox(height: 32),
-          _buildGreyButton('Starter'),
-        ],
+          shadows: const [
+            BoxShadow(
+              color: Color(0x19000000),
+              blurRadius: 8,
+              offset: Offset(0, 4),
+              spreadRadius: -2,
+            ),
+          ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Text(
+                  'One-Time Full \nReport Unlock',
+                  style: TextStyle(
+                    color: Color(0xFF1A1A1A),
+                    fontSize: 22,
+                    fontFamily: 'Archivo',
+                    fontWeight: FontWeight.w600,
+                    height: 1.25,
+                  ),
+                ),
+                Icon(
+                  isSelected ? Icons.verified : Icons.verified_outlined,
+                  color: isSelected
+                      ? const Color(0xFF2B63A8)
+                      : const Color(0xFFBBBBBB),
+                  size: 24,
+                ),
+              ],
+            ),
+            const SizedBox(height: 4),
+            const Text(
+              '£1.99 one-time',
+              style: TextStyle(
+                color: Color(0xFF2B63A8),
+                fontSize: 14,
+                fontFamily: 'Inter',
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            const SizedBox(height: 12),
+            _buildFeatureRow('Full ranked 1–5 causes', isIncluded: true),
+            _buildFeatureRow(
+              'Detailed explanation per cause',
+              isIncluded: true,
+            ),
+            _buildFeatureRow('Full safety-to-drive rating', isIncluded: true),
+            _buildFeatureRow('DIY checks (up to 5)', isIncluded: true),
+            _buildFeatureRow('Unlimited AI Chat', isIncluded: false),
+            _buildFeatureRow('Add vehicle profile', isIncluded: false),
+            _buildFeatureRow(
+              'Use maintenance tracker (basic logging only)',
+              isIncluded: false,
+            ),
+            const SizedBox(height: 32),
+            _buildActionButton(
+              label: 'Unlock Report — £1.99',
+              productId: IAPProductIds.reportUnlock,
+              isSelected: isSelected,
+            ),
+          ],
+        ),
       ),
     );
   }
 
   // ─── Most Popular Pro Card ───────────────────────────────────────────────────
 
-  Widget _buildProCard() {
-    return Container(
-      padding: const EdgeInsets.only(top: 10, left: 4, right: 4, bottom: 4),
-      decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          colors: [Color(0xFF2B63A8), Color(0xFF5B96DD)],
+  Widget _buildProCard({required bool isSelected}) {
+    return GestureDetector(
+      onTap: () => _selectedIndex.value = 2,
+      child: Container(
+        padding: const EdgeInsets.only(top: 10, left: 4, right: 4, bottom: 4),
+        decoration: BoxDecoration(
+          gradient: const LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [Color(0xFF2B63A8), Color(0xFF5B96DD)],
+          ),
+          borderRadius: BorderRadius.circular(28),
+          border: isSelected
+              ? Border.all(color: const Color(0xFF0A3D8F), width: 2)
+              : null,
         ),
-        borderRadius: BorderRadius.circular(28),
-      ),
-      child: Column(
-        children: [
-          const Padding(
-            padding: EdgeInsets.only(bottom: 9),
-            child: Text(
-              'MOST POPULAR PLAN',
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 12,
-                fontFamily: 'Space Grotesk',
-                fontWeight: FontWeight.w600,
-                letterSpacing: 0.96,
-                height: 1.15,
+        child: Column(
+          children: [
+            const Padding(
+              padding: EdgeInsets.only(bottom: 9),
+              child: Text(
+                'MOST POPULAR PLAN',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 12,
+                  fontFamily: 'Space Grotesk',
+                  fontWeight: FontWeight.w600,
+                  letterSpacing: 0.96,
+                  height: 1.15,
+                ),
               ),
             ),
-          ),
-          Container(
-            padding: const EdgeInsets.all(24),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(24),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text(
-                  'One-time Full Report unlock',
-                  style: TextStyle(
-                    color: Color(0xFF1A1A1A),
-                    fontSize: 24,
-                    fontFamily: 'Archivo',
-                    fontWeight: FontWeight.w600,
-                    height: 1.25,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                // Price row
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.baseline,
-                  textBaseline: TextBaseline.alphabetic,
-                  children: const [
-                    Text(
-                      '£',
-                      style: TextStyle(
-                        color: Color(0xFF1A1A1A),
-                        fontSize: 28,
-                        fontFamily: 'Inter',
-                        fontWeight: FontWeight.w500,
-                        letterSpacing: -1.12,
-                        height: 1,
-                      ),
-                    ),
-                    Text(
-                      '3.99',
-                      style: TextStyle(
-                        color: Color(0xFF1A1A1A),
-                        fontSize: 28,
-                        fontFamily: 'Inter',
-                        fontWeight: FontWeight.w600,
-                        letterSpacing: -1.12,
-                        height: 1,
-                      ),
-                    ),
-                    Text(
-                      ' /per Month',
-                      style: TextStyle(
-                        color: Color(0xFF1A1A1A),
-                        fontSize: 14,
-                        fontFamily: 'Inter',
-                        fontWeight: FontWeight.w500,
-                        height: 1,
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 20),
-                _buildFeatureRow(
-                  'Lock premium sections behind a paywall',
-                  isIncluded: true,
-                ),
-                _buildFeatureRow(
-                  'Unlimited Chat with Chat bot',
-                  isIncluded: false,
-                ),
-                _buildFeatureRow(
-                  'Full Vehicle History Tracking',
-                  isIncluded: false,
-                ),
-                _buildFeatureRow('Multiple Vehicles', isIncluded: false),
-                _buildFeatureRow('Smart Maintenance System', isIncluded: false),
-                _buildFeatureRow('Priority Support', isIncluded: false),
-                const SizedBox(height: 32),
-                // "Upgrade to Pro" button — triggers native pay sheet on tap
-                SizedBox(
-                  width: double.infinity,
-                  height: 54,
-                  child: Stack(
+            Container(
+              padding: const EdgeInsets.all(24),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(24),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      // Visual "Upgrade to Pro" button
-                      Container(
-                        width: double.infinity,
-                        height: 54,
-                        decoration: BoxDecoration(
-                          color: const Color(0xFF0A0A0A),
-                          borderRadius: BorderRadius.circular(9999),
-                        ),
-                        alignment: Alignment.center,
-                        child: const Text(
-                          'Upgrade to Pro',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 16,
-                            fontFamily: 'Poppins',
-                            fontWeight: FontWeight.w500,
-                            height: 1.5,
-                          ),
+                      const Text(
+                        'Pro Subscription',
+                        style: TextStyle(
+                          color: Color(0xFF1A1A1A),
+                          fontSize: 24,
+                          fontFamily: 'Archivo',
+                          fontWeight: FontWeight.w600,
+                          height: 1.25,
                         ),
                       ),
-                      // Transparent native pay button on top to capture taps
-                      if (Platform.isIOS)
-                        Positioned.fill(
-                          child: Opacity(
-                            opacity: 0.001,
-                            child: ClipRRect(
-                              borderRadius: BorderRadius.circular(9999),
-                              child: ApplePayButton(
-                                key: _applePayKey,
-                                paymentConfiguration:
-                                    PaymentConfiguration.fromJsonString(
-                                      defaultApplePay,
-                                    ),
-                                paymentItems: const [
-                                  PaymentItem(
-                                    label: 'AutoIntel Premium',
-                                    amount: '3.99',
-                                    status: PaymentItemStatus.final_price,
-                                  ),
-                                ],
-                                style: ApplePayButtonStyle.black,
-                                type: ApplePayButtonType.subscribe,
-                                onPaymentResult: (result) =>
-                                    _handlePaymentResult(result, _applePayKey),
-                                loadingIndicator: _buildPremiumLoader(),
-                              ),
-                            ),
-                          ),
-                        ),
-                      if (Platform.isAndroid)
-                        Positioned.fill(
-                          child: Opacity(
-                            opacity: 0.001,
-                            child: ClipRRect(
-                              borderRadius: BorderRadius.circular(9999),
-                              child: GooglePayButton(
-                                key: _googlePayKey,
-                                paymentConfiguration:
-                                    PaymentConfiguration.fromJsonString(
-                                      defaultGooglePay,
-                                    ),
-                                paymentItems: const [
-                                  PaymentItem(
-                                    label: 'AutoIntel Premium',
-                                    amount: '3.99',
-                                    status: PaymentItemStatus.final_price,
-                                  ),
-                                ],
-                                type: GooglePayButtonType.subscribe,
-                                onPaymentResult: (result) =>
-                                    _handlePaymentResult(result, _googlePayKey),
-                                loadingIndicator: _buildPremiumLoader(),
-                              ),
-                            ),
-                          ),
-                        ),
+                      Icon(
+                        isSelected ? Icons.verified : Icons.verified_outlined,
+                        color: isSelected
+                            ? const Color(0xFF2B63A8)
+                            : const Color(0xFFBBBBBB),
+                        size: 24,
+                      ),
                     ],
                   ),
-                ),
-              ],
+                  const SizedBox(height: 8),
+                  // Price row
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.baseline,
+                    textBaseline: TextBaseline.alphabetic,
+                    children: const [
+                      Text(
+                        '£',
+                        style: TextStyle(
+                          color: Color(0xFF1A1A1A),
+                          fontSize: 28,
+                          fontFamily: 'Inter',
+                          fontWeight: FontWeight.w500,
+                          letterSpacing: -1.12,
+                          height: 1,
+                        ),
+                      ),
+                      Text(
+                        '3.99',
+                        style: TextStyle(
+                          color: Color(0xFF1A1A1A),
+                          fontSize: 28,
+                          fontFamily: 'Inter',
+                          fontWeight: FontWeight.w600,
+                          letterSpacing: -1.12,
+                          height: 1,
+                        ),
+                      ),
+                      Text(
+                        ' /per Month',
+                        style: TextStyle(
+                          color: Color(0xFF1A1A1A),
+                          fontSize: 14,
+                          fontFamily: 'Inter',
+                          fontWeight: FontWeight.w500,
+                          height: 1,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 20),
+                  _buildFeatureRow(
+                    'Lock premium sections behind a paywall',
+                    isIncluded: true,
+                  ),
+                  _buildFeatureRow(
+                    'Unlimited Chat with Chat bot',
+                    isIncluded: true,
+                  ),
+                  _buildFeatureRow(
+                    'Full Vehicle History Tracking',
+                    isIncluded: true,
+                  ),
+                  _buildFeatureRow('Multiple Vehicles', isIncluded: true),
+                  _buildFeatureRow(
+                    'Smart Maintenance System',
+                    isIncluded: true,
+                  ),
+                  _buildFeatureRow('Priority Support', isIncluded: true),
+                  const SizedBox(height: 32),
+                  _buildActionButton(
+                    label: 'Upgrade to Pro',
+                    productId: IAPProductIds.proMonthly,
+                    isSelected: isSelected,
+                    dark: true,
+                    buttonKey: _proButtonKey,
+                  ),
+                ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
 
   // ─── Helpers ─────────────────────────────────────────────────────────────────
 
-  Widget _buildGreyButton(String label) {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-      decoration: BoxDecoration(
-        color: const Color(0xFFD0D0D0),
-        borderRadius: BorderRadius.circular(9999),
+  Widget _buildGreyButton(String label, {VoidCallback? onTap}) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+        decoration: BoxDecoration(
+          color: const Color(0xFFD0D0D0),
+          borderRadius: BorderRadius.circular(9999),
+        ),
+        alignment: Alignment.center,
+        child: Text(
+          label,
+          textAlign: TextAlign.center,
+          style: const TextStyle(
+            color: Colors.white,
+            fontSize: 16,
+            fontFamily: 'Poppins',
+            fontWeight: FontWeight.w500,
+            height: 1.5,
+          ),
+        ),
       ),
-      alignment: Alignment.center,
-      child: Text(
-        label,
-        textAlign: TextAlign.center,
-        style: const TextStyle(
-          color: Colors.white,
-          fontSize: 16,
-          fontFamily: 'Poppins',
-          fontWeight: FontWeight.w500,
-          height: 1.5,
+    );
+  }
+
+  Widget _buildActionButton({
+    required String label,
+    required String productId,
+    required bool isSelected,
+    bool dark = false,
+    GlobalKey? buttonKey,
+  }) {
+    return GestureDetector(
+      onTap: () {
+        final offset = buttonKey != null ? _getCenterOfKey(buttonKey) : null;
+        controller.startSubscription(productId, revealOffset: offset);
+      },
+      child: Container(
+        key: buttonKey,
+        width: double.infinity,
+        height: 54,
+        decoration: BoxDecoration(
+          color: dark ? const Color(0xFF0A0A0A) : const Color(0xFF2B63A8),
+          borderRadius: BorderRadius.circular(9999),
+        ),
+        alignment: Alignment.center,
+        child: Text(
+          label,
+          style: const TextStyle(
+            color: Colors.white,
+            fontSize: 16,
+            fontFamily: 'Poppins',
+            fontWeight: FontWeight.w500,
+            height: 1.5,
+          ),
         ),
       ),
     );
@@ -559,7 +612,7 @@ class SubscriptionView extends GetView<HomeController> {
           Padding(
             padding: const EdgeInsets.only(top: 1),
             child: Icon(
-              isIncluded ? Icons.check_circle : Icons.check_circle_outline,
+              isIncluded ? Icons.verified : Icons.verified_outlined,
               color: isIncluded
                   ? const Color(0xFF1363DF)
                   : const Color(0xFF8599B3),
@@ -584,30 +637,6 @@ class SubscriptionView extends GetView<HomeController> {
           ),
         ],
       ),
-    );
-  }
-
-  Widget _buildPremiumLoader() {
-    return const Center(
-      child: SizedBox(
-        width: 24,
-        height: 24,
-        child: CircularProgressIndicator(
-          strokeWidth: 2,
-          valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF2B63A8)),
-        ),
-      ),
-    );
-  }
-
-  Future<void> _handlePaymentResult(dynamic result, GlobalKey key) async {
-    debugPrint('Payment Result: $result');
-    controller.isProcessingPayment.value = true;
-    await Future.delayed(const Duration(milliseconds: 2500));
-    controller.isProcessingPayment.value = false;
-    Get.toNamed(
-      Routes.paymentSuccess,
-      arguments: {'revealOffset': _getCenterOfKey(key)},
     );
   }
 }

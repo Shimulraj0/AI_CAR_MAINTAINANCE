@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import '../../controllers/home_controller.dart';
 import '../../controllers/my_vehicles_controller.dart';
@@ -85,9 +84,13 @@ class MyVehiclesView extends GetView<MyVehiclesController> {
                   ),
                 ] else ...[
                   ...controller.vehicles.map((vehicle) {
-                    final vehicleId = vehicle['id']?.toString() ?? vehicle['uuid']?.toString() ?? '';
-                    final isActive = homeController.activeVehicleId.value == vehicleId;
-                    
+                    final vehicleId =
+                        vehicle['id']?.toString() ??
+                        vehicle['uuid']?.toString() ??
+                        '';
+                    final isActive =
+                        homeController.activeVehicleId.value == vehicleId;
+
                     return Padding(
                       padding: const EdgeInsets.only(bottom: 16),
                       child: InkWell(
@@ -128,9 +131,14 @@ class MyVehiclesView extends GetView<MyVehiclesController> {
     final title =
         '${vehicle['year']} ${vehicle['manufacturer']} ${vehicle['model']}';
     final subtitle = '${vehicle['fuel_type']} · ${vehicle['engine_size']}';
-    final status = vehicle['status']?.toString().replaceAll('_', ' ') ?? 'Due soon';
-    final statusColor = status.toLowerCase() == 'up to date' ? const Color(0xFF059669) : const Color(0xFFD97706);
-    final statusBgColor = status.toLowerCase() == 'up to date' ? const Color(0xFFECFDF5) : const Color(0xFFFFF7ED);
+    final status =
+        vehicle['status']?.toString().replaceAll('_', ' ') ?? 'Due soon';
+    final statusColor = status.toLowerCase() == 'up to date'
+        ? const Color(0xFF059669)
+        : const Color(0xFFD97706);
+    final statusBgColor = status.toLowerCase() == 'up to date'
+        ? const Color(0xFFECFDF5)
+        : const Color(0xFFFFF7ED);
 
     return Container(
       width: double.infinity,
@@ -271,9 +279,14 @@ class MyVehiclesView extends GetView<MyVehiclesController> {
     final title =
         '${vehicle['year']} ${vehicle['manufacturer']} ${vehicle['model']}';
     final subtitle = '${vehicle['fuel_type']} · ${vehicle['engine_size']}';
-    final status = vehicle['status']?.toString().replaceAll('_', ' ') ?? 'Up to date';
-    final statusColor = status.toLowerCase() == 'up to date' ? const Color(0xFF059669) : const Color(0xFFD97706);
-    final statusBgColor = status.toLowerCase() == 'up to date' ? const Color(0xFFECFDF5) : const Color(0xFFFFF7ED);
+    final status =
+        vehicle['status']?.toString().replaceAll('_', ' ') ?? 'Up to date';
+    final statusColor = status.toLowerCase() == 'up to date'
+        ? const Color(0xFF059669)
+        : const Color(0xFFD97706);
+    final statusBgColor = status.toLowerCase() == 'up to date'
+        ? const Color(0xFFECFDF5)
+        : const Color(0xFFFFF7ED);
 
     return Container(
       width: double.infinity,
@@ -389,7 +402,8 @@ class MyVehiclesView extends GetView<MyVehiclesController> {
   }
 
   void _showStatusPicker(BuildContext context, dynamic vehicle) {
-    final vehicleId = vehicle['id']?.toString() ?? vehicle['uuid']?.toString() ?? '';
+    final vehicleId =
+        vehicle['id']?.toString() ?? vehicle['uuid']?.toString() ?? '';
     Get.bottomSheet(
       Container(
         padding: const EdgeInsets.all(24),
@@ -413,18 +427,33 @@ class MyVehiclesView extends GetView<MyVehiclesController> {
               ),
             ),
             const SizedBox(height: 16),
-            _buildStatusOption('Up to date', Icons.check_circle_outline, Colors.green, () {
-              controller.updateStatus(vehicleId, 'up_to_date');
-              Get.back();
-            }),
-            _buildStatusOption('Due soon', Icons.access_time, Colors.orange, () {
-              controller.updateStatus(vehicleId, 'due_soon');
-              Get.back();
-            }),
-            _buildStatusOption('Overdue', Icons.warning_amber_outlined, Colors.red, () {
-              controller.updateStatus(vehicleId, 'overdue');
-              Get.back();
-            }),
+            _buildStatusOption(
+              'Up to date',
+              Icons.check_circle_outline,
+              Colors.green,
+              () {
+                controller.updateStatus(vehicleId, 'up_to_date');
+                Get.back();
+              },
+            ),
+            _buildStatusOption(
+              'Due soon',
+              Icons.access_time,
+              Colors.orange,
+              () {
+                controller.updateStatus(vehicleId, 'due_soon');
+                Get.back();
+              },
+            ),
+            _buildStatusOption(
+              'Overdue',
+              Icons.warning_amber_outlined,
+              Colors.red,
+              () {
+                controller.updateStatus(vehicleId, 'overdue');
+                Get.back();
+              },
+            ),
             const SizedBox(height: 24),
           ],
         ),
@@ -432,16 +461,18 @@ class MyVehiclesView extends GetView<MyVehiclesController> {
     );
   }
 
-  Widget _buildStatusOption(String label, IconData icon, Color color, VoidCallback onTap) {
+  Widget _buildStatusOption(
+    String label,
+    IconData icon,
+    Color color,
+    VoidCallback onTap,
+  ) {
     return ListTile(
       contentPadding: EdgeInsets.zero,
       leading: Icon(icon, color: color),
       title: Text(
         label,
-        style: const TextStyle(
-          fontSize: 16,
-          fontFamily: 'Inter',
-        ),
+        style: const TextStyle(fontSize: 16, fontFamily: 'Inter'),
       ),
       onTap: onTap,
     );

@@ -1,83 +1,46 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 import '../../controllers/home_controller.dart';
 import '../../routes/app_routes.dart';
 import 'package:animations/animations.dart';
-import 'subscription_view.dart'; // Import the view directly for OpenContainer
+import 'subscription_view.dart';
+import '../../utils/responsive_helper.dart';
 
 class ProfileTabView extends GetView<HomeController> {
   const ProfileTabView({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.white,
-      appBar: AppBar(
-        title: const Text(
-          'Profile',
-          style: TextStyle(
-            color: Colors.white,
-            fontSize: 18,
-            fontFamily: 'Archivo',
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-        centerTitle: true,
-        backgroundColor: const Color(0xFF2B63A8),
-        elevation: 0,
-        systemOverlayStyle: const SystemUiOverlayStyle(
-          statusBarColor: Colors.transparent,
-          statusBarIconBrightness: Brightness.light,
-        ),
-        toolbarHeight: kToolbarHeight,
-        leading: Center(
-          child: Container(
-            margin: const EdgeInsets.only(left: 16),
-            width: 32,
-            height: 32,
-            decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.2),
-              shape: BoxShape.circle,
-            ),
-            child: IconButton(
-              padding: EdgeInsets.zero,
-              icon: const Icon(Icons.arrow_back, color: Colors.white, size: 18),
-              onPressed: () {
-                controller.changeTabIndex(0);
-              },
-            ),
-          ),
-        ),
+    return SingleChildScrollView(
+      padding: EdgeInsets.only(
+        left: context.w(26),
+        right: context.w(26),
+        top: context.h(24),
+        bottom: context.h(24),
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.only(
-          left: 26,
-          right: 26,
-          top: 24,
-          bottom: 24,
-        ),
-        child: Column(
-          children: [
-            _buildProfileCard(),
-            const SizedBox(height: 24),
-            _buildSubscriptionCard(),
-            const SizedBox(height: 24),
-            _buildMenuSection(),
-            const SizedBox(height: 24),
-            _buildLogoutButton(),
-            const SizedBox(height: 100), // Space for bottom nav
-          ],
-        ),
+      child: Column(
+        children: [
+          _buildProfileCard(context),
+          const SizedBox(height: 24),
+          _buildSubscriptionCard(context),
+          const SizedBox(height: 24),
+          _buildMenuSection(context),
+          const SizedBox(height: 24),
+          _buildLogoutButton(context),
+          const SizedBox(height: 100), // Space for bottom nav
+        ],
       ),
     );
   }
 
-  Widget _buildProfileCard() {
+  Widget _buildProfileCard(BuildContext context) {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+      padding: EdgeInsets.symmetric(
+        horizontal: context.w(16),
+        vertical: context.h(16),
+      ),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
@@ -90,8 +53,8 @@ class ProfileTabView extends GetView<HomeController> {
         children: [
           Obx(
             () => Container(
-              width: 56,
-              height: 56,
+              width: context.w(56),
+              height: context.w(56),
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 image: DecorationImage(
@@ -142,7 +105,7 @@ class ProfileTabView extends GetView<HomeController> {
     );
   }
 
-  Widget _buildSubscriptionCard() {
+  Widget _buildSubscriptionCard(BuildContext context) {
     return OpenContainer(
       transitionType: ContainerTransitionType.fadeThrough,
       openBuilder: (context, _) => SubscriptionView(),
@@ -156,7 +119,7 @@ class ProfileTabView extends GetView<HomeController> {
           onTap: openContainer,
           child: Container(
             width: double.infinity,
-            padding: const EdgeInsets.all(16),
+            padding: EdgeInsets.all(context.w(16)),
             decoration: BoxDecoration(
               color: const Color(0xFFEDF2F9),
               borderRadius: BorderRadius.circular(12),
@@ -189,11 +152,11 @@ class ProfileTabView extends GetView<HomeController> {
                     ),
                   ],
                 ),
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 8,
-                  ),
+                  Container(
+                    padding: EdgeInsets.symmetric(
+                      horizontal: context.w(16),
+                      vertical: context.h(8),
+                    ),
                   decoration: BoxDecoration(
                     color: const Color(0xFF2F5EA8),
                     borderRadius: BorderRadius.circular(8),
@@ -216,7 +179,7 @@ class ProfileTabView extends GetView<HomeController> {
     );
   }
 
-  Widget _buildMenuSection() {
+  Widget _buildMenuSection(BuildContext context) {
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
@@ -230,48 +193,56 @@ class ProfileTabView extends GetView<HomeController> {
       child: Column(
         children: [
           _buildMenuItem(
+            context,
             'assets/images/editprofile.svg',
             'Edit Profile',
             onTap: () => Get.toNamed(Routes.editProfile),
           ),
           _buildDivider(),
           _buildMenuItem(
+            context,
             'assets/images/Caricon.svg',
             'My Vehicles',
             onTap: () => Get.toNamed(Routes.myVehicles),
           ),
           _buildDivider(),
           _buildMenuItem(
+            context,
             'assets/images/reports.svg',
             'Saved Reports',
             onTap: () => Get.toNamed(Routes.saveReports),
           ),
           _buildDivider(),
           _buildMenuItem(
+            context,
             'assets/images/notification.svg',
             'Notifications',
             onTap: () => Get.toNamed(Routes.notifications),
           ),
           _buildDivider(),
           _buildMenuItem(
+            context,
             Icons.credit_card_outlined,
             'Subscription',
             onTap: () => Get.toNamed(Routes.subscription),
           ),
           _buildDivider(),
           _buildMenuItem(
+            context,
             Icons.shield_outlined,
             'Privacy & Terms',
             onTap: () => Get.toNamed(Routes.privacyTerms),
           ),
           _buildDivider(),
           _buildMenuItem(
+            context,
             Icons.help_outline,
             'FAQs',
             onTap: () => Get.toNamed(Routes.faqs),
           ),
           _buildDivider(),
           _buildMenuItem(
+            context,
             Icons.support_agent_outlined,
             'Contact Support',
             onTap: () => Get.toNamed(Routes.contactSupport),
@@ -282,6 +253,7 @@ class ProfileTabView extends GetView<HomeController> {
   }
 
   Widget _buildMenuItem(
+    BuildContext context,
     dynamic iconOrAsset,
     String title, {
     VoidCallback? onTap,
@@ -289,7 +261,10 @@ class ProfileTabView extends GetView<HomeController> {
     return InkWell(
       onTap: onTap ?? () {},
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        padding: EdgeInsets.symmetric(
+          horizontal: context.w(16),
+          vertical: context.h(14),
+        ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
@@ -328,7 +303,7 @@ class ProfileTabView extends GetView<HomeController> {
     return Container(height: 1, color: Colors.black.withValues(alpha: 0.04));
   }
 
-  Widget _buildLogoutButton() {
+  Widget _buildLogoutButton(BuildContext context) {
     return Obx(
       () => controller.isLoadingLogout.value
           ? const Center(child: CircularProgressIndicator())

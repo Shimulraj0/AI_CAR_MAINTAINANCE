@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import '../../controllers/home_controller.dart';
 import '../../controllers/diagnose_controller.dart';
+import '../../utils/responsive_helper.dart';
 
 class DiagnoseTabView extends GetView<DiagnoseController> {
   const DiagnoseTabView({super.key});
@@ -21,220 +21,186 @@ class DiagnoseTabView extends GetView<DiagnoseController> {
     });
 
     final homeController = Get.find<HomeController>();
-    
-    return Scaffold(
-      backgroundColor: Colors.white,
-      appBar: AppBar(
-        title: const Text(
-          'Diagnose',
-          style: TextStyle(
-            color: Colors.white,
-            fontSize: 18,
-            fontFamily: 'Archivo',
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-        centerTitle: true,
-        backgroundColor: const Color(0xFF2B63A8),
-        elevation: 0,
-        systemOverlayStyle: const SystemUiOverlayStyle(
-          statusBarColor: Colors.transparent,
-          statusBarIconBrightness: Brightness.light,
-        ),
-        toolbarHeight: kToolbarHeight,
-        leading: Center(
-          child: InkWell(
-            onTap: () {
-              if (Get.isRegistered<HomeController>()) {
-                Get.find<HomeController>().changeTabIndex(0);
-              } else {
-                Get.back();
-              }
-            },
-            child: Container(
-              margin: const EdgeInsets.only(left: 16),
-              width: 24,
-              height: 24,
-              decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.10),
-                shape: BoxShape.circle,
-              ),
-              child: const Icon(Icons.arrow_back, color: Colors.white, size: 16),
+
+    return SingleChildScrollView(
+      padding: EdgeInsets.all(context.w(24.0)),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            'Vehicle',
+            style: TextStyle(
+              color: Color(0xFF0F0F0F),
+              fontSize: 14,
+              fontFamily: 'Archivo',
+              fontWeight: FontWeight.w600,
             ),
           ),
-        ),
-        automaticallyImplyLeading: false,
-      ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(24.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text(
-              'Vehicle',
-              style: TextStyle(
-                color: Color(0xFF0F0F0F),
-                fontSize: 14,
-                fontFamily: 'Archivo',
-                fontWeight: FontWeight.w600,
+          const SizedBox(height: 8),
+          Obx(
+            () => Container(
+              width: double.infinity,
+              height: context.h(47),
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              decoration: ShapeDecoration(
+                color: Colors.white,
+                shape: RoundedRectangleBorder(
+                  side: BorderSide(
+                    width: 1,
+                    color: Colors.black.withValues(alpha: 0.08),
+                  ),
+                  borderRadius: BorderRadius.circular(12),
+                ),
               ),
-            ),
-            const SizedBox(height: 8),
-            Obx(() => Container(
-                  width: double.infinity,
-                  height: 47,
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  decoration: ShapeDecoration(
-                    color: Colors.white,
-                    shape: RoundedRectangleBorder(
-                      side: BorderSide(
-                        width: 1,
-                        color: Colors.black.withValues(alpha: 0.08),
-                      ),
-                      borderRadius: BorderRadius.circular(12),
+              child: DropdownButtonHideUnderline(
+                child: DropdownButton<String>(
+                  value: controller.selectedVehicleId.value.isEmpty
+                      ? null
+                      : controller.selectedVehicleId.value,
+                  isExpanded: true,
+                  hint: const Text(
+                    "Select Vehicle",
+                    style: TextStyle(
+                      color: Color(0xFF9CA3AF),
+                      fontSize: 12,
+                      fontFamily: 'Inter',
                     ),
                   ),
-                  child: DropdownButtonHideUnderline(
-                    child: DropdownButton<String>(
-                      value: controller.selectedVehicleId.value.isEmpty
-                          ? null
-                          : controller.selectedVehicleId.value,
-                      isExpanded: true,
-                      hint: const Text(
-                        "Select Vehicle",
-                        style: TextStyle(
-                          color: Color(0xFF9CA3AF),
+                  icon: const Icon(
+                    Icons.keyboard_arrow_down,
+                    color: Colors.grey,
+                    size: 20,
+                  ),
+                  items: homeController.userVehicles.map((vehicle) {
+                    final make =
+                        vehicle['manufacturer'] ?? vehicle['make'] ?? '';
+                    final model = vehicle['model'] ?? '';
+                    final year = vehicle['year']?.toString() ?? '';
+                    final vehicleId =
+                        vehicle['id']?.toString() ??
+                        vehicle['uuid']?.toString() ??
+                        "";
+
+                    String displayName = "$year $make $model".trim();
+                    if (displayName.isEmpty) displayName = "Unnamed Vehicle";
+
+                    return DropdownMenuItem<String>(
+                      value: vehicleId,
+                      child: Text(
+                        displayName,
+                        style: const TextStyle(
+                          color: Color(0xFF1A1D23),
                           fontSize: 12,
                           fontFamily: 'Inter',
+                          fontWeight: FontWeight.w400,
                         ),
                       ),
-                      icon: const Icon(
-                        Icons.keyboard_arrow_down,
-                        color: Colors.grey,
-                        size: 20,
-                      ),
-                      items: homeController.userVehicles.map((vehicle) {
-                        final make =
-                            vehicle['manufacturer'] ?? vehicle['make'] ?? '';
-                        final model = vehicle['model'] ?? '';
-                        final year = vehicle['year']?.toString() ?? '';
-                        final vehicleId = vehicle['id']?.toString() ??
-                            vehicle['uuid']?.toString() ??
-                            "";
-
-                        String displayName = "$year $make $model".trim();
-                        if (displayName.isEmpty) displayName = "Unnamed Vehicle";
-
-                        return DropdownMenuItem<String>(
-                          value: vehicleId,
-                          child: Text(
-                            displayName,
-                            style: const TextStyle(
-                              color: Color(0xFF1A1D23),
-                              fontSize: 12,
-                              fontFamily: 'Inter',
-                              fontWeight: FontWeight.w400,
-                            ),
-                          ),
-                        );
-                      }).toList(),
-                      onChanged: (newValue) {
-                        if (newValue != null) {
-                          controller.selectedVehicleId.value = newValue;
-                        }
-                      },
-                    ),
-                  ),
-                )),
-
-            const SizedBox(height: 24),
-
-            const Text(
-              'Diagnostic Codes',
-              style: TextStyle(
-                color: Color(0xFF0F0F0F),
-                fontSize: 14,
-                fontFamily: 'Archivo',
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-            const SizedBox(height: 4),
-            const Text(
-              'Enter OBD-II codes (e.g. P0300, P0171)',
-              style: TextStyle(
-                color: Color(0xFF62748E),
-                fontSize: 12,
-                fontFamily: 'Inter',
-              ),
-            ),
-            const SizedBox(height: 8),
-            Row(
-              children: [
-                Expanded(
-                  child: Container(
-                    height: 48,
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFF3F4F6),
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(
-                        color: Colors.black.withValues(alpha: 0.08),
-                      ),
-                    ),
-                    child: TextField(
-                      controller: controller.diagnosticCodeController,
-                      decoration: InputDecoration(
-                        hintText: 'Enter code',
-                        hintStyle: const TextStyle(
-                          color: Color(0xFF9CA3AF),
-                          fontSize: 14,
-                          fontFamily: 'Inter',
-                        ),
-                        border: InputBorder.none,
-                        contentPadding: const EdgeInsets.symmetric(
-                          horizontal: 16,
-                          vertical: 12,
-                        ),
-                      ),
-                      onSubmitted: (_) => controller.addDiagnosticCode(),
-                    ),
-                  ),
+                    );
+                  }).toList(),
+                  onChanged: (newValue) {
+                    if (newValue != null) {
+                      controller.selectedVehicleId.value = newValue;
+                    }
+                  },
                 ),
-                GestureDetector(
-                  onTap: controller.addDiagnosticCode,
-                  child: Container(
-                    height: 48,
-                    padding: const EdgeInsets.symmetric(horizontal: 24),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFEDF2F9),
-                      borderRadius: BorderRadius.circular(12),
+              ),
+            ),
+          ),
+
+          const SizedBox(height: 24),
+
+          const Text(
+            'Diagnostic Codes',
+            style: TextStyle(
+              color: Color(0xFF0F0F0F),
+              fontSize: 14,
+              fontFamily: 'Archivo',
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          const SizedBox(height: 4),
+          const Text(
+            'Enter OBD-II codes (e.g. P0300, P0171)',
+            style: TextStyle(
+              color: Color(0xFF62748E),
+              fontSize: 12,
+              fontFamily: 'Inter',
+            ),
+          ),
+          const SizedBox(height: 8),
+          Row(
+            children: [
+              Expanded(
+                child: Container(
+                  height: context.h(48),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFF3F4F6),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: Colors.black.withValues(alpha: 0.08),
                     ),
-                    alignment: Alignment.center,
-                    child: const Text(
-                      'Add',
-                      style: TextStyle(
-                        color: Color(0xFF2F5EA8),
+                  ),
+                  child: TextField(
+                    controller: controller.diagnosticCodeController,
+                    decoration: InputDecoration(
+                      hintText: 'Enter code',
+                      hintStyle: const TextStyle(
+                        color: Color(0xFF9CA3AF),
                         fontSize: 14,
                         fontFamily: 'Inter',
-                        fontWeight: FontWeight.w600,
                       ),
+                      border: InputBorder.none,
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 12,
+                      ),
+                    ),
+                    onSubmitted: (_) => controller.addDiagnosticCode(),
+                  ),
+                ),
+              ),
+              GestureDetector(
+                onTap: controller.addDiagnosticCode,
+                child: Container(
+                  height: context.h(48),
+                  padding: const EdgeInsets.symmetric(horizontal: 24),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFEDF2F9),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  alignment: Alignment.center,
+                  child: const Text(
+                    'Add',
+                    style: TextStyle(
+                      color: Color(0xFF2F5EA8),
+                      fontSize: 14,
+                      fontFamily: 'Inter',
+                      fontWeight: FontWeight.w600,
                     ),
                   ),
                 ),
-              ],
-            ),
-            const SizedBox(height: 12),
-            
-            // Added codes list
-            Obx(() => Wrap(
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+
+          // Added codes list
+          Obx(
+            () => Wrap(
               spacing: 8,
               runSpacing: 8,
               children: controller.diagnosticCodes.asMap().entries.map((entry) {
                 return Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 6,
+                  ),
                   decoration: BoxDecoration(
-                    color: const Color(0xFF2B63A8).withValues(alpha:0.1),
+                    color: const Color(0xFF2B63A8).withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(20),
-                    border: Border.all(color: const Color(0xFF2B63A8).withValues(alpha:0.2)),
+                    border: Border.all(
+                      color: const Color(0xFF2B63A8).withValues(alpha: 0.2),
+                    ),
                   ),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
@@ -250,133 +216,138 @@ class DiagnoseTabView extends GetView<DiagnoseController> {
                       const SizedBox(width: 4),
                       GestureDetector(
                         onTap: () => controller.removeDiagnosticCode(entry.key),
-                        child: const Icon(Icons.close, size: 14, color: Color(0xFF2B63A8)),
+                        child: const Icon(
+                          Icons.close,
+                          size: 14,
+                          color: Color(0xFF2B63A8),
+                        ),
                       ),
                     ],
                   ),
                 );
               }).toList(),
-            )),
+            ),
+          ),
 
-            const SizedBox(height: 24),
+          const SizedBox(height: 24),
 
-            const Text(
-              'Symptoms',
-              style: TextStyle(
-                color: Color(0xFF0F0F0F),
-                fontSize: 14,
-                fontFamily: 'Archivo',
-                fontWeight: FontWeight.w600,
+          const Text(
+            'Symptoms',
+            style: TextStyle(
+              color: Color(0xFF0F0F0F),
+              fontSize: 14,
+              fontFamily: 'Archivo',
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          const SizedBox(height: 4),
+          const Text(
+            'Describe what you\'re experiencing in plain language',
+            style: TextStyle(
+              color: Color(0xFF62748E),
+              fontSize: 12,
+              fontFamily: 'Inter',
+            ),
+          ),
+          const SizedBox(height: 8),
+          Container(
+            height: context.h(120),
+            decoration: BoxDecoration(
+              color: const Color(0xFFF3F4F6),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: Colors.black.withValues(alpha: 0.08)),
+            ),
+            child: TextField(
+              controller: controller.symptomsController,
+              maxLines: null,
+              keyboardType: TextInputType.multiline,
+              decoration: const InputDecoration(
+                hintText:
+                    'e.g. Engine misfires at idle, rough vibration, reduced fuel economy...',
+                hintStyle: TextStyle(
+                  color: Color(0xFF9CA3AF),
+                  fontSize: 14,
+                  fontFamily: 'Inter',
+                ),
+                border: InputBorder.none,
+                contentPadding: EdgeInsets.all(16),
               ),
             ),
-            const SizedBox(height: 4),
-            const Text(
-              'Describe what you\'re experiencing in plain language',
-              style: TextStyle(
-                color: Color(0xFF62748E),
-                fontSize: 12,
-                fontFamily: 'Inter',
-              ),
-            ),
-            const SizedBox(height: 8),
-            Container(
-              height: 120,
+          ),
+
+          const SizedBox(height: 48), // Spacer before button
+
+          Obx(
+            () => Container(
+              width: double.infinity,
+              height: context.h(50),
               decoration: BoxDecoration(
-                color: const Color(0xFFF3F4F6),
+                gradient: controller.isLoading.value
+                    ? LinearGradient(
+                        begin: const Alignment(0.00, 0.50),
+                        end: const Alignment(1.00, 0.50),
+                        colors: [
+                          const Color(0xFF2B63A8).withValues(alpha: 0.5),
+                          const Color(0xFF5B96DD).withValues(alpha: 0.5),
+                        ],
+                      )
+                    : const LinearGradient(
+                        begin: Alignment(0.00, 0.50),
+                        end: Alignment(1.00, 0.50),
+                        colors: [Color(0xFF2B63A8), Color(0xFF5B96DD)],
+                      ),
                 borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: Colors.black.withValues(alpha: 0.08)),
               ),
-              child: TextField(
-                controller: controller.symptomsController,
-                maxLines: null,
-                keyboardType: TextInputType.multiline,
-                decoration: const InputDecoration(
-                  hintText:
-                      'e.g. Engine misfires at idle, rough vibration, reduced fuel economy...',
-                  hintStyle: TextStyle(
-                    color: Color(0xFF9CA3AF),
-                    fontSize: 14,
-                    fontFamily: 'Inter',
+              child: ElevatedButton(
+                onPressed: controller.isLoading.value
+                    ? null
+                    : controller.startAnalysis,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.transparent,
+                  shadowColor: Colors.transparent,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
                   ),
-                  border: InputBorder.none,
-                  contentPadding: EdgeInsets.all(16),
+                  disabledBackgroundColor: Colors.transparent,
+                  disabledForegroundColor: Colors.white,
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    if (controller.isLoading.value)
+                      const SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          valueColor: AlwaysStoppedAnimation<Color>(
+                            Colors.white,
+                          ),
+                        ),
+                      )
+                    else
+                      CustomPaint(
+                        size: const Size(20, 20),
+                        painter: _ScanIconPainter(),
+                      ),
+                    const SizedBox(width: 8),
+                    Text(
+                      controller.isLoading.value ? 'Analyzing...' : 'Analyze',
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 16,
+                        fontFamily: 'Inter',
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ),
+          ),
 
-            const SizedBox(height: 48), // Spacer before button
-
-            Obx(() => Container(
-                  width: double.infinity,
-                  height: 50,
-                  decoration: BoxDecoration(
-                    gradient: controller.isLoading.value
-                        ? LinearGradient(
-                            begin: const Alignment(0.00, 0.50),
-                            end: const Alignment(1.00, 0.50),
-                            colors: [
-                              const Color(0xFF2B63A8).withValues(alpha: 0.5),
-                              const Color(0xFF5B96DD).withValues(alpha: 0.5),
-                            ],
-                          )
-                        : const LinearGradient(
-                            begin: Alignment(0.00, 0.50),
-                            end: Alignment(1.00, 0.50),
-                            colors: [Color(0xFF2B63A8), Color(0xFF5B96DD)],
-                          ),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: ElevatedButton(
-                    onPressed: controller.isLoading.value
-                        ? null
-                        : controller.startAnalysis,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.transparent,
-                      shadowColor: Colors.transparent,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      disabledBackgroundColor: Colors.transparent,
-                      disabledForegroundColor: Colors.white,
-                    ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        if (controller.isLoading.value)
-                          const SizedBox(
-                            width: 20,
-                            height: 20,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2,
-                              valueColor:
-                                  AlwaysStoppedAnimation<Color>(Colors.white),
-                            ),
-                          )
-                        else
-                          CustomPaint(
-                            size: const Size(20, 20),
-                            painter: _ScanIconPainter(),
-                          ),
-                        const SizedBox(width: 8),
-                        Text(
-                          controller.isLoading.value
-                              ? 'Analyzing...'
-                              : 'Analyze',
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 16,
-                            fontFamily: 'Inter',
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                )),
-
-            const SizedBox(height: 80), // Bottom nav padding
-          ],
-        ),
+          const SizedBox(height: 80), // Bottom nav padding
+        ],
       ),
     );
   }

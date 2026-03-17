@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import '../../controllers/home_controller.dart';
 import '../../controllers/vehicle_registration_controller.dart';
 import '../../routes/app_routes.dart';
 import '../../widgets/custom_bottom_nav_bar.dart';
+import '../../utils/responsive_helper.dart';
 
 class AddVehiclesView extends GetView<VehicleRegistrationController> {
   const AddVehiclesView({super.key});
@@ -22,10 +22,10 @@ class AddVehiclesView extends GetView<VehicleRegistrationController> {
         child: Container(
           color: const Color(0xFF2B63A8),
           padding: EdgeInsets.only(
-            top: MediaQuery.of(context).padding.top + 16,
-            bottom: 16,
-            left: 26,
-            right: 26,
+            top: MediaQuery.of(context).padding.top + context.h(16),
+            bottom: context.h(16),
+            left: context.w(26),
+            right: context.w(26),
           ),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -64,17 +64,18 @@ class AddVehiclesView extends GetView<VehicleRegistrationController> {
       body: Stack(
         children: [
           SingleChildScrollView(
-            padding: const EdgeInsets.only(
-              left: 26,
-              right: 26,
-              top: 24,
-              bottom: 120,
+            padding: EdgeInsets.only(
+              left: context.w(26),
+              right: context.w(26),
+              top: context.h(24),
+              bottom: context.h(120),
             ),
             child: Form(
               key: controller.formKey,
               child: Column(
                 children: [
                   _buildInputField(
+                    context,
                     icon: Icons.precision_manufacturing_outlined,
                     label: 'Manufacturer',
                     hint: 'Enter Vehicle Manufacturer',
@@ -82,6 +83,7 @@ class AddVehiclesView extends GetView<VehicleRegistrationController> {
                   ),
                   const SizedBox(height: 16),
                   _buildInputField(
+                    context,
                     icon: Icons.directions_car_outlined,
                     label: 'Vehicle Model',
                     hint: 'Enter Vehicle Model',
@@ -89,6 +91,7 @@ class AddVehiclesView extends GetView<VehicleRegistrationController> {
                   ),
                   const SizedBox(height: 16),
                   _buildInputField(
+                    context,
                     icon: Icons.calendar_today_outlined,
                     label: 'Vehicle Year',
                     hint: 'Enter Vehicle Year',
@@ -97,6 +100,7 @@ class AddVehiclesView extends GetView<VehicleRegistrationController> {
                   ),
                   const SizedBox(height: 16),
                   _buildInputField(
+                    context,
                     icon: Icons.local_gas_station_outlined,
                     label: 'Fuel Type',
                     hint: 'Enter Fuel Type',
@@ -104,6 +108,7 @@ class AddVehiclesView extends GetView<VehicleRegistrationController> {
                   ),
                   const SizedBox(height: 16),
                   _buildInputField(
+                    context,
                     icon: Icons
                         .build_outlined, // Closer match since engineering is material icons
                     label: 'Engine Size',
@@ -112,6 +117,7 @@ class AddVehiclesView extends GetView<VehicleRegistrationController> {
                   ),
                   const SizedBox(height: 16),
                   _buildOptionalInputField(
+                    context,
                     icon: Icons
                         .person_outline, // Representing ownership/registration
                     label: 'VIN/Registration',
@@ -120,44 +126,55 @@ class AddVehiclesView extends GetView<VehicleRegistrationController> {
                   ),
                   const SizedBox(height: 16),
                   _buildOptionalInputField(
+                    context,
                     icon: Icons.troubleshoot_outlined,
                     label: 'Diagonostic Codes',
                     hint: 'Enter Diagonostic Codes',
                     txtController: controller.diagnosticCodesController,
                   ),
                   const SizedBox(height: 32),
-                  Obx(() => Opacity(
-                    opacity: controller.isFormValid.value ? 1.0 : 0.50,
-                    child: InkWell(
-                      onTap: controller.isFormValid.value && !controller.isLoading.value 
-                          ? controller.saveVehicle 
-                          : null,
-                      borderRadius: BorderRadius.circular(12),
-                      child: Container(
-                        width: double.infinity,
-                        padding: const EdgeInsets.all(16),
-                        decoration: BoxDecoration(
-                          color: const Color(0xFF2B63A8),
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        alignment: Alignment.center,
-                        child: controller.isLoading.value
-                          ? const SizedBox(
-                              height: 20, width: 20, 
-                              child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2)
-                            )
-                          : Text(
-                          controller.vehicleId != null ? 'Update Vehicle' : 'Save Vehicle',
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 16,
-                            fontFamily: 'Inter',
-                            fontWeight: FontWeight.w500,
+                  Obx(
+                    () => Opacity(
+                      opacity: controller.isFormValid.value ? 1.0 : 0.50,
+                      child: InkWell(
+                        onTap:
+                            controller.isFormValid.value &&
+                                !controller.isLoading.value
+                            ? controller.saveVehicle
+                            : null,
+                        borderRadius: BorderRadius.circular(12),
+                        child: Container(
+                          width: double.infinity,
+                          padding: const EdgeInsets.all(16),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFF2B63A8),
+                            borderRadius: BorderRadius.circular(12),
                           ),
+                          alignment: Alignment.center,
+                          child: controller.isLoading.value
+                              ? const SizedBox(
+                                  height: 20,
+                                  width: 20,
+                                  child: CircularProgressIndicator(
+                                    color: Colors.white,
+                                    strokeWidth: 2,
+                                  ),
+                                )
+                              : Text(
+                                  controller.vehicleId != null
+                                      ? 'Update Vehicle'
+                                      : 'Save Vehicle',
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 16,
+                                    fontFamily: 'Inter',
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
                         ),
                       ),
                     ),
-                  )),
+                  ),
                 ],
               ),
             ),
@@ -180,7 +197,8 @@ class AddVehiclesView extends GetView<VehicleRegistrationController> {
     );
   }
 
-  Widget _buildInputField({
+  Widget _buildInputField(
+    BuildContext context, {
     required IconData icon,
     required String label,
     required String hint,
@@ -189,7 +207,7 @@ class AddVehiclesView extends GetView<VehicleRegistrationController> {
   }) {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      padding: EdgeInsets.symmetric(horizontal: context.w(16), vertical: context.h(12)),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),
@@ -242,7 +260,10 @@ class AddVehiclesView extends GetView<VehicleRegistrationController> {
                   fontWeight: FontWeight.w400,
                 ),
                 isDense: true,
-                contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 10,
+                ),
                 fillColor: const Color(0x192B63A8),
                 filled: true,
                 enabledBorder: OutlineInputBorder(
@@ -254,7 +275,10 @@ class AddVehiclesView extends GetView<VehicleRegistrationController> {
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8),
-                  borderSide: const BorderSide(color: Color(0xFF2B63A8), width: 1),
+                  borderSide: const BorderSide(
+                    color: Color(0xFF2B63A8),
+                    width: 1,
+                  ),
                 ),
                 errorStyle: const TextStyle(height: 0),
               ),
@@ -265,7 +289,8 @@ class AddVehiclesView extends GetView<VehicleRegistrationController> {
     );
   }
 
-  Widget _buildOptionalInputField({
+  Widget _buildOptionalInputField(
+    BuildContext context, {
     required IconData icon,
     required String label,
     required String hint,
@@ -273,7 +298,7 @@ class AddVehiclesView extends GetView<VehicleRegistrationController> {
   }) {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+      padding: EdgeInsets.symmetric(horizontal: context.w(16), vertical: context.h(16)),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),
@@ -333,7 +358,10 @@ class AddVehiclesView extends GetView<VehicleRegistrationController> {
                 fontWeight: FontWeight.w400,
               ),
               isDense: true,
-              contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              contentPadding: const EdgeInsets.symmetric(
+                horizontal: 16,
+                vertical: 12,
+              ),
               fillColor: const Color(0x192B63A8),
               filled: true,
               enabledBorder: OutlineInputBorder(
@@ -345,7 +373,10 @@ class AddVehiclesView extends GetView<VehicleRegistrationController> {
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8),
-                borderSide: const BorderSide(color: Color(0xFF2B63A8), width: 1),
+                borderSide: const BorderSide(
+                  color: Color(0xFF2B63A8),
+                  width: 1,
+                ),
               ),
             ),
           ),
