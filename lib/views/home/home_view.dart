@@ -275,15 +275,34 @@ class HomeView extends GetView<HomeController> {
           ),
 
           // Active Issues Section
-          Obx(() => Padding(
-                padding: EdgeInsets.all(context.w(24.0)),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    if (controller.overdueTasks.isNotEmpty ||
-                        controller.lastSessionId.value.isNotEmpty) ...[
+          Obx(
+            () => Padding(
+              padding: EdgeInsets.all(context.w(24.0)),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  if (controller.overdueTasks.isNotEmpty ||
+                      controller.lastSessionId.value.isNotEmpty) ...[
+                    const Text(
+                      'Active Issues',
+                      style: TextStyle(
+                        color: Color(0xFF0F0F0F),
+                        fontSize: 18,
+                        fontFamily: 'Archivo',
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    _buildActiveIssueCard(context),
+                  ],
+                  const SizedBox(height: 32),
+
+                  // Upcoming Service Section
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
                       const Text(
-                        'Active Issues',
+                        'Upcoming Service',
                         style: TextStyle(
                           color: Color(0xFF0F0F0F),
                           fontSize: 18,
@@ -291,87 +310,85 @@ class HomeView extends GetView<HomeController> {
                           fontWeight: FontWeight.w600,
                         ),
                       ),
-                      const SizedBox(height: 16),
-                      _buildActiveIssueCard(context),
-                    ],
-                    const SizedBox(height: 32),
-
-                    // Upcoming Service Section
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        const Text(
-                          'Upcoming Service',
+                      TextButton(
+                        onPressed: () {
+                          controller.changeTabIndex(
+                            2,
+                          ); // Switch to Maintenance Tab
+                        },
+                        style: TextButton.styleFrom(
+                          padding: EdgeInsets.zero,
+                          minimumSize: Size.zero,
+                          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                        ),
+                        child: const Text(
+                          'View All',
                           style: TextStyle(
-                            color: Color(0xFF0F0F0F),
-                            fontSize: 18,
-                            fontFamily: 'Archivo',
-                            fontWeight: FontWeight.w600,
+                            decoration: TextDecoration.underline,
+                            color: Color(0xFF2B63A8),
+                            fontSize: 14,
                           ),
                         ),
-                        TextButton(
-                          onPressed: () {
-                            controller.changeTabIndex(2); // Switch to Maintenance Tab
-                          },
-                          style: TextButton.styleFrom(
-                            padding: EdgeInsets.zero,
-                            minimumSize: Size.zero,
-                            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                          ),
-                          child: const Text(
-                            'View All',
-                            style: TextStyle(
-                              decoration: TextDecoration.underline,
-                              color: Color(0xFF2B63A8),
-                              fontSize: 14,
-                            ),
-                          ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+                  if (controller.upcomingTasks.isEmpty)
+                    const Center(
+                      child: Padding(
+                        padding: EdgeInsets.symmetric(vertical: 20),
+                        child: Text(
+                          'No upcoming maintenance scheduled',
+                          style: TextStyle(color: Colors.grey),
                         ),
-                      ],
-                    ),
-                    const SizedBox(height: 16),
-                    if (controller.upcomingTasks.isEmpty)
-                      const Center(
-                        child: Padding(
-                          padding: EdgeInsets.symmetric(vertical: 20),
-                          child: Text(
-                            'No upcoming maintenance scheduled',
-                            style: TextStyle(color: Colors.grey),
-                          ),
-                        ),
-                      )
-                    else
-                      ...controller.upcomingTasks.take(3).map((task) {
-                        final String nextDate = task['next_due_date']?.toString() ?? task['due_date']?.toString() ?? '';
-                        final DateTime? parsedDate = nextDate.isNotEmpty ? DateTime.tryParse(nextDate) : null;
-                        
-                        final String day = parsedDate?.day.toString() ?? '0';
-                        final String month = parsedDate != null ? _getMonthName(parsedDate.month) : 'JAN';
+                      ),
+                    )
+                  else
+                    ...controller.upcomingTasks.take(3).map((task) {
+                      final String nextDate =
+                          task['next_due_date']?.toString() ??
+                          task['due_date']?.toString() ??
+                          '';
+                      final DateTime? parsedDate = nextDate.isNotEmpty
+                          ? DateTime.tryParse(nextDate)
+                          : null;
 
-                        return Padding(
-                          padding: const EdgeInsets.only(bottom: 12.0),
-                          child: _buildServiceItem(
-                            day: day,
-                            month: month,
-                            id: task['id']?.toString() ?? task['uuid']?.toString() ?? '',
-                            title: task['service_type'] ??
-                                task['service type'] ??
-                                task['task_type'] ??
-                                task['title'] ??
-                                'Maintenance',
-                            subtitle: (task['mileage'] ?? task['Mileage']) != null
-                                ? 'Due at ${task['mileage'] ?? task['Mileage']} mi'
-                                : 'Upcoming',
-                            statusType: 'upcoming',
-                            notes: task['notes'],
-                            date: task['next_due_date']?.toString() ?? task['due_date']?.toString(),
-                          ),
-                        );
-                      }),
-                    const SizedBox(height: 80), // Space for bottom nav
-                  ],
-                ),
-              )),
+                      final String day = parsedDate?.day.toString() ?? '0';
+                      final String month = parsedDate != null
+                          ? _getMonthName(parsedDate.month)
+                          : 'JAN';
+
+                      return Padding(
+                        padding: const EdgeInsets.only(bottom: 12.0),
+                        child: _buildServiceItem(
+                          day: day,
+                          month: month,
+                          id:
+                              task['id']?.toString() ??
+                              task['uuid']?.toString() ??
+                              '',
+                          title:
+                              task['service_type'] ??
+                              task['service type'] ??
+                              task['task_type'] ??
+                              task['title'] ??
+                              'Maintenance',
+                          subtitle: (task['mileage'] ?? task['Mileage']) != null
+                              ? 'Due at ${task['mileage'] ?? task['Mileage']} mi'
+                              : 'Upcoming',
+                          statusType: 'upcoming',
+                          notes: task['notes'],
+                          date:
+                              task['next_due_date']?.toString() ??
+                              task['due_date']?.toString(),
+                        ),
+                      );
+                    }),
+                  const SizedBox(height: 80), // Space for bottom nav
+                ],
+              ),
+            ),
+          ),
         ],
       ),
     );
@@ -383,8 +400,14 @@ class HomeView extends GetView<HomeController> {
       final task = controller.overdueTasks.first;
       return _buildIssueCard(
         context,
-        title: task['service_type'] ?? task['service type'] ?? task['task_type'] ?? task['title'] ?? 'Overdue Maintenance',
-        subtitle: 'OVERDUE ${ (task['mileage'] ?? task['Mileage']) != null ? '• ${task['mileage'] ?? task['Mileage']} mi' : ''}',
+        title:
+            task['service_type'] ??
+            task['service type'] ??
+            task['task_type'] ??
+            task['title'] ??
+            'Overdue Maintenance',
+        subtitle:
+            'OVERDUE ${(task['mileage'] ?? task['Mileage']) != null ? '• ${task['mileage'] ?? task['Mileage']} mi' : ''}',
         isOverdue: true,
         onTap: () {
           Get.toNamed(
@@ -392,8 +415,16 @@ class HomeView extends GetView<HomeController> {
             arguments: {
               'id': task['id']?.toString() ?? task['uuid']?.toString() ?? '',
               'status': 'OVERDUE',
-              'title': task['service_type'] ?? task['service type'] ?? task['task_type'] ?? task['title'] ?? 'Overdue Maintenance',
-              'date': task['next_due_date']?.toString() ?? task['due_date']?.toString() ?? 'N/A',
+              'title':
+                  task['service_type'] ??
+                  task['service type'] ??
+                  task['task_type'] ??
+                  task['title'] ??
+                  'Overdue Maintenance',
+              'date':
+                  task['next_due_date']?.toString() ??
+                  task['due_date']?.toString() ??
+                  'N/A',
               'mileage': '${task['mileage'] ?? task['Mileage'] ?? "N/A"} mi',
               'notes': task['notes'] ?? 'No notes provided.',
             },
@@ -415,18 +446,14 @@ class HomeView extends GetView<HomeController> {
         onTap: () {
           Get.toNamed(
             Routes.diagnosticResult,
-            arguments: {
-              'diagnostic_id': controller.lastSessionId.value,
-            },
+            arguments: {'diagnostic_id': controller.lastSessionId.value},
           );
         },
         buttonLabel: 'View Results',
         onButtonTap: () {
           Get.toNamed(
             Routes.diagnosticResult,
-            arguments: {
-              'diagnostic_id': controller.lastSessionId.value,
-            },
+            arguments: {'diagnostic_id': controller.lastSessionId.value},
           );
         },
       );
@@ -465,7 +492,9 @@ class HomeView extends GetView<HomeController> {
             decoration: BoxDecoration(
               border: Border(
                 left: BorderSide(
-                  color: isOverdue ? const Color(0xFFFF6900) : const Color(0xFF2B63A8),
+                  color: isOverdue
+                      ? const Color(0xFFFF6900)
+                      : const Color(0xFF2B63A8),
                   width: 4,
                 ),
               ),
@@ -478,7 +507,9 @@ class HomeView extends GetView<HomeController> {
                     Container(
                       padding: EdgeInsets.all(context.w(8)),
                       decoration: BoxDecoration(
-                        color: isOverdue ? const Color(0xFFFFF7ED) : const Color(0xFFEFF6FF),
+                        color: isOverdue
+                            ? const Color(0xFFFFF7ED)
+                            : const Color(0xFFEFF6FF),
                         shape: BoxShape.circle,
                       ),
                       child: isOverdue
@@ -537,9 +568,7 @@ class HomeView extends GetView<HomeController> {
                       child: OutlinedButton(
                         onPressed: onButtonTap,
                         style: OutlinedButton.styleFrom(
-                          side: const BorderSide(
-                            color: Color(0xFFE0E0E0),
-                          ),
+                          side: const BorderSide(color: Color(0xFFE0E0E0)),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(20),
                           ),
@@ -577,7 +606,7 @@ class HomeView extends GetView<HomeController> {
       'SEP',
       'OCT',
       'NOV',
-      'DEC'
+      'DEC',
     ];
     if (month >= 1 && month <= 12) {
       return months[month - 1];
@@ -640,36 +669,36 @@ class HomeView extends GetView<HomeController> {
                 color: bgColor,
                 borderRadius: BorderRadius.circular(12),
               ),
-                child: isOverdue 
-                    ? Center(
-                        child: Image.asset(
-                          'assets/images/cautions.png',
-                          width: 32,
-                          height: 32,
-                          fit: BoxFit.contain,
-                        ),
-                      )
-                    : Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Text(
-                            day,
-                            style: TextStyle(
-                              color: primaryColor,
-                              fontSize: 20,
-                              fontWeight: FontWeight.w700,
-                            ),
-                          ),
-                          Text(
-                            month,
-                            style: TextStyle(
-                              color: primaryColor,
-                              fontSize: 10,
-                              fontWeight: FontWeight.w700,
-                            ),
-                          ),
-                        ],
+              child: isOverdue
+                  ? Center(
+                      child: Image.asset(
+                        'assets/images/cautions.png',
+                        width: 32,
+                        height: 32,
+                        fit: BoxFit.contain,
                       ),
+                    )
+                  : Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          day,
+                          style: TextStyle(
+                            color: primaryColor,
+                            fontSize: 20,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                        Text(
+                          month,
+                          style: TextStyle(
+                            color: primaryColor,
+                            fontSize: 10,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ],
+                    ),
             ),
             const SizedBox(width: 16),
             Expanded(

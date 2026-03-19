@@ -31,6 +31,12 @@ class HomeController extends GetxController {
   var overdueCount = 0.obs;
   var completedCount = 0.obs;
 
+  // Diagnostic Stats
+  var diagnosticTotalCount = 0.obs;
+  var diagnosticFreeCount = 0.obs;
+  var diagnosticFullCount = 0.obs;
+  var diagnosticUnlockedCount = 0.obs;
+
   // Maintenance Tasks
   final RxList<dynamic> upcomingTasks = <dynamic>[].obs;
   final RxList<dynamic> overdueTasks = <dynamic>[].obs;
@@ -54,6 +60,7 @@ class HomeController extends GetxController {
     fetchUserProfile();
     fetchUserVehicles();
     fetchMaintenanceStats();
+    fetchDiagnosticStats();
     fetchAllMaintenanceTasks();
     lastSessionId.value = _apiService.getSessionId() ?? '';
     // Wire up IAP success callback
@@ -122,6 +129,22 @@ class HomeController extends GetxController {
       }
     } catch (e) {
       debugPrint('Error fetching maintenance stats: $e');
+    }
+  }
+
+  void fetchDiagnosticStats() async {
+    try {
+      final response = await _apiService.getDiagnosticStats();
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+
+        diagnosticTotalCount.value = data['total_diagnostics'] ?? 0;
+        diagnosticFreeCount.value = data['free_diagnostics'] ?? 0;
+        diagnosticFullCount.value = data['full_diagnostics'] ?? 0;
+        diagnosticUnlockedCount.value = data['unlocked_sessions'] ?? 0;
+      }
+    } catch (e) {
+      debugPrint('Error fetching diagnostic stats: $e');
     }
   }
 
@@ -358,7 +381,12 @@ class HomeController extends GetxController {
   Future<void> markTaskCompleted(String taskId) async {
     try {
       final response = await _apiService.markTaskCompleted(taskId);
-      if (response.statusCode == 200) {
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        // Sync the latest session ID picked up from the completed task response
+        lastSessionId.value = _apiService.getSessionId() ?? '';
+        
+        debugPrint('HomeController - Synced new Session ID after task completion: ${lastSessionId.value}');
+
         Get.snackbar(
           'Success',
           'Task marked as completed successfully',
@@ -369,11 +397,10 @@ class HomeController extends GetxController {
         // Refresh data
         fetchMaintenanceStats();
         fetchAllMaintenanceTasks();
-        // Go back if we are in details
-        if (Get.currentRoute == Routes.taskDetails ||
-            Get.currentRoute == '/task-details') {
-          Get.back();
-        }
+        
+        // Go back to Maintenance tab
+        changeTabIndex(2);
+        Get.offAllNamed(Routes.home);
       } else {
         Get.snackbar(
           'Error',
@@ -385,6 +412,45 @@ class HomeController extends GetxController {
       }
     } catch (e) {
       debugPrint('Error marking task as completed: $e');
+      Get.snackbar(
+        'Error',
+        'An unexpected error occurred',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: const Color(0xFFEF4444),
+        colorText: Colors.white,
+      );
+    }
+  }
+
+  Future<void> deleteTask(String taskId) async {
+    try {
+      final response = await _apiService.deleteMaintenanceTask(taskId);
+      if (response.statusCode == 200 || response.statusCode == 204) {
+        Get.snackbar(
+          'Success',
+          'Task deleted successfully',
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: const Color(0xFF10B981),
+          colorText: Colors.white,
+        );
+        // Refresh data
+        fetchMaintenanceStats();
+        fetchAllMaintenanceTasks();
+        
+        // Go back to Maintenance tab
+        changeTabIndex(2);
+        Get.offAllNamed(Routes.home);
+      } else {
+        Get.snackbar(
+          'Error',
+          'Failed to delete task',
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: const Color(0xFFEF4444),
+          colorText: Colors.white,
+        );
+      }
+    } catch (e) {
+      debugPrint('Error deleting task: $e');
       Get.snackbar(
         'Error',
         'An unexpected error occurred',

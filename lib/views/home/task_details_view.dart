@@ -194,7 +194,35 @@ class TaskDetailsView extends GetView<HomeController> {
                   textColor: const Color(0xFF314158),
                   borderColor: const Color(0xFFE2E8F0),
                   onTap: () {
-                    // Handle delete action
+                    // Show a quick dialog or directly call it
+                    if (taskId.isNotEmpty) {
+                      Get.dialog(
+                        AlertDialog(
+                          title: const Text('Delete Task'),
+                          content: const Text(
+                            'Are you sure you want to delete this task? This action cannot be undone.',
+                          ),
+                          actions: [
+                            TextButton(
+                              onPressed: () => Get.back(),
+                              child: const Text('Cancel'),
+                            ),
+                            TextButton(
+                              onPressed: () {
+                                Get.back(); // close dialog
+                                controller.deleteTask(taskId);
+                              },
+                              style: TextButton.styleFrom(
+                                foregroundColor: const Color(0xFFE7000B),
+                              ),
+                              child: const Text('Delete'),
+                            ),
+                          ],
+                        ),
+                      );
+                    } else {
+                      Get.snackbar('Error', 'Task ID not found');
+                    }
                   },
                 ),
               ],

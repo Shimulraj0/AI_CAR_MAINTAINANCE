@@ -24,7 +24,8 @@ class ApiService extends GetConnect {
     final prefs = await SharedPreferences.getInstance();
     _token = prefs.getString('auth_token');
     _resetToken = prefs.getString('reset_token');
-    _csrfToken = prefs.getString('csrf_token') ?? 'JzRi4cSVcW79ODedGqUV7PoqbctoDGR3';
+    _csrfToken =
+        prefs.getString('csrf_token') ?? 'JzRi4cSVcW79ODedGqUV7PoqbctoDGR3';
     _sessionId = prefs.getString('last_session_id');
     _rememberMe = prefs.getBool('remember_me') ?? false;
 
@@ -102,12 +103,14 @@ class ApiService extends GetConnect {
     // Request modifier (Interceptors)
     httpClient.addRequestModifier<dynamic>((request) {
       // Only set application/json if the body is not FormData
-      final isMultipart = request.headers['content-type']?.contains('multipart/form-data') ?? false;
+      final isMultipart =
+          request.headers['content-type']?.contains('multipart/form-data') ??
+          false;
       if (!isMultipart) {
-          request.headers['Content-Type'] = 'application/json';
+        request.headers['Content-Type'] = 'application/json';
       }
       request.headers['Accept'] = 'application/json';
-      
+
       String? csrf = getCsrfToken();
       if (csrf != null) {
         request.headers['Cookie'] = 'csrftoken=$csrf';
@@ -160,14 +163,15 @@ class ApiService extends GetConnect {
 
   Stream<Response> verifyRegistration(Map<String, dynamic> payload) {
     _isLoadingSubject.add(true);
-    return Stream.fromFuture(_verifyRegistrationHttp(payload))
-        .doOnDone(() => _isLoadingSubject.add(false));
+    return Stream.fromFuture(
+      _verifyRegistrationHttp(payload),
+    ).doOnDone(() => _isLoadingSubject.add(false));
   }
 
   Future<Response> _verifyRegistrationHttp(Map<String, dynamic> payload) async {
     final url = Uri.parse('$apiBaseUrl/api/user/register/verify/');
     final headers = await _getHeaders();
-    
+
     try {
       final request = http.Request('POST', url);
       request.body = json.encode(payload);
@@ -220,14 +224,15 @@ class ApiService extends GetConnect {
   // --- LOGIN & AUTH API ---
   Stream<Response> loginUser(Map<String, dynamic> payload) {
     _isLoadingSubject.add(true);
-    return Stream.fromFuture(_loginUserHttp(payload))
-        .doOnDone(() => _isLoadingSubject.add(false));
+    return Stream.fromFuture(
+      _loginUserHttp(payload),
+    ).doOnDone(() => _isLoadingSubject.add(false));
   }
 
   Future<Response> _loginUserHttp(Map<String, dynamic> payload) async {
     final url = Uri.parse('$apiBaseUrl/api/user/login/');
     final headers = await _getHeaders();
-    
+
     try {
       final request = http.Request('POST', url);
       request.body = json.encode(payload);
@@ -285,22 +290,39 @@ class ApiService extends GetConnect {
   }
 
   Future<http.Response> markTaskCompleted(String taskId) async {
-    final url = Uri.parse('$apiBaseUrl/api/maintenance/tasks/$taskId/mark-completed/');
+    final url = Uri.parse(
+      '$apiBaseUrl/api/maintenance/tasks/$taskId/mark-completed/',
+    );
     final headers = await _getHeaders();
-    
+
     _isLoadingSubject.add(true);
     try {
       final response = await http.patch(
         url,
         headers: headers,
-        body: json.encode({'is_completed': true}),
+        body: json.encode({"is_completed": true}),
       );
-      
-      if (response.statusCode != 200) {
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        try {
+          final body = json.decode(response.body);
+          // Look for session_id (or fallback to id/uuid if the backend returns a purely new object representation)
+          final sessionId =
+              recursiveSearch(body, 'session_id') ??
+              recursiveSearch(body, 'id') ??
+              recursiveSearch(body, 'uuid');
+
+          debugPrint('Mark Task Completed - Extracted Session ID: $sessionId');
+
+          if (sessionId != null) {
+            await saveSessionId(sessionId.toString());
+          }
+        } catch (_) {}
+      } else {
         debugPrint('Mark Task Completed Error Status: ${response.statusCode}');
         debugPrint('Mark Task Completed Error Body: ${response.body}');
       }
-      
+
       return response;
     } catch (e) {
       debugPrint('Mark Task Completed Exception: $e');
@@ -310,22 +332,46 @@ class ApiService extends GetConnect {
     }
   }
 
-  Future<http.Response> getMaintenanceStats() async {
-    final url = Uri.parse('$apiBaseUrl/api/maintenance/tasks/stats/');
+  Future<http.Response> deleteMaintenanceTask(String taskId) async {
+    final url = Uri.parse('$apiBaseUrl/api/maintenance/tasks/$taskId/');
     final headers = await _getHeaders();
-    
+
     _isLoadingSubject.add(true);
     try {
-      final response = await http.get(
+      final response = await http.delete(
         url,
         headers: headers,
       );
-      
+
+      if (response.statusCode != 200 && response.statusCode != 204) {
+        debugPrint('Delete Task Error Status: ${response.statusCode}');
+        debugPrint('Delete Task Error Body: ${response.body}');
+      }
+
+      return response;
+    } catch (e) {
+      debugPrint('Delete Task Exception: $e');
+      rethrow;
+    } finally {
+      _isLoadingSubject.add(false);
+    }
+  }
+
+  Future<http.Response> getMaintenanceStats() async {
+    final url = Uri.parse('$apiBaseUrl/api/maintenance/tasks/stats/');
+    final headers = await _getHeaders();
+
+    _isLoadingSubject.add(true);
+    try {
+      final response = await http.get(url, headers: headers);
+
       if (response.statusCode != 200) {
-        debugPrint('Get Maintenance Stats Error Status: ${response.statusCode}');
+        debugPrint(
+          'Get Maintenance Stats Error Status: ${response.statusCode}',
+        );
         debugPrint('Get Maintenance Stats Error Body: ${response.body}');
       }
-      
+
       return response;
     } catch (e) {
       debugPrint('Get Maintenance Stats Exception: $e');
@@ -335,22 +381,26 @@ class ApiService extends GetConnect {
     }
   }
 
-  Future<http.Response> getMaintenanceTasks(String status, {int page = 1}) async {
-    final url = Uri.parse('$apiBaseUrl/api/maintenance/tasks/?status=$status&page=$page');
+  Future<http.Response> getMaintenanceTasks(
+    String status, {
+    int page = 1,
+  }) async {
+    final url = Uri.parse(
+      '$apiBaseUrl/api/maintenance/tasks/?status=$status&page=$page',
+    );
     final headers = await _getHeaders();
-    
+
     _isLoadingSubject.add(true);
     try {
-      final response = await http.get(
-        url,
-        headers: headers,
-      );
-      
+      final response = await http.get(url, headers: headers);
+
       if (response.statusCode != 200) {
-        debugPrint('Get Maintenance Tasks Error Status: ${response.statusCode}');
+        debugPrint(
+          'Get Maintenance Tasks Error Status: ${response.statusCode}',
+        );
         debugPrint('Get Maintenance Tasks Error Body: ${response.body}');
       }
-      
+
       return response;
     } catch (e) {
       debugPrint('Get Maintenance Tasks Exception: $e');
@@ -359,6 +409,7 @@ class ApiService extends GetConnect {
       _isLoadingSubject.add(false);
     }
   }
+
   Future<Map<String, String>> _getHeaders() async {
     final Map<String, String> headers = {
       'Content-Type': 'application/json',
@@ -380,8 +431,9 @@ class ApiService extends GetConnect {
   // --- DIAGNOSTICS & AI CHAT API ---
   Stream<Response> normalChat(Map<String, dynamic> payload) {
     _isLoadingSubject.add(true);
-    return Stream.fromFuture(_normalChatHttp(payload))
-        .doOnDone(() => _isLoadingSubject.add(false));
+    return Stream.fromFuture(
+      _normalChatHttp(payload),
+    ).doOnDone(() => _isLoadingSubject.add(false));
   }
 
   Future<Response> _normalChatHttp(Map<String, dynamic> payload) async {
@@ -422,10 +474,10 @@ class ApiService extends GetConnect {
 
     if (data is Map) {
       return data['ai_response']?.toString() ??
-             data['response']?.toString() ??
-             data['reply']?.toString() ??
-             data['message']?.toString() ??
-             "";
+          data['response']?.toString() ??
+          data['reply']?.toString() ??
+          data['message']?.toString() ??
+          "";
     } else if (data is String) {
       return data;
     }
@@ -436,7 +488,7 @@ class ApiService extends GetConnect {
   Future<http.Response> createDiagnostic(Map<String, dynamic> payload) async {
     final url = Uri.parse('$apiBaseUrl/api/diagnostics/');
     final headers = await _getHeaders();
-    
+
     _isLoadingSubject.add(true);
     try {
       final response = await http.post(
@@ -444,12 +496,13 @@ class ApiService extends GetConnect {
         headers: headers,
         body: json.encode(payload),
       );
-      
+
       if (response.statusCode == 200 || response.statusCode == 201) {
         final body = json.decode(response.body);
-        final sessionId = recursiveSearch(body, 'session_id') ?? 
-                        recursiveSearch(body, 'id') ?? 
-                        recursiveSearch(body, 'uuid');
+        final sessionId =
+            recursiveSearch(body, 'session_id') ??
+            recursiveSearch(body, 'id') ??
+            recursiveSearch(body, 'uuid');
 
         if (sessionId != null) {
           await saveSessionId(sessionId.toString());
@@ -458,7 +511,7 @@ class ApiService extends GetConnect {
         debugPrint('Create Diagnostic Error Status: ${response.statusCode}');
         debugPrint('Create Diagnostic Error Body: ${response.body}');
       }
-      
+
       return response;
     } catch (e) {
       debugPrint('Create Diagnostic Exception: $e');
@@ -471,22 +524,43 @@ class ApiService extends GetConnect {
   Future<http.Response> getDiagnosticDetails(String id) async {
     final url = Uri.parse('$apiBaseUrl/api/diagnostics/$id/');
     final headers = await _getHeaders();
-    
+
     _isLoadingSubject.add(true);
     try {
-      final response = await http.get(
-        url,
-        headers: headers,
-      );
-      
+      final response = await http.get(url, headers: headers);
+
       if (response.statusCode != 200) {
-        debugPrint('Get Diagnostic Details Error Status: ${response.statusCode}');
+        debugPrint(
+          'Get Diagnostic Details Error Status: ${response.statusCode}',
+        );
         debugPrint('Get Diagnostic Details Error Body: ${response.body}');
       }
-      
+
       return response;
     } catch (e) {
       debugPrint('Get Diagnostic Details Exception: $e');
+      rethrow;
+    } finally {
+      _isLoadingSubject.add(false);
+    }
+  }
+
+  Future<http.Response> getDiagnosticStats() async {
+    final url = Uri.parse('$apiBaseUrl/api/diagnostics/stats/');
+    final headers = await _getHeaders();
+
+    _isLoadingSubject.add(true);
+    try {
+      final response = await http.get(url, headers: headers);
+
+      if (response.statusCode != 200) {
+        debugPrint('Get Diagnostic Stats Error Status: ${response.statusCode}');
+        debugPrint('Get Diagnostic Stats Error Body: ${response.body}');
+      }
+
+      return response;
+    } catch (e) {
+      debugPrint('Get Diagnostic Stats Exception: $e');
       rethrow;
     } finally {
       _isLoadingSubject.add(false);
@@ -498,7 +572,7 @@ class ApiService extends GetConnect {
   Future<http.Response> exportDiagnosticPdf(String sessionId) async {
     final url = Uri.parse('$apiBaseUrl/api/diagnostics/export/pdf/');
     final headers = await _getHeaders();
-    
+
     _isLoadingSubject.add(true);
     try {
       // Using http.post directly with encoded body as in user's working snippet
@@ -507,12 +581,12 @@ class ApiService extends GetConnect {
         headers: headers,
         body: json.encode({'session_id': sessionId}),
       );
-      
+
       if (response.statusCode != 200) {
         debugPrint('Export PDF Error Status: ${response.statusCode}');
         debugPrint('Export PDF Error Body: ${response.body}');
       }
-      
+
       return response;
     } catch (e) {
       debugPrint('Export PDF Exception: $e');
@@ -525,8 +599,9 @@ class ApiService extends GetConnect {
   // --- VEHICLES API ---
   Stream<Response> getVehicles() {
     _isLoadingSubject.add(true);
-    return Stream.fromFuture(_getVehiclesHttp())
-        .doOnDone(() => _isLoadingSubject.add(false));
+    return Stream.fromFuture(
+      _getVehiclesHttp(),
+    ).doOnDone(() => _isLoadingSubject.add(false));
   }
 
   Future<Response> _getVehiclesHttp() async {
@@ -604,7 +679,7 @@ class ApiService extends GetConnect {
   Future<http.Response> createPaymentIntent(double amount) async {
     final url = Uri.parse('$apiBaseUrl/api/payments/create-intent/');
     final headers = await _getHeaders();
-    
+
     _isLoadingSubject.add(true);
     try {
       final response = await http.post(

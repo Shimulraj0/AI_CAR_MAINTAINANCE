@@ -13,7 +13,11 @@ class MaintenanceTabView extends StatefulWidget {
 class _MaintenanceTabViewState extends State<MaintenanceTabView> {
   int _selectedTabIndex = 0; // 0: Upcoming, 1: Overdue, 2: Completed
 
-  Widget _buildPaginationControls(BuildContext context, HomeController controller, String status) {
+  Widget _buildPaginationControls(
+    BuildContext context,
+    HomeController controller,
+    String status,
+  ) {
     int page = 1;
     bool hasNext = false;
     bool isLoading = false;
@@ -112,7 +116,10 @@ class _MaintenanceTabViewState extends State<MaintenanceTabView> {
     );
   }
 
-  List<Widget> _buildTabContent(BuildContext context, HomeController controller) {
+  List<Widget> _buildTabContent(
+    BuildContext context,
+    HomeController controller,
+  ) {
     switch (_selectedTabIndex) {
       case 0:
         if (controller.upcomingTasks.isEmpty &&
