@@ -1,4 +1,4 @@
-import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -40,6 +40,10 @@ class ApiService extends GetConnect {
   }
 
   bool _rememberMe = false;
+
+  // Rate limiting properties
+  DateTime _lastRequestTime = DateTime.fromMillisecondsSinceEpoch(0);
+  final Duration _requestThrottle = const Duration(milliseconds: 500); // Max 2 requests per sec
 
   bool getRememberMe() => _rememberMe;
 
@@ -101,7 +105,19 @@ class ApiService extends GetConnect {
   @override
   void onInit() {
     // Request modifier (Interceptors)
-    httpClient.addRequestModifier<dynamic>((request) {
+    httpClient.addRequestModifier<dynamic>((request) async {
+      // API Rate Limit Throttle
+      final now = DateTime.now();
+      final timeSinceLast = now.difference(_lastRequestTime);
+      
+      if (timeSinceLast < _requestThrottle) {
+        final delay = _requestThrottle - timeSinceLast;
+        _lastRequestTime = now.add(delay);
+        await Future.delayed(delay);
+      } else {
+        _lastRequestTime = now;
+      }
+
       // Only set application/json if the body is not FormData
       final isMultipart =
           request.headers['content-type']?.contains('multipart/form-data') ??
@@ -126,7 +142,17 @@ class ApiService extends GetConnect {
 
     // Response modifier
     httpClient.addResponseModifier((request, response) {
-      if (response.statusCode == 401) {
+      if (response.statusCode == 429) {
+        // Handle Too Many Requests
+        Get.snackbar(
+          'Too Many Requests',
+          'Please slow down. You are making requests too quickly.',
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: Get.theme.colorScheme.error.withValues(alpha: 0.9),
+          colorText: Get.theme.colorScheme.onError,
+          margin: const EdgeInsets.all(16),
+        );
+      } else if (response.statusCode == 401) {
         // Handle unauthorized (e.g., logout)
       }
       return response;
