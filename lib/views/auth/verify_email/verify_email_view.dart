@@ -1,10 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
+import 'package:pinput/pinput.dart';
 import '../../../controllers/verify_email_controller.dart';
 
 class VerifyEmailView extends GetView<VerifyEmailController> {
-  const VerifyEmailView({super.key});
+  VerifyEmailView({super.key});
+
+  final _pinController = TextEditingController();
+  final _focusNode = FocusNode();
 
   @override
   Widget build(BuildContext context) {
@@ -71,12 +75,65 @@ class VerifyEmailView extends GetView<VerifyEmailController> {
               ),
               const SizedBox(height: 40),
 
-              // OTP Input Fields
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: List.generate(
-                  6,
-                  (index) => _buildOTPField(context, index),
+              // OTP Input Fields using Pinput without dialpad
+              Center(
+                child: Pinput(
+                  length: 6,
+                  controller: _pinController,
+                  focusNode: _focusNode,
+                  autofocus: true,
+                  inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                  onChanged: (value) {
+                    if (value.length == 6) {
+                      _focusNode.unfocus();
+                    }
+                  },
+                  onCompleted: (value) {
+                    controller.verifyCode(value);
+                  },
+                  defaultPinTheme: PinTheme(
+                    width: 48,
+                    height: 54,
+                    margin: const EdgeInsets.symmetric(horizontal: 4),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(color: const Color(0xFFD2D6DB)),
+                    ),
+                    textStyle: const TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.w600,
+                      color: Color(0xFF0F0F0F),
+                    ),
+                  ),
+                  focusedPinTheme: PinTheme(
+                    width: 48,
+                    height: 54,
+                    margin: const EdgeInsets.symmetric(horizontal: 4),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(
+                        color: const Color(0xFF2B63A8),
+                        width: 2,
+                      ),
+                    ),
+                    textStyle: const TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.w600,
+                      color: Color(0xFF0F0F0F),
+                    ),
+                  ),
+                  errorPinTheme: PinTheme(
+                    width: 48,
+                    height: 54,
+                    margin: const EdgeInsets.symmetric(horizontal: 4),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(color: const Color(0xFFFF7061)),
+                    ),
+                  ),
                 ),
               ),
 
@@ -119,7 +176,19 @@ class VerifyEmailView extends GetView<VerifyEmailController> {
                 height: 54,
                 child: Obx(
                   () => ElevatedButton(
-                    onPressed: controller.isLoading.value ? null : () => controller.submitCode(),
+                    onPressed: controller.isLoading.value
+                        ? null
+                        : () {
+                            final code = _pinController.text;
+                            if (code.length == 6) {
+                              controller.verifyCode(code);
+                            } else {
+                              Get.snackbar(
+                                'Error',
+                                'Please enter a valid 6-digit code',
+                              );
+                            }
+                          },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: const Color(0xFF2B63A8),
                       elevation: 0,
@@ -150,43 +219,6 @@ class VerifyEmailView extends GetView<VerifyEmailController> {
               ),
             ],
           ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildOTPField(BuildContext context, int index) {
-    return Container(
-      width: 48,
-      height: 54,
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: const Color(0xFFD2D6DB)),
-      ),
-      child: Center(
-        child: TextFormField(
-          textAlign: TextAlign.center,
-          keyboardType: TextInputType.number,
-          maxLength: 1,
-          decoration: const InputDecoration(
-            counterText: '',
-            border: InputBorder.none,
-            contentPadding: EdgeInsets.zero,
-          ),
-          style: const TextStyle(
-            fontSize: 20,
-            fontWeight: FontWeight.w600,
-            color: Color(0xFF0F0F0F),
-          ),
-          onChanged: (value) {
-            controller.updateOtp(index, value);
-            if (value.isNotEmpty && index < 5) {
-              FocusScope.of(context).nextFocus();
-            } else if (value.isEmpty && index > 0) {
-              FocusScope.of(context).previousFocus();
-            }
-          },
         ),
       ),
     );

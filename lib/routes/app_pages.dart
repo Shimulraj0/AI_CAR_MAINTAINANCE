@@ -93,7 +93,7 @@ class AppPages {
     ),
     GetPage(
       name: Routes.verifyEmail,
-      page: () => const VerifyEmailView(),
+      page: () => VerifyEmailView(),
       binding: BindingsBuilder(() {
         Get.lazyPut<VerifyEmailController>(() => VerifyEmailController());
       }),

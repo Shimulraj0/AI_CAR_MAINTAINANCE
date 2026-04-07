@@ -54,6 +54,7 @@ dependencies:
   pdf: ^3.11.3
   flutter_stripe: ^12.4.0
   in_app_purchase: ^3.2.3
+  pinput: ^4.0.0
 
 dev_dependencies:
   flutter_test:

@@ -30,7 +30,7 @@ class ApiService extends GetConnect {
     _rememberMe = prefs.getBool('remember_me') ?? false;
 
     // Base URL for API requests
-    apiBaseUrl = 'http://10.10.7.120:8000';
+    apiBaseUrl = 'https://api.autointeldiagnostics.com';
     baseUrl = apiBaseUrl;
     httpClient.baseUrl = apiBaseUrl;
     httpClient.timeout = const Duration(seconds: 30);
@@ -43,7 +43,9 @@ class ApiService extends GetConnect {
 
   // Rate limiting properties
   DateTime _lastRequestTime = DateTime.fromMillisecondsSinceEpoch(0);
-  final Duration _requestThrottle = const Duration(milliseconds: 500); // Max 2 requests per sec
+  final Duration _requestThrottle = const Duration(
+    milliseconds: 500,
+  ); // Max 2 requests per sec
 
   bool getRememberMe() => _rememberMe;
 
@@ -109,7 +111,7 @@ class ApiService extends GetConnect {
       // API Rate Limit Throttle
       final now = DateTime.now();
       final timeSinceLast = now.difference(_lastRequestTime);
-      
+
       if (timeSinceLast < _requestThrottle) {
         final delay = _requestThrottle - timeSinceLast;
         _lastRequestTime = now.add(delay);
@@ -364,10 +366,7 @@ class ApiService extends GetConnect {
 
     _isLoadingSubject.add(true);
     try {
-      final response = await http.delete(
-        url,
-        headers: headers,
-      );
+      final response = await http.delete(url, headers: headers);
 
       if (response.statusCode != 200 && response.statusCode != 204) {
         debugPrint('Delete Task Error Status: ${response.statusCode}');

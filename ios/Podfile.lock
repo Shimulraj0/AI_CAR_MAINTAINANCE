@@ -116,6 +116,8 @@ PODS:
   - shared_preferences_foundation (0.0.1):
     - Flutter
     - FlutterMacOS
+  - smart_auth (0.0.1):
+    - Flutter
   - Stripe (25.6.4):
     - StripeApplePay (= 25.6.4)
     - StripeCore (= 25.6.4)
@@ -189,6 +191,7 @@ DEPENDENCIES:
   - in_app_purchase_storekit (from `.symlinks/plugins/in_app_purchase_storekit/darwin`)
   - open_file_ios (from `.symlinks/plugins/open_file_ios/ios`)
   - shared_preferences_foundation (from `.symlinks/plugins/shared_preferences_foundation/darwin`)
+  - smart_auth (from `.symlinks/plugins/smart_auth/ios`)
   - stripe_ios (from `.symlinks/plugins/stripe_ios/ios`)
 
 SPEC REPOS:
@@ -237,6 +240,8 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/open_file_ios/ios"
   shared_preferences_foundation:
     :path: ".symlinks/plugins/shared_preferences_foundation/darwin"
+  smart_auth:
+    :path: ".symlinks/plugins/smart_auth/ios"
   stripe_ios:
     :path: ".symlinks/plugins/stripe_ios/ios"
 
@@ -263,6 +268,7 @@ SPEC CHECKSUMS:
   PromisesObjC: f5707f49cb48b9636751c5b2e7d227e43fba9f47
   SDWebImage: e9fc87c1aab89a8ab1bbd74eba378c6f53be8abf
   shared_preferences_foundation: 7036424c3d8ec98dfe75ff1667cb0cd531ec82bb
+  smart_auth: 33668081c5f646af84f10492a067d25fdcd16951
   Stripe: 7cb1009980324c6c16b6a4af5843b8ef54549065
   stripe_ios: eebee52319de946cc0da2d6ddc98a89b04cec95e
   StripeApplePay: 91000b0927f53c58a2a1f829a4ee246d508bd1c4
