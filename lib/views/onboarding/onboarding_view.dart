@@ -72,19 +72,14 @@ class _OnboardingViewState extends State<OnboardingView> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         // Image Section (First)
-                        Center(
-                          child: Container(
-                            width: 350,
-                            height: 408,
-                            decoration: ShapeDecoration(
-                              image: DecorationImage(
-                                image: AssetImage(
-                                  _onboardingData[index]['image']!,
-                                ),
-                                fit: BoxFit.fill,
-                              ),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(8),
+                        Expanded(
+                          child: Center(
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(8),
+                              child: Image.asset(
+                                _onboardingData[index]['image']!,
+                                width: 350,
+                                fit: BoxFit.contain,
                               ),
                             ),
                           ),
